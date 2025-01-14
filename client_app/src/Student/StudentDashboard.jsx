@@ -1,0 +1,265 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Container, Navbar } from 'react-bootstrap';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Calendar from 'react-calendar';
+import '../index.css';
+import 'react-calendar/dist/Calendar.css';
+import '../calendar.css';
+import StudentAnnouncements from './StudentAnnouncements';
+import StudentCompanies from './StudentCompanies';
+import StudentFiles from './StudentFiles';
+import StudentProgress from './StudentProgress';
+import StudentReports from './StudentReports';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/ExitToApp';
+import ProfileModal from './StudentProfile'; // Adjust if necessary
+
+function AccountInfoPopup({ onClose, onProfileOpen }) {
+  const popupRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
+
+  const handleProfileOpen = () => {
+    onProfileOpen();
+  };
+
+  async function logoutUser() {
+    // let res = await axios({
+    //   method: 'POST',
+    //   url: 'auth/logout',
+    //   data: {}
+    // });
+
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+
+  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  const email = loggedInUser.email;
+
+  return (
+    <div className="account-info-popup" ref={popupRef}>
+      <div className="popup-content">
+        <div className="popup-header">
+          <img src="../anyrgb.com.png" alt="Profile" className="popup-profile-picture" />
+          <h6>{email}</h6>
+        </div>
+        <button onClick={handleProfileOpen} className="options-button">
+          <SettingsIcon style={{ marginRight: '10px' }} />
+          Options
+        </button>
+        <button onClick={() => {
+          logoutUser()
+        }} className="logout-button">
+          <LogoutIcon style={{ marginRight: '10px' }} />
+          Logout
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AdditionalContent() {
+  return (
+    <div className="additional-content">
+      <h5>Remaining Hours</h5>
+      <div className="remaining-hours-box">
+        <div className="remaining-hours-content">
+          <span style={{ fontWeight: 600, color: '#1F41BB', marginRight: '5px' }}>
+            176 Hours
+          </span>
+          <span style={{ fontWeight: 400, marginRight: '5px' }}>and</span>
+          <span style={{ fontWeight: 600, color: '#1F41BB', marginRight: '5px' }}>
+            46 Minutes
+          </span>
+          <span style={{ fontWeight: 400 }}>left</span>
+        </div>
+      </div>
+
+      <div className="calendar-container">
+        <h5>Calendar</h5>
+        <Calendar className="my-custom-calendar" />
+      </div>
+      <div className="info-container">
+        <h5 style={{ marginTop: '20px' }}>Requirements Checklist</h5>
+        <div className="requirements-checklist">
+          <ul>
+            <li>
+              <input type="checkbox" id="requirement1" name="requirement1" />
+              <label htmlFor="requirement1" style={{ marginLeft: '10px' }}>
+                Requirement 1
+              </label>
+            </li>
+            <li>
+              <input type="checkbox" id="requirement2" name="requirement2" />
+              <label htmlFor="requirement2" style={{ marginLeft: '10px' }}>
+                Requirement 2
+              </label>
+            </li>
+            <li>
+              <input type="checkbox" id="requirement3" name="requirement3" />
+              <label htmlFor="requirement3" style={{ marginLeft: '10px' }}>
+                Requirement 3
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StudentDashboard() {
+  const location = useLocation();
+  const [expanded, setExpanded] = useState(false); // Define expanded state
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const handleProfileClick = () => {
+    setIsPopupOpen(true);
+  };
+
+  const handleProfileOpen = () => {
+    setIsPopupOpen(false);
+    setIsProfileModalOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+  };
+
+  const handleProfileModalClose = () => {
+    setIsProfileModalOpen(false);
+  };
+
+  return (
+    <div>
+      {/* Navbar */}
+      <Navbar bg="white" variant="light" className="m-3">
+        <Container fluid className="d-flex justify-content-between align-items-center">
+          <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" />
+          <Navbar.Brand className="d-flex align-items-left p-4 mx-auto">
+            <img
+              src="../logo.png"
+              width="auto"
+              height="20"
+              className="d-inline-block align-top me-1"
+              alt="Logo"
+            />
+          </Navbar.Brand>
+          <div className="account-info">
+            <img
+              src="../anyrgb.com.png"
+              alt="Profile"
+              className="profile-picture"
+              onClick={handleProfileClick}
+            />
+            {isPopupOpen && (
+              <AccountInfoPopup
+                onClose={handleClosePopup}
+                onProfileOpen={handleProfileOpen}
+              />
+            )}
+          </div>
+        </Container>
+      </Navbar>
+
+      <ProfileModal open={isProfileModalOpen} onClose={handleProfileModalClose} />
+
+      {/* Dashboard Layout */}
+      <div className="dashboard-container">
+        <Sidebar expanded={expanded} setExpanded={setExpanded} />
+        <div className="main-content">
+          <Routes>
+            <Route
+              path="/home"
+              element={
+                <>
+                  <h1>Dashboard</h1>
+                  <h5>Recent Notifications</h5>
+                  <div className="notification-panel">
+                    <div className="notification-content">
+                      <div className="notification-user">
+                        <img
+                          src="../anyrgb.com.png"
+                          alt="User Profile"
+                          className="profile-picture"
+                        />
+                        <div>
+                          <h5 className="user-name">
+                            Juan Dela Cruz
+                            <span className="notification-time"> • 5h</span>
+                          </h5>
+                          <p className="user-message">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="notification-panel">
+                    <div className="notification-content">
+                      <div className="notification-user">
+                        <img
+                          src="../anyrgb.com.png"
+                          alt="User Profile"
+                          className="profile-picture"
+                        />
+                        <div>
+                          <h5 className="user-name">
+                            Juan Dela Cruz
+                            <span className="notification-time"> • 12d</span>
+                          </h5>
+                          <p className="user-message">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="notification-panel">
+                    <div className="notification-content">
+                      <div className="notification-user">
+                        <img
+                          src="../anyrgb.com.png"
+                          alt="User Profile"
+                          className="profile-picture"
+                        />
+                        <div>
+                          <h5 className="user-name">
+                            Juan Dela Cruz
+                            <span className="notification-time"> • Jun 3</span>
+                          </h5>
+                          <p className="user-message">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              }
+            />
+            <Route path="/announcements" element={<StudentAnnouncements />} />
+            <Route path="/companies" element={<StudentCompanies />} />
+            <Route path="/files" element={<StudentFiles />} />
+            <Route path="/progress-reports" element={<StudentProgress />} />
+            <Route path="/emergency-reports" element={<StudentReports />} />
+          </Routes>
+        </div>
+        {location.pathname === '/student/home' && <AdditionalContent />}
+      </div>
+    </div>
+  );
+}
+
+export default StudentDashboard;
