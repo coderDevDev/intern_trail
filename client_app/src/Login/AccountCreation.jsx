@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../index.css'; // Adjust the import path if necessary
 
@@ -23,6 +23,49 @@ function AccountCreation() {
   };
 
 
+
+  const [companies, setCompanies] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [programs, setPrograms] = useState([]);
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get('company/list');
+      let result = response.data.data
+
+
+      setCompanies(result);
+      setIsLoaded(true)
+
+    } catch (error) {
+      console.error("Error fetching trainees:", error);
+    }
+  };
+
+
+  const fetchColleges = async () => {
+    try {
+      const response = await axios.get('college/list');
+      let result = response.data.data
+
+
+      setColleges(result.colleges);
+      setPrograms(result.programs)
+      setIsLoaded(true)
+
+    } catch (error) {
+      console.error("Error fetching trainees:", error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchCompanies();
+    fetchColleges();
+  }, []);
 
   const formikConfig = {
     initialValues: {
@@ -177,7 +220,9 @@ function AccountCreation() {
     },
   };
 
-  return (
+  console.log({ companies })
+
+  return isLoaded && (
     <Formik {...formikConfig}>
       {({
         handleSubmit,
@@ -341,9 +386,14 @@ function AccountCreation() {
 
                       }}
                     >
-                      <option value="cect">CECT</option>
-                      <option value="cba">CBA</option>
-                      <option value="cas">CAS</option>
+
+
+                      {colleges.map((company) => (
+                        <option key={company.collegeID} value={company.collegeID}>
+                          {company.collegeName}
+                        </option>
+                      ))}
+
                     </select>
                   </div>
                   {userType !== 'university-dean' && (
@@ -360,10 +410,12 @@ function AccountCreation() {
 
                         }}
                       >
-                        <option value="ece">ECE</option>
-                        <option value="cpe">CPE</option>
-                        <option value="it">IT</option>
-                        <option value="bsa">BSA</option>
+                        {programs.map((company) => (
+                          <option key={company.programID} value={company.programID}>
+                            {company.progName}
+                          </option>
+                        ))}
+
                       </select>
                     </div>
                   )}
@@ -373,21 +425,22 @@ function AccountCreation() {
               {userType === 'hte-supervisor' && (
                 <div className="mt-2">
                   <label htmlFor="company" className='mb-2'>Company</label>
-                  <select id="company" className="form-control"
-
+                  <select
+                    id="company"
+                    className="form-control"
                     onChange={(e) => {
-
                       let value = e.target.value;
-
-
-                      setFieldValue('company', value);
-
+                      setFieldValue("company", value);
                     }}
                   >
-                    <option value="1">Company 1</option>
-                    <option value="2">Company 2</option>
-                    <option value="3">Company 3</option>
+                    <option value="">Select a company</option>
+                    {companies.map((company) => (
+                      <option key={company.companyID} value={company.companyID}>
+                        {company.companyName}
+                      </option>
+                    ))}
                   </select>
+
                 </div>
               )}
 

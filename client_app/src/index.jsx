@@ -1,5 +1,3 @@
-// src/index.js
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -27,6 +25,7 @@ import EmailVerified from './Login/EmailVerified';
 import PasswordChangedSuccess from './Login/PasswordChangedSuccess'; // Import the PasswordChangedSuccess component
 
 import initializeApp from './app/init';
+
 initializeApp();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -51,9 +50,8 @@ root.render(
         <Route
           path="/password-changed-success"
           element={<PasswordChangedSuccess />}
-        />{' '}
+        />
         <Route path="/verify-email/:token" element={<AccountVerification />} />
-        {/* Add the PasswordChangedSuccess route */}
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

@@ -1,0 +1,23 @@
+.view-more-button,
+.email-button,
+.apply-now-button {
+  background-color: #1F41BB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: 'Poppins, sans-serif';
+  font-weight: 600;
+}
+.download-button {
+    background-color: #1F41BB;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: 'Poppins, sans-serif';
+    font-weight: 600;
+  }
+  

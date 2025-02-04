@@ -9,6 +9,7 @@ import ProgressIcon from '@mui/icons-material/EmojiEventsOutlined';
 import WarningIcon from '@mui/icons-material/ReportOutlined';
 import TraineesIcon from '@mui/icons-material/HailOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
+import ApplicationsIcon from '@mui/icons-material/HowToReg';
 
 function HTESidebar({ expanded, setExpanded }) {
   return (
@@ -39,6 +40,14 @@ function HTESidebar({ expanded, setExpanded }) {
               <div className="d-flex align-items-center">
                 <FilesIcon className="custom-icon" />
                 <span>Files</span>
+              </div>
+            </Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Link to="/HTE/applications" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
+              <div className="d-flex align-items-center">
+                <ApplicationsIcon className="custom-icon" />
+                <span>Applications</span>
               </div>
             </Link>
           </Nav.Item>

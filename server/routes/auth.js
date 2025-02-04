@@ -8,7 +8,7 @@ let db = config.mySqlDriver;
 const router = express.Router();
 
 // Replace these with your environment variables or constants
-const JWT_SECRET = 'your_secret_key';
+const JWT_SECRET = config.JWT_TOKEN_SECRET;
 const REACT_FRONT_END_URL = 'http://localhost:3000';
 
 // Helper function for SQL queries
@@ -53,6 +53,49 @@ router.post('/login', async (req, res) => {
     const user = rows[0];
 
     console.log({ user });
+
+    let mappedTable = {
+      'ojt-coordinator': {
+        table_name: 'coordinators',
+        id: 'coordinatorID'
+      },
+      trainee: {
+        table_name: 'trainee',
+        id: 'traineeID'
+      },
+      'hte-supervisor': {
+        table_name: 'hte_supervisors',
+        id: 'hteID'
+      },
+      dean: {
+        table_name: 'deans',
+        id: 'deanID'
+      }
+    };
+
+    let selectedRole = mappedTable[user.role];
+
+    if (selectedRole && selectedRole.table_name) {
+      const [query2] = await db.query(
+        `
+        SELECT *
+        FROM ${selectedRole.table_name}
+        WHERE userID = ?
+        `,
+        [user.userID]
+      );
+
+      let is_approved =
+        query2[0].is_approved_by_admin || query2[0].is_verified_by_coordinator;
+
+      console.log({ is_approved });
+      if (!is_approved || is_approved < 1) {
+        return res.status(401).json({
+          success: false,
+          message: 'Account not verified or approved by the administrator.'
+        });
+      }
+    }
 
     if (password !== user.password) {
       return res

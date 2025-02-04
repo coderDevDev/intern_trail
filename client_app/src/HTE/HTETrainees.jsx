@@ -1,86 +1,172 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../index.css'; // Adjust the import path if necessary
-import TraineeInfo from '@mui/icons-material/MoreVertOutlined';
+import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
 import AddIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import HTETraineeOptions from './HTETraineeOptions'; // Adjust the import path if necessary
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+} from '@mui/material';
+
+
 import axios from 'axios';
+import StudentView from "./HTEView/student-view"
+function HTETrainees() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedTrainee, setSelectedTrainee] = useState(null);
 
-function CoordinatorTrainees() {
+
   const [trainees, setTrainees] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
 
-  // Fetch trainees from the API
+
   const fetchTrainees = async () => {
     try {
-      const response = await axios.get('user/trainees/list');
-      setTrainees(response.data.data);
+      const response = await axios.post('company/trainees/application/list', {
+        status: 'Approved'
+      });
+      let result = response.data.data
+      let mappedData = result.map((company) => {
+
+        let name = `${company.first_name} ${company.last_name}`
+        return {
+          ...company
+          // name: name,
+          // profilePicture: company.proof_identity,
+          // program: 'BSCpE',
+          // course: '4th Year',
+          // school: 'University A',
+          // resumeLink: company.resume_link,
+          // status: company.status
+        }
+      });
+
+      setTrainees(mappedData);
+
+
     } catch (error) {
       console.error("Error fetching trainees:", error);
     }
   };
 
+
   useEffect(() => {
     fetchTrainees();
   }, []);
 
-  // Filter trainees based on the search query
-  const filteredTrainees = trainees.filter((trainee) => {
-    let fullName = `${trainee.first_name} ${trainee.last_name}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase()); // Case-insensitive search
-  });
+  // const trainees = [
+  //   {
+  //     name: 'Juan Dela Cruz',
+  //     profilePicture: '../anyrgb.com.png',
+  //     school: 'WU-P',
+  //     department: 'MISD Division Trainee',
+  //   },
+  //   {
+  //     name: 'Maria Clara',
+  //     profilePicture: '../anyrgb.com.png',
+  //     school: 'WU-P',
+  //     department: 'Accounting Office Trainee',
+  //   },
+  //   {
+  //     name: 'Jose Rizal',
+  //     profilePicture: '../anyrgb.com.png',
+  //     school: 'WU-P',
+  //     department: 'Human Resource Office Trainee',
+  //   },
+  //   {
+  //     name: 'Andres Bonifacio',
+  //     profilePicture: '../anyrgb.com.png',
+  //     school: 'WU-P',
+  //     department: 'Marketing Division Team',
+  //   },
+  // ];
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredTrainees = trainees.filter((trainee) =>
+    (trainee.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleMenuOpen = (event, trainee) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedTrainee(trainee);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedTrainee(null);
+  };
 
   return (
     <div>
-      <h1>Trainees</h1>
-      <div className="trainees-button-container">
-        <div className="trainees-search-bar">
-          <SearchIcon />
+
+
+      <h1 className='font-bold mb-4'>Trainees</h1>
+      <StudentView
+        data={trainees || []}
+        fetchFunction={fetchTrainees}
+
+      />
+
+
+
+      {/* <div className="trainees-button-container" style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <div className="trainees-search-bar" style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+          <SearchIcon style={{ color: 'gray', marginRight: '5px' }} />
           <input
             type="text"
             placeholder="Search Trainees..."
-            value={searchQuery} // Bind input to searchQuery state
-            onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery on input change
+            value={searchTerm}
+            onChange={handleSearchChange}
+            style={{ padding: '5px', borderRadius: '4px' }}
           />
         </div>
-        <button className="trainees-icon-button"><AddIcon /></button>
-        <button className="trainees-icon-button"><SortIcon /></button>
+        <IconButton style={{ color: 'gray', marginLeft: '10px' }}>
+          <AddIcon />
+        </IconButton>
+        <IconButton style={{ color: 'gray', marginLeft: '10px' }}>
+          <SortIcon />
+        </IconButton>
       </div>
-
-      {/* Show "No results" if there are no filtered trainees */}
-      {filteredTrainees.length === 0 ? (
-        <div className="text-center text-gray-500 mt-4">
-          No results found
-        </div>
-      ) : (
-        <div className="trainees-container">
-          {filteredTrainees.map((trainee, index) => {
-            let fullName = `${trainee.first_name} ${trainee.last_name}`;
-            let college = trainee.collegeName;
-            let course = trainee.progName;
-            return (
-              <div key={index} className="trainees-box">
-                <div className="trainees-header">
+      <div className="trainees-container">
+        <table className="emergency-reports-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={{ padding: '8px' }}>Name</th>
+              <th style={{ padding: '8px' }}>Department</th>
+              <th style={{ padding: '8px' }}>School</th>
+              <th style={{ padding: '8px' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTrainees.map((trainee, index) => (
+              <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
+                <td style={{ padding: '8px' }}>
                   <img
-                    src={trainee.proof_identity}
-                    alt={`${trainee.first_name}'s profile`}
+                    src={trainee.profilePicture}
+                    alt={`${trainee.name}'s profile`}
                     className="trainees-profile-picture"
+                    style={{ marginRight: '10px', verticalAlign: 'middle' }}
                   />
-                  <div>
-                    <h5 className="trainees-user-name">{fullName}</h5>
-                    <p className="trainees-user-message">{college} - {course}</p>
-                  </div>
-                </div>
-                <button className="trainees-view-info-button">
-                  <TraineeInfo style={{ marginRight: '5px' }} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                  {trainee.name}
+                </td>
+                <td style={{ padding: '8px' }}>{trainee.department}</td>
+                <td style={{ padding: '8px' }}>{trainee.school}</td>
+                <td style={{ padding: '8px' }}>
+                  <HTETraineeOptions />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div> */}
     </div>
   );
 }
 
-export default CoordinatorTrainees;
+export default HTETrainees;

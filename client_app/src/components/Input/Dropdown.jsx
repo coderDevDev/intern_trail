@@ -18,8 +18,7 @@ const MyTextInput = ({
   functionToCalled,
   value,
   allValues,
-  defaultValue,
-  defaultInputValue,
+  isMulti = true,
   ...props
 }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
@@ -40,42 +39,48 @@ const MyTextInput = ({
     ''
   ].join(' ');
 
+  console.log({ value })
 
   return (
     <>
       <div className="mb-6 last:mb-0">
         {label && (
           <label
-            className={`block mb-2 border-gray-700 text-left font-bold ${labelFor ? 'cursor-pointer' : ''
+            className={`block mb-2 text-neutral-900 text-left ${labelFor ? 'cursor-pointer' : ''
               }`}>
             {label}
           </label>
         )}
 
-        <div className="relative">
+        <div className="">
           <CreatableSelect
-            defaultInputValue={defaultInputValue}
-            defaultValue={defaultValue}
-            placeholder="Select"
-            value={options.filter(v => {
+
+            value={!isMulti ? options.filter(v => {
               return v.value === field.value;
-            })}
-            isClearable={true}
+            }) : value}
+
+            isMulti={isMulti}
+            placeholder="Select"
+            // value={options.filter(v => {
+            //   return v.value === field.value;
+            // })}
+
             classNames={{
               control: () => `${controlClassName}`
             }}
             options={options}
-            onChange={({ value }) => {
-              if (affectedInput) {
-                props.setFieldValue(affectedInput, value);
-              }
+            // onChange={({ value }) => {
+            //   // if (affectedInput) {
+            //   //   props.setFieldValue(affectedInput, value);
+            //   // }
 
-              props.setFieldValue(props.name, value);
+            //   // props.setFieldValue(props.name, value);
 
-              if (functionToCalled) {
-                functionToCalled(value);
-              }
-            }}
+            //   if (functionToCalled) {
+            //     functionToCalled(value);
+            //   }
+            // }}
+            {...props}
           />
           {/* <input
             className={`${controlClassName} pl-10`}

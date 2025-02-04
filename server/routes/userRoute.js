@@ -36,6 +36,183 @@ const upload = multer({ storage: multer.memoryStorage() });
  */
 
 // Create User
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'dextermiranda441@gmail.com', // Replace with your email
+    pass: 'oczk mljj symm bjgc' // Replace with your email password
+  }
+});
+
+const sendRegistrationEmail = async (email, templateKey) => {
+  // Set the mail options
+  const mailOptions = {
+    from: 'dextermiranda441@gmail.com',
+    to: email,
+    subject: '',
+    html: ''
+  };
+
+  // Define the dynamic email template
+  const getEmailTemplate = key => {
+    if (key === 'APPROVE_REGISTRATION') {
+      return {
+        subject: 'Your Registration Has Been Approved!',
+        html: `
+          <html>
+            <head>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f4f4f4;
+                }
+                .email-wrapper {
+                  width: 100%;
+                  background-color: #ffffff;
+                  margin: 0 auto;
+                  padding: 20px;
+                  border-radius: 8px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  max-width: 600px;
+                }
+                .email-header {
+                  text-align: center;
+                  padding-bottom: 20px;
+                }
+                .email-header h1 {
+                  color: #333333;
+                  font-size: 24px;
+                }
+                .email-content {
+                  font-size: 16px;
+                  color: #555555;
+                }
+                .button {
+                  display: inline-block;
+                  padding: 10px 20px;
+                  margin-top: 20px;
+                  background-color:rgb(72, 124, 187);
+                  color:rgb(255, 255, 255);
+                  text-decoration: none;
+                  border-radius: 5px;
+                }
+                .footer {
+                  text-align: center;
+                  font-size: 12px;
+                  color: #888888;
+                  margin-top: 30px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="email-wrapper">
+                <div class="email-header">
+                  <h1>Welcome to InterTrail!</h1>
+                </div>
+                <div class="email-content">
+                  <p>Dear User,</p>
+                  <p>Your registration has been approved successfully. You can now start exploring the features of our platform.</p>
+               
+                </div>
+                <div class="footer">
+                  <p>If you did not request this registration, please ignore this email.</p>
+                </div>
+              </div>
+            </body>
+          </html>
+        `
+      };
+    } else if (key === 'REJECT_REGISTRATION') {
+      return {
+        subject: 'Your Registration Has Been Rejected',
+        html: `
+          <html>
+            <head>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f4f4f4;
+                }
+                .email-wrapper {
+                  width: 100%;
+                  background-color: #ffffff;
+                  margin: 0 auto;
+                  padding: 20px;
+                  border-radius: 8px;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  max-width: 600px;
+                }
+                .email-header {
+                  text-align: center;
+                  padding-bottom: 20px;
+                }
+                .email-header h1 {
+                  color: #333333;
+                  font-size: 24px;
+                }
+                .email-content {
+                  font-size: 16px;
+                  color: #555555;
+                }
+                .button {
+                  display: inline-block;
+                  padding: 10px 20px;
+                  margin-top: 20px;
+                  background-color: #f44336;
+                  color: #ffffff;
+                  text-decoration: none;
+                  border-radius: 5px;
+                }
+                .footer {
+                  text-align: center;
+                  font-size: 12px;
+                  color: #888888;
+                  margin-top: 30px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="email-wrapper">
+                <div class="email-header">
+                  <h1>Registration Rejected</h1>
+                </div>
+                <div class="email-content">
+                  <p>Dear User,</p>
+                  <p>We regret to inform you that your registration has been rejected. If you have any questions, feel free to contact our support team.</p>
+                 
+                </div>
+                <div class="footer">
+                  <p>If you did not request this registration, please ignore this email.</p>
+                </div>
+              </div>
+            </body>
+          </html>
+        `
+      };
+    } else {
+      return {
+        subject: 'Unknown Template',
+        html: `<p>No template found for the key: ${key}</p>`
+      };
+    }
+  };
+
+  // Get the correct template based on the template key
+  const template = getEmailTemplate(templateKey);
+
+  // Set the subject and html to the mail options
+  mailOptions.subject = template.subject;
+  mailOptions.html = template.html;
+
+  // Send the email
+  await transporter.sendMail(mailOptions);
+};
+
 router.post('/create', async (req, res) => {
   let {
     firstName,
@@ -317,4 +494,240 @@ INNER JOIN programs p ON t.programID = p.programID;
   }
 });
 
+router.put('/trainee/:id', async (req, res) => {
+  const { id } = req.params;
+  const { is_verified_by_coordinator } = req.body;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE trainee 
+       SET 
+       is_verified_by_coordinator = ? 
+       WHERE traineeID  = ?`,
+      [is_verified_by_coordinator, id]
+    );
+    if (result.affectedRows > 0) {
+      const [result] = await db.query(
+        `select email from users 
+        where userID = (select userID from trainee where traineeID = ?)
+        `,
+        [id]
+      );
+
+      let email = result[0].email;
+
+      const templateKey = is_verified_by_coordinator
+        ? 'APPROVE_REGISTRATION'
+        : 'REJECT_REGISTRATION'; // Example: This could be dynamic based on your logic
+
+      await sendRegistrationEmail(email, templateKey);
+      res
+        .status(200)
+        .json({ success: true, message: 'User updated successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to update user' });
+  }
+});
+
+router.get('/coordinators/list', async (req, res) => {
+  try {
+    const [users] = await db.query(`
+  SELECT t.*, u.userID, u.email,
+    u.first_name, u.middle_initial, 
+    u.last_name, u.phone, u.is_verified, 
+    u.proof_identity, 
+    u.role,
+     u.last_login_at, u.created_at, 
+     u.updated_at, 
+     c.collegeID, c.collegeName, c.collegeCode, 
+     p.programID, p.progName, p.progCode
+FROM coordinators t
+INNER JOIN users u ON t.userID = u.userID
+INNER JOIN colleges c ON t.collegeID = c.collegeID
+INNER JOIN programs p ON t.programID = p.programID;
+
+      
+      `);
+
+    res.status(200).json({ success: true, data: users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+});
+
+router.put('/coordinator/:id', async (req, res) => {
+  const { id } = req.params;
+  const { is_approved_by_admin } = req.body;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE coordinators 
+       SET 
+       is_approved_by_admin = ? 
+       WHERE coordinatorID   = ?`,
+      [is_approved_by_admin, id]
+    );
+    if (result.affectedRows > 0) {
+      const [result] = await db.query(
+        `select email from users 
+        where userID = (select userID from coordinators where coordinatorID  = ?)
+        `,
+        [id]
+      );
+
+      let email = result[0].email;
+
+      console.log({ email });
+
+      const templateKey = is_approved_by_admin
+        ? 'APPROVE_REGISTRATION'
+        : 'REJECT_REGISTRATION'; // Example: This could be dynamic based on your logic
+
+      await sendRegistrationEmail(email, templateKey);
+      res
+        .status(200)
+        .json({ success: true, message: 'User updated successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to update user' });
+  }
+});
+
+router.get('/HTE/list', async (req, res) => {
+  try {
+    const [users] = await db.query(`
+  SELECT t.*, u.userID, u.email,
+    u.first_name, u.middle_initial, 
+    u.last_name, u.phone, u.is_verified, 
+    u.proof_identity, 
+    u.role,
+     u.last_login_at, u.created_at, 
+     u.updated_at
+FROM hte_supervisors t
+INNER JOIN users u ON t.userID = u.userID
+
+
+      
+      `);
+
+    res.status(200).json({ success: true, data: users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+});
+
+router.put('/HTE/:id', async (req, res) => {
+  const { id } = req.params;
+  const { is_approved_by_admin } = req.body;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE hte_supervisors 
+       SET 
+       is_approved_by_admin = ? 
+       WHERE hteID    = ?`,
+      [is_approved_by_admin, id]
+    );
+    if (result.affectedRows > 0) {
+      const [result] = await db.query(
+        `select email from users 
+        where userID = (select userID from hte_supervisors where hteID   = ?)
+        `,
+        [id]
+      );
+
+      let email = result[0].email;
+
+      console.log({ email });
+
+      const templateKey = is_approved_by_admin
+        ? 'APPROVE_REGISTRATION'
+        : 'REJECT_REGISTRATION'; // Example: This could be dynamic based on your logic
+
+      await sendRegistrationEmail(email, templateKey);
+      res
+        .status(200)
+        .json({ success: true, message: 'User updated successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to update user' });
+  }
+});
+
+router.get('/deans/list', async (req, res) => {
+  try {
+    const [users] = await db.query(`
+  SELECT t.*, u.userID, u.email,
+    u.first_name, u.middle_initial, 
+    u.last_name, u.phone, u.is_verified, 
+    u.proof_identity, 
+    u.role,
+     u.last_login_at, u.created_at, 
+     u.updated_at, 
+     c.collegeID, c.collegeName, c.collegeCode
+FROM deans t
+INNER JOIN users u ON t.userID = u.userID
+INNER JOIN colleges c ON t.collegeID = c.collegeID
+
+      
+      `);
+
+    res.status(200).json({ success: true, data: users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+});
+router.put('/dean/:id', async (req, res) => {
+  const { id } = req.params;
+  const { is_approved_by_admin } = req.body;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE deans 
+       SET 
+       is_approved_by_admin = ? 
+       WHERE deanID     = ?`,
+      [is_approved_by_admin, id]
+    );
+    if (result.affectedRows > 0) {
+      const [result] = await db.query(
+        `select email from users 
+        where userID = (select userID from deans where deanID    = ?)
+        `,
+        [id]
+      );
+
+      let email = result[0].email;
+
+      console.log({ email });
+
+      const templateKey = is_approved_by_admin
+        ? 'APPROVE_REGISTRATION'
+        : 'REJECT_REGISTRATION'; // Example: This could be dynamic based on your logic
+
+      await sendRegistrationEmail(email, templateKey);
+      res
+        .status(200)
+        .json({ success: true, message: 'User updated successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to update user' });
+  }
+});
 export default router;

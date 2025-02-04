@@ -93,6 +93,12 @@ function Login() {
 
         }
 
+        else if (role === 'admin') {
+          window.location.href = '/admin';
+
+        }
+
+
         localStorage.setItem('token', token);
         localStorage.setItem('loggedInUser', JSON.stringify(user));
 

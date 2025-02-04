@@ -1,0 +1,13 @@
+.view-more-button, .email-button {
+    background-color: #1F41BB; /* Match the color */
+    color: white;
+    padding: 8px 16px; /* Adjust padding as needed */
+    border-radius: 4px; /* Adjust border radius as needed */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-more-button:hover, .email-button:hover {
+    background-color: #163a8a; /* Darker shade for hover */
+  }

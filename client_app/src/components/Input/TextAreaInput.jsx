@@ -17,7 +17,7 @@ function TextAreaInput({
     const [field, meta] = useField(props);
 
     let controlClassName = [
-        'h-24 px-3 py-2 max-w-full border-gray-700 rounded w-full dark:placeholder-gray-400',
+        'h-24 px-3 py-2 max-w-full border-2 border-gray-900 rounded w-full dark:placeholder-gray-400',
         meta.touched && meta.error
             ? 'px-3 py-2 max-w-full border-2 border-red-600 rounded w-full dark:placeholder-red-600'
             : '',
@@ -26,13 +26,12 @@ function TextAreaInput({
         props.isBorderless ? 'border-0' : 'border',
         props.isTransparent ? 'bg-transparent' : 'bg-white dark:bg-slate-800',
 
-        'rounded-lg',
-        '',
+
 
     ].join(' ');
     return (
-        <div className="mb-6 last:mb-0">
-            {label && <label className={`mt-2 font-bold text-neutral-600  block mb-2 ${labelColor}`}>
+        <div className="mb-6 last:mb-0 ">
+            {label && <label className={`mt-2  text-neutral-600  block mb-2 ${labelColor}`}>
                 {label} {isRequired ? '*' : ''} </label>
             }        <div className="relative">
                 <textarea

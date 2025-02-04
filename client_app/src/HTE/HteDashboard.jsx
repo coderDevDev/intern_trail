@@ -11,7 +11,8 @@ import HTEFiles from './HTEFiles';
 import HTEProgress from './HTEProgress';
 import HTEReports from './HTEReports';
 import HTETrainees from './HTETrainees';
-import HTEProfile from './HTEProfile'; // Import the HTEProfile component
+import HTEProfile from './HTEProfile';
+import HTEApplications from './HTEApplications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 
@@ -31,19 +32,6 @@ function AccountInfoPopup({ onClose, onProfileOpen }) {
     };
   }, [onClose]);
 
-
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-  const email = loggedInUser.email;
-  async function logoutUser() {
-    // let res = await axios({
-    //   method: 'POST',
-    //   url: 'auth/logout',
-    //   data: {}
-    // });
-
-    localStorage.clear();
-    window.location.href = '/login';
-  }
   return (
     <div className="account-info-popup" ref={popupRef}>
       <div className="popup-content">
@@ -53,15 +41,13 @@ function AccountInfoPopup({ onClose, onProfileOpen }) {
             alt="Profile"
             className="popup-profile-picture"
           />
-          <h6>{email}</h6>
+          <h6>Onin Aldrine Vincent Lance</h6>
         </div>
         <button onClick={onProfileOpen} className="options-button">
           <SettingsIcon style={{ marginRight: '10px' }} />
           Options
         </button>
-        <button onClick={() => {
-          logoutUser()
-        }} className="logout-button">
+        <button onClick={onClose} className="logout-button">
           <LogoutIcon style={{ marginRight: '10px' }} />
           Logout
         </button>
@@ -74,13 +60,13 @@ function AdditionalContent() {
   return (
     <div className="additional-content">
       <h5>Number of Trainees</h5>
-      <div className="student-num-box">
-        <div className="student-num-content">
-          <span style={{ fontWeight: 600, color: '#1F41BB', marginRight: '5px' }}>
-            4 Students
-          </span>
+        <div className="student-num-box">
+          <div className="student-num-content">
+            <span style={{ fontWeight: 600, color: '#1F41BB', marginRight: '5px' }}>
+              4 Students
+            </span>
+          </div>
         </div>
-      </div>
       <div className="calendar-container">
 
         <h5>Calendar</h5>
@@ -195,9 +181,9 @@ function HTEDashboard() {
                           className="profile-picture"
                         />
                         <div>
-                          <h5 className="user-name">Juan Dela Cruz
+                          <h5 className="user-name">Juan Dela Cruz 
                             <span className='notification-time'> • 5h</span>
-                          </h5>
+                            </h5>
                           <p className="user-message">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                           </p>
@@ -215,9 +201,9 @@ function HTEDashboard() {
                           className="profile-picture"
                         />
                         <div>
-                          <h5 className="user-name">Juan Dela Cruz
+                          <h5 className="user-name">Juan Dela Cruz 
                             <span className='notification-time'> • 12d</span>
-                          </h5>
+                            </h5>
                           <p className="user-message">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                           </p>
@@ -235,9 +221,9 @@ function HTEDashboard() {
                           className="profile-picture"
                         />
                         <div>
-                          <h5 className="user-name">Juan Dela Cruz
+                          <h5 className="user-name">Juan Dela Cruz 
                             <span className='notification-time'> • Jun 3</span>
-                          </h5>
+                            </h5>
                           <p className="user-message">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                           </p>
@@ -254,13 +240,14 @@ function HTEDashboard() {
             <Route path="/files" element={<HTEFiles />} />
             <Route path="/progress-reports" element={<HTEProgress />} />
             <Route path="/trainees" element={<HTETrainees />} />
+            <Route path="/applications" element={<HTEApplications />} />
             <Route path="/emergency-reports" element={<HTEReports />} />
             <Route path="/profile" element={<HTEProfile open={true} onClose={handleProfileModalClose} />} />
           </Routes>
         </div>
 
-        {/* Render Additional Content only on /HTE/home route */}
-        {location.pathname === '/HTE/home' && <AdditionalContent />}
+       {/* Render Additional Content only on /HTE/home route */}
+       {location.pathname === '/HTE/home' && <AdditionalContent />}
       </div>
     </div>
   );

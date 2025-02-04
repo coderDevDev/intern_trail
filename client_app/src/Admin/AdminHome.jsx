@@ -11,6 +11,13 @@ import "../index.css";
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 
+
+
+
+import CoordinatorTrainees from './CoordinatorList';
+import HTEList from './HTEList';
+import DeansList from './DeansList';
+
 function AccountInfoPopup({ onClose, onProfileOpen }) {
   const popupRef = useRef(null);
 
@@ -214,6 +221,14 @@ function AdminHome() {
             }
           />
           <Route path="/system-logs" element={<SystemLogs />} />
+
+
+          <Route path="/coordinators" element={<CoordinatorTrainees />} />
+
+          <Route path="/HTE" element={<HTEList />} />
+
+          <Route path="/deans" element={<DeansList />} />
+
         </Routes>
       </div>
     </div>

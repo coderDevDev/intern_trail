@@ -14,16 +14,46 @@ function AdminSidebar({ expanded, setExpanded }) {
         <MenuIcon />
       </div>
       <div className={`custom-sidebar ${expanded ? 'expanded' : ''}`}>
-        <Nav defaultActiveKey="/admin/users" className="flex-column">
+        <Nav defaultActiveKey="/admin/coordinators" className="flex-column">
           {/* Users Section */}
-          <Nav.Item>
+          {/* <Nav.Item>
             <Link to="/admin/users" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">
                 <UsersIcon className="custom-icon" />
                 <span>Users</span>
               </div>
             </Link>
+          </Nav.Item> */}
+
+
+          <Nav.Item>
+            <Link to="/admin/coordinators" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
+              <div className="d-flex align-items-center">
+                <UsersIcon className="custom-icon" />
+                <span>OJT Coordinators</span>
+              </div>
+            </Link>
           </Nav.Item>
+
+          <Nav.Item>
+            <Link to="/admin/HTE" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
+              <div className="d-flex align-items-center">
+                <UsersIcon className="custom-icon" />
+                <span>HTE Supervisors</span>
+              </div>
+            </Link>
+          </Nav.Item>
+
+          <Nav.Item>
+            <Link to="/admin/deans" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
+              <div className="d-flex align-items-center">
+                <UsersIcon className="custom-icon" />
+                <span>Deans</span>
+              </div>
+            </Link>
+          </Nav.Item>
+
+
 
           {/* System Logs Section */}
           <Nav.Item>

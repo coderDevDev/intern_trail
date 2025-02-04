@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../index.css'; // Adjust if necessary
+import './Coordinator.css';
 import EditIcon from '@mui/icons-material/Edit';
 import AddCompany from '@mui/icons-material/AddCircleOutlineOutlined';
 import SortIcon from '@mui/icons-material/Sort';
@@ -23,7 +24,95 @@ import {
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
+import InputText from './../components/Input/InputText';
+import TextAreaInput from './../components/Input/TextAreaInput';
+
+import { Formik, useField, useFormik, Form } from 'formik';
+import * as Yup from 'yup';
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+
+
+import Dropdown from './../components/Input/Dropdown';
+import { useDropzone } from "react-dropzone";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCoffee, faEye, faEyeDropper, faMailBulk, faMailReply, faSms } from '@fortawesome/free-solid-svg-icons'
+
+
+
+
 function CoordinatorCompanies() {
+
+  // Define file handling logic
+  const [files, setFiles] = useState({
+    MOA: null,
+
+  });
+
+  const onDrop = (acceptedFiles, fieldName) => {
+    setFiles((prevFiles) => ({
+      ...prevFiles,
+      [fieldName]: acceptedFiles[0],
+    }));
+  };
+
+  const dropzoneProps = (fieldName) => ({
+    onDrop: (files) => onDrop(files, fieldName),
+    accept: {
+      "image/*": [".jpeg", ".png", ".jpg"],
+      "application/pdf": [".pdf"],
+    },
+    multiple: false,
+  });
+
+
+  const DropzoneArea = ({ fieldName, files, dropzoneProps, setFieldValue, errors }) => {
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+      ...dropzoneProps,
+      onDrop: (acceptedFiles) => {
+
+        setFieldValue(fieldName, acceptedFiles[0]);
+        if (acceptedFiles.length > 0) {
+          // Update files state with the new file
+          setFiles((prevFiles) => ({
+            ...prevFiles,
+            [fieldName]: acceptedFiles[0],
+          }));
+        }
+      },
+    });
+
+
+    let hasError = errors[fieldName];
+    return (
+      <div
+        {...getRootProps()}
+        className={`flex justify-center items-center w-full h-32 p-4 border-2 
+       
+          ${isDragActive ? "border-blue-500" : "border-gray-300"
+          } border-dashed rounded-md text-sm cursor-pointer`}
+      >
+        <input {...getInputProps()} />
+        <div>
+          {files[fieldName] ? (
+            <p className="text-gray-700">
+              {files[fieldName].name} <span className="text-green-500">(Selected)</span>
+            </p>
+          ) : (
+            <p className="text-gray-500">
+              Drag and drop a file here, or click to select a file.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
@@ -32,71 +121,121 @@ function CoordinatorCompanies() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddCompanyModalOpen, setIsAddCompanyModalOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [file, setFile] = useState(null);
+  const [avatarPhoto, setFile] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  const companies = [
-    {
-      name: 'Philippine Information Agency',
-      logo: 'https://yt3.googleusercontent.com/ytc/AIdro_keIW9LrzLnDTC0HWc-VT5Lzq28ZH90eCe6KjwnJj1jMEU=s900-c-k-c0x00ffffff-no-rj',
-      contact: 'piahrdd@pia.gov.ph',
-      description: 'PIA - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-      location: 'Quezon City, Metro Manila',
-      applicationRequirements: 'Requirements for Company A.\nRequirement 1\nRequirement 2\nRequirement 3',
-      expertise: 'A IT Tech Support',
-      MOAApprovalStatus: 'MOA Approved',
-      starRating: 4.5,
-      feedback: [
-        { student: 'Student 1', comment: 'Great experience!', date: '2023-01-01', profilePicture: 'https://via.placeholder.com/40' },
-        { student: 'Student 2', comment: 'Learned a lot!', date: '2023-02-01', profilePicture: 'https://via.placeholder.com/40' }
-      ]
-    },
-    {
-      name: 'DOST-SEI',
-      logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHelZpTYsSK51UGDEjonNl-QlREI1O28bweA&s',
-      contact: 'dosthr@example.com',
-      description: 'DOST - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-      location: 'Taguig City, Metro Manila',
-      applicationRequirements: 'Requirements for Company B.\nRequirement 1\nRequirement 2\nRequirement 3',
-      expertise: 'B Javascript Programmer',
-      MOAApprovalStatus: 'MOA Pending',
-      starRating: 4.0,
-      feedback: [
-        { student: 'Student 3', comment: 'Good company.', date: '2023-03-01', profilePicture: 'https://via.placeholder.com/40' },
-        { student: 'Student 4', comment: 'Helpful staff.', date: '2023-04-01', profilePicture: 'https://via.placeholder.com/40' }
-      ]
-    },
-    {
-      name: 'iSynergies Inc.',
-      logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4j2_XlpIbgR-IidZJrsYGP6BXa1aHRxrrNg&s',
-      contact: 'isynergies@example.com',
-      description: 'ISYNERGIES - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-      location: 'Cabanatuan City, Nueva Ecija',
-      applicationRequirements: 'Requirements for Company C.\nRequirement 1\nRequirement 2\nRequirement 3',
-      expertise: 'C PHP Programmer',
-      MOAApprovalStatus: 'MOA Approved',
-      starRating: 4.8,
-      feedback: [
-        { student: 'Student 5', comment: 'Excellent!', date: '2023-05-01', profilePicture: 'https://via.placeholder.com/40' },
-        { student: 'Student 6', comment: 'Highly recommend.', date: '2023-06-01', profilePicture: 'https://via.placeholder.com/40' }
-      ]
-    },
-    {
-      name: 'ASKI Lending Corporation',
-      logo: 'https://i0.wp.com/vincerapisura.com/wp/wp-content/uploads/2019/10/aski-logo.png?fit=500%2C500&ssl=1',
-      contact: 'aski@example.com',
-      description: 'ASKI - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-      location: 'Cabanatuan City, Nueva Ecija',
-      applicationRequirements: 'Requirements for Company D.\nRequirement 1\nRequirement 2\nRequirement 3',
-      expertise: 'D IT Tech Support',
-      MOAApprovalStatus: 'MOA Pending',
-      starRating: 4.2,
-      feedback: [
-        { student: 'Student 7', comment: 'Good learning experience.', date: '2023-07-01', profilePicture: 'https://via.placeholder.com/40' },
-        { student: 'Student 8', comment: 'Supportive environment.', date: '2023-08-01', profilePicture: 'https://via.placeholder.com/40' }
-      ]
+
+  const [companies, setCompanies] = useState([]);
+
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get('company/list');
+      let result = response.data.data
+      let mappedData = result.map((company) => {
+        return {
+          name: company.companyName,
+          logo: company.avatar_photo,
+          contact: company.contact_email,
+          description: `${company.description}`,
+          // description: `Expertise: ${company.expertise || 'N/A'}`,
+          location: company.address,
+          applicationRequirements: company.list_of_requirements
+            ? JSON.parse(company.list_of_requirements)
+              .map((req) => `- ${req.label}`)
+              .join('\n')
+            : 'No requirements specified.',
+          expertise: company.expertise || 'No expertise provided.',
+          MOAApprovalStatus: company.moa_status === 'pending' ? 'Pending Approval' : 'Approved',
+          starRating: 0, // Placeholder as the response doesn't include ratings
+          feedback: [], // Placeholder as the response doesn't include feedback
+        }
+      });
+
+      setCompanies(mappedData);
+
+
+    } catch (error) {
+      console.error("Error fetching trainees:", error);
     }
-  ];
+  };
+
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  // const companies = [
+  //   {
+  //     name: 'Philippine Information Agency',
+  //     logo: 'https://yt3.googleusercontent.com/ytc/AIdro_keIW9LrzLnDTC0HWc-VT5Lzq28ZH90eCe6KjwnJj1jMEU=s900-c-k-c0x00ffffff-no-rj',
+  //     contact: 'piahrdd@pia.gov.ph',
+  //     description: 'PIA - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+  //     location: 'Quezon City, Metro Manila',
+  //     applicationRequirements: 'Requirements for Company A.\nRequirement 1\nRequirement 2\nRequirement 3',
+  //     expertise: 'A IT Tech Support',
+  //     MOAApprovalStatus: 'MOA Approved',
+  //     starRating: 4.5,
+  //     feedback: [
+  //       { student: 'Student 1', comment: 'Great experience!', date: '2023-01-01', profilePicture: 'https://via.placeholder.com/40' },
+  //       { student: 'Student 2', comment: 'Learned a lot!', date: '2023-02-01', profilePicture: 'https://via.placeholder.com/40' }
+  //     ]
+  //   },
+  //   {
+  //     name: 'DOST-SEI',
+  //     logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHelZpTYsSK51UGDEjonNl-QlREI1O28bweA&s',
+  //     contact: 'dosthr@example.com',
+  //     description: 'DOST - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+  //     location: 'Taguig City, Metro Manila',
+  //     applicationRequirements: 'Requirements for Company B.\nRequirement 1\nRequirement 2\nRequirement 3',
+  //     expertise: 'B Javascript Programmer',
+  //     MOAApprovalStatus: 'MOA Pending',
+  //     starRating: 4.0,
+  //     feedback: [
+  //       { student: 'Student 3', comment: 'Good company.', date: '2023-03-01', profilePicture: 'https://via.placeholder.com/40' },
+  //       { student: 'Student 4', comment: 'Helpful staff.', date: '2023-04-01', profilePicture: 'https://via.placeholder.com/40' }
+  //     ]
+  //   },
+  //   {
+  //     name: 'iSynergies Inc.',
+  //     logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4j2_XlpIbgR-IidZJrsYGP6BXa1aHRxrrNg&s',
+  //     contact: 'isynergies@example.com',
+  //     description: 'ISYNERGIES - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+  //     location: 'Cabanatuan City, Nueva Ecija',
+  //     applicationRequirements: 'Requirements for Company C.\nRequirement 1\nRequirement 2\nRequirement 3',
+  //     expertise: 'C PHP Programmer',
+  //     MOAApprovalStatus: 'MOA Approved',
+  //     starRating: 4.8,
+  //     feedback: [
+  //       { student: 'Student 5', comment: 'Excellent!', date: '2023-05-01', profilePicture: 'https://via.placeholder.com/40' },
+  //       { student: 'Student 6', comment: 'Highly recommend.', date: '2023-06-01', profilePicture: 'https://via.placeholder.com/40' }
+  //     ]
+  //   },
+  //   {
+  //     name: 'ASKI Lending Corporation',
+  //     logo: 'https://i0.wp.com/vincerapisura.com/wp/wp-content/uploads/2019/10/aski-logo.png?fit=500%2C500&ssl=1',
+  //     contact: 'aski@example.com',
+  //     description: 'ASKI - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+  //     location: 'Cabanatuan City, Nueva Ecija',
+  //     applicationRequirements: 'Requirements for Company D.\nRequirement 1\nRequirement 2\nRequirement 3',
+  //     expertise: 'D IT Tech Support',
+  //     MOAApprovalStatus: 'MOA Pending',
+  //     starRating: 4.2,
+  //     feedback: [
+  //       { student: 'Student 7', comment: 'Good learning experience.', date: '2023-07-01', profilePicture: 'https://via.placeholder.com/40' },
+  //       { student: 'Student 8', comment: 'Supportive environment.', date: '2023-08-01', profilePicture: 'https://via.placeholder.com/40' }
+  //     ]
+  //   }
+  // ];
+
+
+
+
+
+
+
+
+
 
   const handleCompanyClick = (company) => {
     setSelectedCompany(company);
@@ -181,286 +320,433 @@ function CoordinatorCompanies() {
     setFile(uploadedFile);
   };
 
+
+  const formikConfig = {
+    initialValues: {
+      description: '',
+      avatar_photo: '', // file
+      companyName: '',
+      expertise: '',
+      address: '',
+      contact_phone: '',
+      contact_email: '',
+      list_of_requirements: [],
+      MOA: null  // file
+    },
+    validationSchema: Yup.object({
+      description: Yup.string()
+        .min(8, 'Minimun of 10 character(s)')
+        .required('Required field'),
+      companyName: Yup.string()
+        .min(8, 'Minimun of 4 character(s)')
+        .required('Required field'),
+      expertise: Yup.string()
+        .min(8, 'Minimun of 4 character(s)')
+        .required('Required field'),
+      address: Yup.string()
+        .min(8, 'Minimun of 4 character(s)')
+        .required('Required field'),
+      contact_phone: Yup.number()
+        .min(11, 'Minimun of 11 character(s)')
+        .required('Required field'),
+      contact_email: Yup.string().email()
+
+        .required('Required field'),
+      list_of_requirements: Yup.array().required('Required'),
+      MOA: Yup.string().required('Required'),
+    }),
+    onSubmit: async (
+      values,
+      { setSubmitting, setFieldValue, setErrorMessage, setErrors }
+    ) => {
+      try {
+
+
+
+
+        // Create a new FormData instance
+        const formData = new FormData();
+        // Append fields to FormData
+        formData.append('avatar_photo', values.avatar_photo);
+        formData.append('MOA', values.MOA);
+
+        //
+        formData.append('description', values.description);
+        formData.append('companyName', values.companyName);
+        formData.append('expertise', values.expertise);
+        formData.append('address', values.address);
+        formData.append('contact_phone', values.contact_phone);
+        formData.append('contact_email', values.contact_email);
+        formData.append('list_of_requirements', JSON.stringify(values.list_of_requirements));
+
+        console.log({ dex: values.list_of_requirements })
+
+        let res = await axios({
+          method: 'POST',
+          url: 'company/create',
+          data: formData
+        });
+
+
+        toast.success('Created Successfully', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light'
+        });
+        closeAddCompanyModal()
+        // window.location.href = '/app/dashboard';
+      } catch (error) {
+        const errorMessage =
+          error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : 'An unknown error occurred.';
+        // console.log(error.response.data.message)
+        toast.error(errorMessage, {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light'
+        });
+      }
+
+      // setErrorMessage('');
+      // localStorage.setItem('token', 'DumyTokenHere');
+      // setLoading(false);
+      // window.location.href = '/app/dashboard';
+    }
+  };
+  const Badge = ({ status }) => {
+    const badgeClass = status === "approved"
+      ? "bg-green-500 text-white text-sm"
+      : "bg-yellow-500 text-white text-sm";
+
+    return (
+      <span className={`px-3 py-1 rounded-full ${badgeClass}`}>
+        {status === "approved" ? "Approved" : "Pending"}
+      </span>
+    );
+  };
+
   return (
     <div>
-      <h1>Companies</h1>
-      <h5>Available affiliated companies</h5>
-      <div className="company-button-container">
-        <div className="search-bar">
-          <SearchIcon />
-          <input
-            type="text"
-            placeholder="Search Companies by name, location, or your expertise..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-        </div>
-        <IconButton color="primary" onClick={handleSort}>
-          <SortIcon />
-        </IconButton>
-        <IconButton color="primary" onClick={handleAddCompany}>
-          <AddCompany />
-        </IconButton>
-      </div>
+      <Formik {...formikConfig}>
+        {({
+          handleSubmit,
+          handleChange,
+          handleBlur, // handler for onBlur event of form elements
+          values,
+          touched,
+          errors,
+          setFieldValue
+        }) => {
 
-      <div className="companies-container">
-        {sortedCompanies.map((company, index) => (
-          <div key={index} className="company-box">
-            <div className="company-header">
-            <img src={company.logo} alt={`${company.name} Logo`} className="company-logo" style={{ boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }} />
-              <h5 className="company-name">{company.name}</h5>
-            </div>
-            <p className="company-description">{company.description}</p>
-            <p className="company-expertise" style={{ color: '#1F41BB' }}><span style={{color:'#000'}}>Looking for: </span> {company.expertise}</p>
-            <p className="company-location" style={{ color: '#1F41BB' }}>{company.location}</p>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <button className="view-more-button" onClick={() => handleCompanyClick(company)}>View More</button>
-              <span style={{ alignSelf: 'center', fontWeight: 600, color: '#1F41BB' }}>
-                {company.MOAApprovalStatus}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+          console.log({ values })
+          return <div>
 
-      {isModalOpen && selectedCompany && (
-        <Dialog
-          open={isModalOpen}
-          onClose={closeModal}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            style: {
-              border: '2px solid #808080',
-              borderRadius: '8px',
-              overflow: 'auto',
-            },
-          }}
-        >
-          <DialogTitle
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 600,
-              color: '#000',
-            }}
-          >
-            
-            <img
-              src={selectedCompany.logo}
-              alt={`${selectedCompany.name} Logo`}
-              style={{ width: '150px', height: '150px', borderRadius: '50%', marginBottom: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}
-            />
-            <Typography variant="h6" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
-              {selectedCompany.name}
-            </Typography>
-            <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#808080' }}>
-              {selectedCompany.location}
-            </Typography>
-            <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#808080' }}>
-              {selectedCompany.contact}
-            </Typography>
-            <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#1F41BB' }}>
-              {selectedCompany.MOAApprovalStatus}
-            </Typography>
-          </DialogTitle>
-
-          <DialogContent
-            dividers={false}
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              color: '#000',
-              overflowY: 'scroll',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >      
-            <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
-              Description
-            </Typography>
-            <Typography variant="body1" style={{ marginBottom: '20px', whiteSpace: 'pre-line' }}>
-              {selectedCompany.description}
-            </Typography>
-            <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
-              Application Requirements
-            </Typography>
-            <Typography variant="body1" style={{ marginBottom: '20px', whiteSpace: 'pre-line' }}>
-              {selectedCompany.applicationRequirements}
-            </Typography>
-            <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
-              Expertise and Location
-            </Typography>
-            <Typography variant="body1" style={{ marginBottom: '20px' }}>
-              {selectedCompany.expertise} - {selectedCompany.location}
-            </Typography>
-            <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
-              Star Rating
-            </Typography>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-              {renderStars(Math.round(selectedCompany.starRating))}
-            </div>
-            <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
-              Student Feedback
-            </Typography>
-            {selectedCompany.feedback.map((feedback, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <img
-                  src={feedback.profilePicture}
-                  alt={`${feedback.student} Profile`}
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
+            <h1>Companies</h1>
+            <h5>Available affiliated companies</h5>
+            <div className="company-button-container">
+              <div className="search-bar">
+                <SearchIcon />
+                <input
+                  type="text"
+                  placeholder="Search Companies by name, location, or your expertise..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
                 />
-                <Typography variant="body2">
-                  {feedback.student}: {feedback.comment} ({feedback.date})
-                </Typography>
               </div>
-            ))}
-          </DialogContent>
-          <DialogActions style={{ padding: '16px' }}>
-            <Button
-              style={{
-                backgroundColor: '#ffffff',
-                color: 'black',
-                border: '2px solid #808080',
-                borderRadius: '8px',
-                marginRight: '8px',
-                fontFamily: 'Poppins, sans-serif',
-              }}
-              onClick={closeModal}
-            >
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+              <IconButton style={{ color: 'black' }} className='company-icon-button' onClick={handleAddCompany}>
+                <AddCompany />
+              </IconButton>
+              <IconButton style={{ color: 'black' }} className='company-icon-button' onClick={handleSort}>
+                <SortIcon />
+              </IconButton>
+            </div>
 
-      {isSortModalOpen && (
-        <Dialog
-          open={isSortModalOpen}
-          onClose={closeSortModal}
-          fullWidth
-          maxWidth="xs"
-          PaperProps={{
-            style: {
-              border: '2px solid #808080',
-              borderRadius: '8px',
-              overflow: 'auto',
-            },
-          }}
-        >
-          <DialogTitle
-            style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#000' }}
-          >
-            Sort Companies
-          </DialogTitle>
+            <div className="companies-container">
+              {sortedCompanies.map((company, index) => (
+                <div key={index} className="company-box">
+                  <div className="company-header">
+                    <img src={company.logo} alt={`${company.name} Logo`} className="company-logo" style={{ boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }} />
+                    <h5 className="company-name">{company.name}</h5>
+                  </div>
+                  <p className="company-description">{company.description}</p>
+                  <p className="company-expertise" style={{ color: '#1F41BB' }}><span style={{ color: '#000' }}>Looking for: </span> {company.expertise}</p>
+                  <p className="company-location" style={{ color: '#1F41BB' }}>{company.location}</p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <button
+                        className="view-more-button bg-blue-500 text-white py-1 px-4 rounded-lg 
+                      hover:bg-blue-600 transition duration-300 mr-2"
+                        onClick={() => handleCompanyClick(company)}
+                      >
+                        <FontAwesomeIcon icon={faEye} />
 
-          <DialogContent
-            dividers={false}
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              color: '#000',
-              overflowY: 'scroll',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-            <RadioGroup value={sortCriteria} onChange={handleSortChange}>
-              <FormControlLabel value="name" control={<Radio />} label="Alphabetical Order" />
-              <FormControlLabel value="location" control={<Radio />} label="Location" />
-              <FormControlLabel value="expertise" control={<Radio />} label="Expertise" />
-            </RadioGroup>
-          </DialogContent>
+                      </button>
+                      <button
+                        className="email-button bg-gray-500 text-white py-1 px-4 rounded-lg hover:bg-gray-600 transition duration-300"
+                        onClick={() => {
+                          /* Add your handler here */
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faMailBulk} />
+                      </button>
+                    </div>
 
-          <DialogActions style={{ padding: '16px' }}>
-            <Button
-              style={{
-                backgroundColor: '#ffffff',
-                color: 'black',
-                border: '2px solid #808080',
-                borderRadius: '8px',
-                marginRight: '8px',
-                fontFamily: 'Poppins, sans-serif',
-              }}
-              onClick={closeSortModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              style={{
-                backgroundColor: '#1F41BB',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontFamily: 'Poppins, sans-serif',
-              }}
-              onClick={applySort}
-            >
-              Apply
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+                    {/* <Badge status={company.moa_status} /> */}
+                  </div>
 
-      {isAddCompanyModalOpen && (
-        <Dialog
-          open={isAddCompanyModalOpen}
-          onClose={closeAddCompanyModal}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            style: {
-              border: '2px solid #808080',
-              borderRadius: '8px',
-              overflow: 'auto',
-            },
-          }}
-        >
-          <DialogTitle
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 600,
-              color: '#000',
-            }}
-          >
-            Add Company
-          </DialogTitle>
-          
-          <DialogContent
-            dividers={false}
-            style={{
-              fontFamily: 'Poppins, sans-serif',
-              color: '#000',
-              overflowY: 'scroll',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-             <div
-              style={{
-                textAlign: 'center',
-                marginBottom: '20px',
-                position: 'relative',
-              }}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
+                </div>
+              ))}
+            </div>
 
-            <Avatar
-                  src={file ? URL.createObjectURL(file) : 'https://via.placeholder.com/100'}
-                  alt="Company Avatar"
+            {isModalOpen && selectedCompany && (
+              <Dialog
+                open={isModalOpen}
+                onClose={closeModal}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                  style: {
+                    border: '2px solid #808080',
+                    borderRadius: '8px',
+                    overflow: 'auto',
+                  },
+                }}
+              >
+                <DialogTitle
                   style={{
-                    width: '150px',
-                    height: '150px',
-                    margin: '0 auto',
-                    filter: isHovered ? 'brightness(70%)' : 'none',
-                    transition: 'filter 0.2s ease',
-                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: 600,
+                    color: '#000',
                   }}
-                  onClick={() => document.getElementById('avatarUpload').click()}
-                />
+                >
 
-                {isHovered && (
+                  <img
+                    src={selectedCompany.logo}
+                    alt={`${selectedCompany.name} Logo`}
+                    style={{ width: '150px', height: '150px', borderRadius: '50%', marginBottom: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}
+                  />
+                  <Typography variant="h6" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
+                    {selectedCompany.name}
+                  </Typography>
+                  <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#808080' }}>
+                    {selectedCompany.location}
+                  </Typography>
+                  <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#808080' }}>
+                    {selectedCompany.contact}
+                  </Typography>
+                  <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#1F41BB' }}>
+                    {selectedCompany.MOAApprovalStatus}
+                  </Typography>
+                </DialogTitle>
+
+                <DialogContent
+                  dividers={false}
+                  style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    color: '#000',
+                    overflowY: 'scroll',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                  }}
+                >
+                  <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
+                    Description
+                  </Typography>
+                  <Typography variant="body1" style={{ marginBottom: '20px', whiteSpace: 'pre-line' }}>
+                    {selectedCompany.description}
+                  </Typography>
+                  <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
+                    Application Requirements
+                  </Typography>
+                  <Typography variant="body1" style={{ marginBottom: '20px', whiteSpace: 'pre-line' }}>
+                    {selectedCompany.applicationRequirements}
+                  </Typography>
+                  <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
+                    Expertise and Location
+                  </Typography>
+                  <Typography variant="body1" style={{ marginBottom: '20px' }}>
+                    {selectedCompany.expertise} - {selectedCompany.location}
+                  </Typography>
+                  <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
+                    Star Rating
+                  </Typography>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                    {renderStars(Math.round(selectedCompany.starRating))}
+                  </div>
+                  <Typography variant="h6" style={{ marginBottom: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>
+                    Student Feedback
+                  </Typography>
+                  {selectedCompany.feedback.map((feedback, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                      <img
+                        src={feedback.profilePicture}
+                        alt={`${feedback.student} Profile`}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
+                      />
+                      <Typography variant="body2">
+                        {feedback.student}: {feedback.comment} ({feedback.date})
+                      </Typography>
+                    </div>
+                  ))}
+                </DialogContent>
+                <DialogActions style={{ padding: '16px' }}>
+                  <Button
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: 'black',
+                      border: '2px solid #808080',
+                      borderRadius: '8px',
+                      marginRight: '8px',
+                      fontFamily: 'Poppins, sans-serif',
+                    }}
+                    onClick={closeModal}
+                  >
+                    Close
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            )}
+
+            {isSortModalOpen && (
+              <Dialog
+                open={isSortModalOpen}
+                onClose={closeSortModal}
+                fullWidth
+                maxWidth="xs"
+                PaperProps={{
+                  style: {
+                    border: '2px solid #808080',
+                    borderRadius: '8px',
+                    overflow: 'auto',
+                  },
+                }}
+              >
+                <DialogTitle
+                  style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#000' }}
+                >
+                  Sort Companies
+                </DialogTitle>
+
+                <DialogContent
+                  dividers={false}
+                  style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    color: '#000',
+                    overflowY: 'scroll',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                  }}
+                >
+                  <RadioGroup value={sortCriteria} onChange={handleSortChange}>
+                    <FormControlLabel value="name" control={<Radio />} label="Alphabetical Order" />
+                    <FormControlLabel value="location" control={<Radio />} label="Location" />
+                    <FormControlLabel value="expertise" control={<Radio />} label="Expertise" />
+                  </RadioGroup>
+                </DialogContent>
+
+                <DialogActions style={{ padding: '16px' }}>
+                  <Button
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: 'black',
+                      border: '2px solid #808080',
+                      borderRadius: '8px',
+                      marginRight: '8px',
+                      fontFamily: 'Poppins, sans-serif',
+                    }}
+                    onClick={closeSortModal}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    style={{
+                      backgroundColor: '#1F41BB',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontFamily: 'Poppins, sans-serif',
+                    }}
+                    onClick={applySort}
+                  >
+                    Apply
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            )}
+
+            {isAddCompanyModalOpen && (
+              <Dialog
+                open={isAddCompanyModalOpen}
+                onClose={closeAddCompanyModal}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                  style: {
+                    border: '2px solid #808080',
+                    borderRadius: '8px',
+                    overflow: 'auto',
+                  },
+                }}
+              >
+                <DialogTitle
+                  style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: 600,
+                    color: '#000',
+                  }}
+                >
+                  Add Company
+                </DialogTitle>
+
+                <DialogContent
+                  dividers={false}
+                  style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    color: '#000',
+                    overflowY: 'scroll',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                  }}
+                >
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      marginBottom: '20px',
+                      position: 'relative',
+                    }}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                  >
+
+                    <Avatar
+                      src={avatarPhoto ? URL.createObjectURL(avatarPhoto) : 'https://via.placeholder.com/100'}
+                      alt="Company Avatar"
+                      style={{
+                        width: '150px',
+                        height: '150px',
+                        margin: '0 auto',
+                        filter: isHovered ? 'brightness(70%)' : 'none',
+                        transition: 'filter 0.2s ease',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => document.getElementById('avatarUpload').click()}
+                    />
+
+                    {isHovered && (
                       <IconButton
                         onClick={() => document.getElementById('avatarUpload').click()}
                         style={{
@@ -476,317 +762,217 @@ function CoordinatorCompanies() {
                       </IconButton>
                     )}
 
-                <input
+                    <input
                       type="file"
                       id="avatarUpload"
                       style={{ display: 'none' }}
                       onChange={(event) => {
                         const uploadedFile = event.target.files[0];
+                        setFieldValue('avatar_photo', uploadedFile)
                         setFile(uploadedFile);
                       }}
                     />
-                </div>
+                  </div>
 
-            <h5 style={{marginBottom:'0', marginTop:'20px'}}>Company information</h5>
-            {/* Example of MUI FormControl + FormLabel styling, repeated as needed */}
-            <FormControl margin="normal" fullWidth>
-              <FormLabel
-                sx={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontSize: '16px',
-                  color: '#000',
-                  marginBottom: '4px',
-                }}
-              >
-                Company Name
-              </FormLabel>
-              <TextField
-                variant="outlined"
-                name="companyName"
-                InputProps={{
-                  sx: {
-                    fontSize: '14px',
-                    fontFamily: 'Poppins, sans-serif',
-                    height: '40px',
-                  },
-                }}
-                InputLabelProps={{
-                  sx: {
-                    fontSize: '14px',
-                    fontFamily: 'Poppins, sans-serif',
-                  },
-                }}
-                sx={{
-                  borderRadius: '8px',
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: '#808080',
-                      borderWidth: '2px',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#1F41BB',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1F41BB',
-                    },
-                  },
-                }}
-              />
-            </FormControl>
+                  <h5 style={{ marginBottom: '0', marginTop: '20px' }}>Company information</h5>
+                  {/* Example of MUI FormControl + FormLabel styling, repeated as needed */}
+                  <FormControl margin="normal" fullWidth>
 
-            <FormControl margin="normal" fullWidth>
-              <FormLabel
-                sx={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontSize: '16px',
-                  color: '#000',
-                  marginBottom: '4px',
-                }}
-              >
-                Expertise
-              </FormLabel>
-              <TextField
-                variant="outlined"
-                name="expertise"
-                InputProps={{
-                  sx: {
-                    fontSize: '14px',
-                    fontFamily: 'Poppins, sans-serif',
-                    height: '40px',
-                  },
-                }}
-                sx={{
-                  borderRadius: '8px',
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: '#808080',
-                      borderWidth: '2px',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#1F41BB',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1F41BB',
-                    },
-                  },
-                }}
-              />
-            </FormControl>
+                    <InputText
+                      // icons={mdiAccount}
+                      label="Company Name"
+                      labelColor="text-blue-950"
+                      name="companyName"
+                      type="text"
+                      placeholder=""
+                      value={values.companyName}
+                      onBlur={handleBlur} // This apparently updates `touched`?
+                    />
 
-            <FormControl margin="normal" fullWidth>
-            <FormLabel
-              sx={{
-                fontFamily: 'Poppins, sans-serif',
-                fontSize: '16px',
-                color: '#000',
-                marginBottom: '4px',
-              }}
-            >
-              Location
-            </FormLabel>
-            <TextField
-              variant="outlined"
-              name="location"
-              InputProps={{
-                sx: {
-                  fontSize: '14px',
-                  fontFamily: 'Poppins, sans-serif',
-                  height: '40px',
-                },
-              }}
-              sx={{
-                borderRadius: '8px',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#808080',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#1F41BB',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1F41BB',
-                  },
-                },
-              }}
-            />
-          </FormControl>
+                  </FormControl>
 
-          <FormControl margin="normal" fullWidth>
-          <FormLabel
-            sx={{
-              fontFamily: 'Poppins, sans-serif',
-              fontSize: '16px',
-              color: '#000',
-              marginBottom: '4px',
-            }}
-          >
-            List of Requirements
-          </FormLabel>
-          <TextField
-            variant="outlined"
-            name="requirements"
-            multiline
-            rows={4}
-            InputProps={{
-              sx: {
-                fontSize: '14px',
-                fontFamily: 'Poppins, sans-serif',
-              },
-            }}
-            sx={{
-              borderRadius: '8px',
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: '#808080',
-                  borderWidth: '2px',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#1F41BB',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#1F41BB',
-                },
-              },
-            }}
-          />
-        </FormControl>
+                  <FormControl margin="normal" fullWidth>
 
-        <FormControl margin="normal" fullWidth>
-          <FormLabel
-            sx={{
-              fontFamily: 'Poppins, sans-serif',
-              fontSize: '16px',
-              color: '#000',
-              marginBottom: '4px',
-            }}
-          >
-            Contact Email
-          </FormLabel>
-          <TextField
-            variant="outlined"
-            name="contactEmail"
-            type="email"
-            InputProps={{
-              sx: {
-                fontSize: '14px',
-                fontFamily: 'Poppins, sans-serif',
-                height: '40px',
-              },
-            }}
-            sx={{
-              borderRadius: '8px',
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: '#808080',
-                  borderWidth: '2px',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#1F41BB',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#1F41BB',
-                },
-              },
-            }}
-          />
-        </FormControl>
+                    <TextAreaInput
+                      // icons={mdiAccount}
+                      label="Description"
+                      labelColor="text-blue-950"
+                      name="description"
+                      type="textarea"
+                      placeholder=""
+                      value={values.description}
+                      hasTextareaHeight={true}
+                      onBlur={handleBlur} // This apparently updates `touched`?
+                    />
 
-        <FormControl margin="normal" fullWidth>
-        <FormLabel
-          sx={{
-            fontFamily: 'Poppins, sans-serif',
-            fontSize: '16px',
-            color: '#000',
-            marginBottom: '4px',
-          }}
-        >
-          Contact Phone
-        </FormLabel>
-        <TextField
-          variant="outlined"
-          name="contactPhone"
-          InputProps={{
-            sx: {
-              fontSize: '14px',
-              fontFamily: 'Poppins, sans-serif',
-              height: '40px',
-            },
-          }}
-          sx={{
-            borderRadius: '8px',
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#808080',
-                borderWidth: '2px',
-              },
-              '&:hover fieldset': {
-                borderColor: '#1F41BB',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#1F41BB',
-              },
-            },
-          }}
-        />
-      </FormControl>
+                  </FormControl>
 
-            {/* Drag-and-drop file section */}
 
-            <h5 style={{marginTop: '20px'}}>Memorandum Of Agreement</h5>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              style={{
-                border: dragOver ? '2px solid #1F41BB' : '2px dashed #808080',
-                borderRadius: '8px',
-                padding: '20px',
-                textAlign: 'center',
-                marginTop: '20px',
-                cursor: 'pointer',
-              }}
-            >
-              <CloudUploadIcon style={{ fontSize: '48px', color: dragOver ? '#1F41BB' : '#808080' }} />
-              <Typography variant="body1" style={{ fontFamily: 'Poppins, sans-serif', color: '#808080' }}>
-                {file ? file.name : 'Drag and drop the Memorandum of Agreement file here or click to upload'}
-              </Typography>
-              <input
-                type="file"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
-            </div>
-          </DialogContent>
-          <DialogActions style={{ padding: '16px' }}>
-            <Button
-              style={{
-                backgroundColor: '#ffffff',
-                color: 'black',
-                border: '2px solid #808080',
-                borderRadius: '8px',
-                marginRight: '8px',
-                fontFamily: 'Poppins, sans-serif',
-              }}
-              onClick={closeAddCompanyModal}
-            >
-              Discard
-            </Button>
-            <Button
-              style={{
-                backgroundColor: '#1F41BB',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontFamily: 'Poppins, sans-serif',
-              }}
-              onClick={closeAddCompanyModal}
-            >
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+                  <FormControl margin="normal" fullWidth>
+                    <InputText
+                      // icons={mdiAccount}
+                      label="Expertise"
+                      labelColor="text-blue-950"
+                      name="expertise"
+                      type="text"
+                      placeholder=""
+                      value={values.expertise}
+                      onBlur={handleBlur} // This apparently updates `touched`?
+                    />
+                  </FormControl>
+
+                  <FormControl margin="normal" fullWidth>
+                    <InputText
+                      // icons={mdiAccount}
+                      label="Address"
+                      labelColor="text-blue-950"
+                      name="address"
+                      type="text"
+                      placeholder=""
+                      value={values.address}
+                      onBlur={handleBlur} // This apparently updates `touched`?
+                    />
+                  </FormControl>
+
+                  <FormControl margin="normal" fullWidth>
+                    <Dropdown
+                      className="z-50"
+                      isMulti={true}
+                      label="List of requirements"
+                      name="list_of_requirements"
+                      value={values.list_of_requirements}
+
+                      onBlur={handleBlur}
+                      options={[{
+                        label: 'OJT endorsement',
+                        value: 'OJT endorsement'
+                      },
+                      {
+                        label: 'Training plan',
+                        value: 'Training plan'
+                      },
+                      {
+                        label: 'Medical Clearance',
+                        value: 'Medical Clearance'
+                      },
+                      {
+                        label: 'Birth Certificate',
+                        value: 'Birth Certificate'
+                      },
+                      ]}
+
+                      onChange={(newValue) => {
+
+                        // setSelectedOptions(newValue);
+                        setFieldValue('list_of_requirements', newValue)
+                        // setSelectedOptions(newValue);
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormControl margin="normal" fullWidth>
+                    <InputText
+                      // icons={mdiAccount}
+                      label="Contact Email"
+                      labelColor="text-blue-950"
+                      name="contact_email"
+                      type="text"
+                      placeholder=""
+                      value={values.contact_email}
+                      onBlur={handleBlur} // This apparently updates `touched`?
+                    />
+                  </FormControl>
+
+                  <FormControl margin="normal" fullWidth>
+                    <InputText
+                      // icons={mdiAccount}
+                      label="Contact Phone"
+                      labelColor="text-blue-950"
+                      name="contact_phone"
+                      type="text"
+                      placeholder=""
+                      value={values.contact_phone}
+                      onBlur={handleBlur} // This apparently updates `touched`?
+                    />
+                  </FormControl>
+
+                  {/* Drag-and-drop file section */}
+
+                  <h5 style={{ marginTop: '20px' }}>Memorandum Of Agreement</h5>
+                  <div
+
+                    className={`${errors.MOA ? "border-2 rounded border-red-500" : ""
+                      }`}>
+                    <DropzoneArea
+                      fieldName="MOA"
+                      files={files}
+                      dropzoneProps={dropzoneProps("MOA")}
+                      setFieldValue={setFieldValue}
+                      errors={errors}
+                    />
+                  </div>
+
+                  {/* <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  style={{
+                    border: dragOver ? '2px solid #1F41BB' : '2px dashed #808080',
+                    borderRadius: '8px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    marginTop: '20px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <CloudUploadIcon style={{ fontSize: '48px', color: dragOver ? '#1F41BB' : '#808080' }} />
+                  <Typography variant="body1" style={{ fontFamily: 'Poppins, sans-serif', color: '#808080' }}>
+                    {file ? file.name : 'Drag and drop the Memorandum of Agreement file here or click to upload'}
+                  </Typography>
+                  <input
+                    type="file"
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                  />
+                </div> */}
+                </DialogContent>
+                <DialogActions style={{ padding: '16px' }}>
+                  <Button
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: 'black',
+                      border: '2px solid #808080',
+                      borderRadius: '8px',
+                      marginRight: '8px',
+                      fontFamily: 'Poppins, sans-serif',
+                    }}
+                    onClick={closeAddCompanyModal}
+                  >
+                    Discard
+                  </Button>
+                  <Button
+                    style={{
+                      backgroundColor: '#1F41BB',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontFamily: 'Poppins, sans-serif',
+                    }}
+                    onClick={() => {
+                      handleSubmit()
+                    }}
+                  >
+                    Save
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            )}
+          </div>
+
+        }}
+
+      </Formik>
+      <ToastContainer />
     </div>
   );
 }

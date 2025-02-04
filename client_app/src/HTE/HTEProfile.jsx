@@ -8,10 +8,8 @@ import {
   TextField,
   IconButton,
   Avatar,
-  MenuItem,
   FormControl,
   FormLabel,
-  Grid,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import '../index.css'; // Adjust the import path if necessary
@@ -62,10 +60,6 @@ function HTEProfileModal({ open, onClose }) {
 
   const handlePictureUpload = () => {
     // Upload logic here...
-  };
-
-  const stopPropagation = (e) => {
-    e.stopPropagation();
   };
 
   return (

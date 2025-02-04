@@ -7,6 +7,10 @@ import userRoute from './routes/userRoute.js';
 
 import authRoute from './routes/auth.js';
 
+import companyRoute from './routes/company.js';
+
+import collegeRoute from './routes/college.js';
+
 import bodyParser from 'body-parser';
 
 import path from 'path';
@@ -49,11 +53,15 @@ app.use(express.json());
 app.use('/api/user', userRoute);
 app.use('/api/auth', authRoute);
 
+app.use('/api/company', companyRoute);
+
+app.use('/api/college', collegeRoute);
+
 app.use(express.static('public'));
 app.use(express.static('files'));
 
 app.use('/static', express.static('public'));
 
 app.listen(config.port, async () => {
-  console.log(`Hello Server is live`);
+  console.log(`Hello the server is live`);
 });

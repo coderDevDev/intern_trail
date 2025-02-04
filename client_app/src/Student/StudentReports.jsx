@@ -8,7 +8,7 @@ function StudentReports() {
       <form className="emergency-form">
         <div className="form-left">
           <div className="form-group">
-            <h5>Student Info</h5>
+            <h5>Info</h5>
             <label htmlFor="name">Name</label>
             <input type="text" id="name" name="name" className="report-input" required />
           </div>
@@ -27,7 +27,7 @@ function StudentReports() {
         </div>
         <div className="form-right">
           <div className="form-group">
-          <h5>Incident Info</h5>
+            <h5>Incident Info</h5>
             <label className="form-header-label">Type of Emergency</label>
             <div className="radio-group">
               <label>
