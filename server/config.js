@@ -121,5 +121,5 @@ export default {
   defaultDBName: 'neo4j',
   mySqlDriver: mySqlDriver,
   firebaseStorage,
-  REACT_FRONT_END_URL: 'http://localhost:3000'
+  REACT_FRONT_END_URL: 'http://localhost:5173'
 };
