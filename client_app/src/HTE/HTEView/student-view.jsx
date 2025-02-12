@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { StudentModal } from "./student-modal"
+import StatusBadge from '@/components/StatusBadge'
 
 import axios from 'axios';
 
@@ -64,8 +65,6 @@ export default function StudentView({
 
   let students = data;
 
-  console.log({ students })
-
 
   const [view, setView] = useState("table")
   const [searchTerm, setSearchTerm] = useState("")
@@ -105,25 +104,33 @@ export default function StudentView({
   })
 
   const handleViewInfo = (student) => {
+    setIsModalOpen(true)
     setSelectedStudent(student)
 
 
 
   }
 
-  const handleApprove = async (student) => {
-    console.log(`Approving student ${student}`)
-    // setIsModalOpen(false)\
+  const handleApprove = async (studentData, status = 'Approved') => {
+    // console.log(`Approving student ${studentId}`)
+    // setIsModalOpen(false)
+    // console.log({ studentId })
 
-    let { trainee_user_id, company_id } = student;
+    let companyId = studentData.company_id;
+
+    let studentId = studentData.trainee_user_id;
+
+
 
     try {
       let res = await axios({
         method: 'put',
-        url: `company/trainee/application/${trainee_user_id}`,
+        url: `company/trainee/application/${studentId}`,
         data: {
-          status: 'Approved',
-          companyId: company_id
+          companyId,
+          studentId,
+          status
+
         }
       });
 
@@ -154,45 +161,7 @@ export default function StudentView({
 
   }
 
-  const handleReject = async (student) => {
 
-    let { trainee_user_id, company_id } = student;
-
-    try {
-      let res = await axios({
-        method: 'put',
-        url: `company/trainee/application/${trainee_user_id}`,
-        data: {
-          status: 'Rejected',
-          companyId: company_id
-        }
-      });
-
-      toast.warning('Rejected Successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light'
-      });
-      fetchFunction()
-      setIsModalOpen(false)
-    } catch (error) {
-      toast.error('An error occured', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light'
-      });
-    }
-  }
 
   const uniqueColleges = Array.from(new Set(students.map((s) => s.collegeName)))
   const uniquePrograms = Array.from(new Set(students.map((s) => s.progName)))
@@ -232,7 +201,7 @@ export default function StudentView({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <Input
           type="text"
-          placeholder="Search ..."
+          placeholder="Search students..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
@@ -255,8 +224,14 @@ export default function StudentView({
                 onClick={() => handleSort("traineeID")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
               >
-                ID
+                Trainee ID
               </TableHead> */}
+              <TableHead
+                onClick={() => handleSort("traineeID")}
+                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
+              >
+                Profile Picture
+              </TableHead>
               <TableHead
                 onClick={() => handleSort("first_name")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
@@ -269,55 +244,53 @@ export default function StudentView({
               >
                 Email
               </TableHead>
-
               <TableHead
-                onClick={() => handleSort("email")}
+                onClick={() => handleSort("collegeName")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
               >
-                College Name
+                College
+                <FilterPopover
+                  options={uniqueColleges}
+                  value={collegeFilter}
+                  onChange={setCollegeFilter}
+                  placeholder="Filter by College"
+                />
               </TableHead>
-
               <TableHead
-                onClick={() => handleSort("email")}
+                onClick={() => handleSort("progName")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
               >
                 Program
-              </TableHead>
-
-              <TableHead
-                onClick={() => handleSort("is_verified")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              > Is Approved
-
                 <FilterPopover
-                  options={["true", "false"]}
-                  value={verifiedFilter}
-                  onChange={setVerifiedFilter}
-                  placeholder="Filter by Verification"
+                  options={uniquePrograms}
+                  value={programFilter}
+                  onChange={setProgramFilter}
+                  placeholder="Filter by Program"
                 />
               </TableHead>
-
-
               <TableHead
-                onClick={() => handleSort("is_verified")}
+                onClick={() => handleSort("remaining_hours")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              > Approval Date
-
-                <FilterPopover
-                  options={["true", "false"]}
-                  value={verifiedFilter}
-                  onChange={setVerifiedFilter}
-                  placeholder="Filter by Verification"
-                />
+              >
+                Remaining Hours
               </TableHead>
-
-
               <TableHead
                 onClick={() => handleSort("is_verified")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
               >
-
-                Is Accepted
+                Verified
+                <FilterPopover
+                  options={["true", "false"]}
+                  value={verifiedFilter}
+                  onChange={setVerifiedFilter}
+                  placeholder="Filter by Verification"
+                />
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort("is_verified")}
+                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
+              >
+                Approved
                 <FilterPopover
                   options={["true", "false"]}
                   value={verifiedFilter}
@@ -332,21 +305,30 @@ export default function StudentView({
           <TableBody>
             {sortedStudents.map((student) => (
               <TableRow
-                key={student.coordinatorID}
+                key={student.traineeID}
                 className="text-sm text-gray-700 border-b hover:bg-gray-50"
               >
                 {/* <TableCell className="px-4 py-2">{student.traineeID}</TableCell> */}
+                <TableCell className="px-4 py-2">
+
+
+                  <img src={student.proof_identity || "../anyrgb.com.png"} alt="Profile" class="profile-picture" />
+
+
+                </TableCell>
                 <TableCell className="px-4 py-2">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</TableCell>
                 <TableCell className="px-4 py-2">{student.email}</TableCell>
+                <TableCell className="px-4 py-2">{student.collegeName}</TableCell>
+                <TableCell className="px-4 py-2">{student.progName}</TableCell>
+                <TableCell className="px-4 py-2">{student.remaining_hours}</TableCell>
+                <TableCell className="px-4 py-2">
 
-                <TableCell className="px-4 py-2 font-bold">{student.collegeName}</TableCell>
-                <TableCell className="px-4 py-2 font-bold">{student.progName}</TableCell>
+                  <StatusBadge isActive={student.is_verified} />
 
-                <TableCell className="px-4 py-2 font-bold">{student.status}</TableCell>
-                <TableCell className="px-4 py-2 font-bold">{
-                  student.status === 'Approved' ?
-                    student.approval_date : ''}</TableCell>
-                <TableCell className="px-4 py-2 font-bold">{student.is_confirmed > 0 ? 'Yes' : ''}</TableCell>
+                </TableCell>
+                <TableCell className="px-4 py-2">
+                  <StatusBadge isActive={student.status === 'Approved'} />
+                </TableCell>
                 <TableCell className="px-4 py-2">
                   <Button
 
@@ -409,7 +391,7 @@ export default function StudentView({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onApprove={handleApprove}
-        onReject={handleReject}
+        onReject={handleApprove}
       />
       <ToastContainer />
     </div>

@@ -20,7 +20,8 @@ const router = express.Router();
 
 let firebaseStorage = config.firebaseStorage;
 
-const JWT_SECRET = 'your_secret_key';
+const JWT_SECRET = config.JWT_TOKEN_SECRET;
+console.log({ JWT_SECRET });
 const storage = multer.diskStorage({
   destination: (req, file, callBack) => {
     callBack(null, 'uploads');
@@ -40,15 +41,15 @@ const upload = multer({ storage: multer.memoryStorage() });
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'dextermiranda441@gmail.com', // Replace with your email
-    pass: 'oczk mljj symm bjgc' // Replace with your email password
+    user: 'interntrailwup@gmail.com', // Replace with your email
+    pass: 'oclc xbbw agiq cdvl' // Replace with your email password
   }
 });
 
 const sendRegistrationEmail = async (email, templateKey) => {
   // Set the mail options
   const mailOptions = {
-    from: 'dextermiranda441@gmail.com',
+    from: 'interntrailwup@gmail.com',
     to: email,
     subject: '',
     html: ''
@@ -234,10 +235,22 @@ router.post('/create', async (req, res) => {
   console.log({ role, college, program });
 
   const findCollegeByCodeQuery = collegeCode =>
-    `SELECT * FROM colleges WHERE collegeCode = '${collegeCode}'`;
+    `SELECT * FROM colleges WHERE collegeCode = '${collegeCode}'
+
+    OR collegeID  = '${collegeCode}'
+  
+  
+  `;
 
   const findProgramByCodeQuery = progCode =>
-    `SELECT * FROM programs WHERE progCode = '${progCode}'`;
+    `
+  
+  SELECT * FROM programs WHERE progCode = '${progCode}'
+  
+  OR programID  = '${progCode}'
+  
+  
+  `;
 
   try {
     const [existingUser] = await db.query(
@@ -261,8 +274,11 @@ router.post('/create', async (req, res) => {
 
     console.log('Inserted User ID:', insertedUserID);
 
+    console.log({ college });
     const [rows] = await db.query(findCollegeByCodeQuery(college));
     const collegeInfo = rows[0];
+
+    console.log({ collegeInfo });
 
     const [rows2] = await db.query(findProgramByCodeQuery(program));
     const programInfo = rows2[0];
@@ -431,8 +447,8 @@ router.post(
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'dextermiranda441@gmail.com', // Replace with your email
-          pass: 'oczk mljj symm bjgc' // Replace with your email password
+          user: 'interntrailwup@gmail.com', // Replace with your email
+          pass: 'oclc xbbw agiq cdvl' // Replace with your email password
         }
       });
 

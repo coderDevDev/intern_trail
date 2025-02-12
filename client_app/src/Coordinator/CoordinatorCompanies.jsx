@@ -6,11 +6,12 @@ import AddCompany from '@mui/icons-material/AddCircleOutlineOutlined';
 import SortIcon from '@mui/icons-material/Sort';
 import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
+import { Button as ButtonUI } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Dialog as MuiDialog,
+  DialogTitle as MuiDialogTitle,
+  DialogContent as MuiDialogContent,
+  DialogActions as MuiDialogActions,
   Button,
   Typography,
   TextField,
@@ -22,6 +23,14 @@ import {
   FormLabel,
   Avatar
 } from '@mui/material';
+
+import {
+  Dialog as ShadcnDialog,
+  DialogContent as ShadcnDialogContent,
+  DialogHeader as ShadcnDialogHeader,
+  DialogTitle as ShadcnDialogTitle
+} from "@/components/ui/dialog";
+
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 import InputText from './../components/Input/InputText';
@@ -34,22 +43,20 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
-
 import Dropdown from './../components/Input/Dropdown';
 import { useDropzone } from "react-dropzone";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee, faEye, faEyeDropper, faMailBulk, faMailReply, faSms } from '@fortawesome/free-solid-svg-icons'
-
-
-
+import { CloudLightning, FileText, Check, X } from "lucide-react"
+import FileManager from "@/components/FileManager"
+import { DialogFooter } from "@/components/ui/dialog"
 
 function CoordinatorCompanies() {
 
   // Define file handling logic
   const [files, setFiles] = useState({
     MOA: null,
-
   });
 
   const onDrop = (acceptedFiles, fieldName) => {
@@ -68,12 +75,10 @@ function CoordinatorCompanies() {
     multiple: false,
   });
 
-
   const DropzoneArea = ({ fieldName, files, dropzoneProps, setFieldValue, errors }) => {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
       ...dropzoneProps,
       onDrop: (acceptedFiles) => {
-
         setFieldValue(fieldName, acceptedFiles[0]);
         if (acceptedFiles.length > 0) {
           // Update files state with the new file
@@ -84,7 +89,6 @@ function CoordinatorCompanies() {
         }
       },
     });
-
 
     let hasError = errors[fieldName];
     return (
@@ -111,8 +115,6 @@ function CoordinatorCompanies() {
     );
   };
 
-
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
@@ -124,9 +126,7 @@ function CoordinatorCompanies() {
   const [avatarPhoto, setFile] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
 
-
   const [companies, setCompanies] = useState([]);
-
 
   const fetchCompanies = async () => {
     try {
@@ -134,6 +134,7 @@ function CoordinatorCompanies() {
       let result = response.data.data
       let mappedData = result.map((company) => {
         return {
+          id: company.companyID,
           name: company.companyName,
           logo: company.avatar_photo,
           contact: company.contact_email,
@@ -154,88 +155,14 @@ function CoordinatorCompanies() {
 
       setCompanies(mappedData);
 
-
     } catch (error) {
       console.error("Error fetching trainees:", error);
     }
   };
 
-
   useEffect(() => {
     fetchCompanies();
   }, []);
-
-  // const companies = [
-  //   {
-  //     name: 'Philippine Information Agency',
-  //     logo: 'https://yt3.googleusercontent.com/ytc/AIdro_keIW9LrzLnDTC0HWc-VT5Lzq28ZH90eCe6KjwnJj1jMEU=s900-c-k-c0x00ffffff-no-rj',
-  //     contact: 'piahrdd@pia.gov.ph',
-  //     description: 'PIA - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     location: 'Quezon City, Metro Manila',
-  //     applicationRequirements: 'Requirements for Company A.\nRequirement 1\nRequirement 2\nRequirement 3',
-  //     expertise: 'A IT Tech Support',
-  //     MOAApprovalStatus: 'MOA Approved',
-  //     starRating: 4.5,
-  //     feedback: [
-  //       { student: 'Student 1', comment: 'Great experience!', date: '2023-01-01', profilePicture: 'https://via.placeholder.com/40' },
-  //       { student: 'Student 2', comment: 'Learned a lot!', date: '2023-02-01', profilePicture: 'https://via.placeholder.com/40' }
-  //     ]
-  //   },
-  //   {
-  //     name: 'DOST-SEI',
-  //     logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHelZpTYsSK51UGDEjonNl-QlREI1O28bweA&s',
-  //     contact: 'dosthr@example.com',
-  //     description: 'DOST - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     location: 'Taguig City, Metro Manila',
-  //     applicationRequirements: 'Requirements for Company B.\nRequirement 1\nRequirement 2\nRequirement 3',
-  //     expertise: 'B Javascript Programmer',
-  //     MOAApprovalStatus: 'MOA Pending',
-  //     starRating: 4.0,
-  //     feedback: [
-  //       { student: 'Student 3', comment: 'Good company.', date: '2023-03-01', profilePicture: 'https://via.placeholder.com/40' },
-  //       { student: 'Student 4', comment: 'Helpful staff.', date: '2023-04-01', profilePicture: 'https://via.placeholder.com/40' }
-  //     ]
-  //   },
-  //   {
-  //     name: 'iSynergies Inc.',
-  //     logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4j2_XlpIbgR-IidZJrsYGP6BXa1aHRxrrNg&s',
-  //     contact: 'isynergies@example.com',
-  //     description: 'ISYNERGIES - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     location: 'Cabanatuan City, Nueva Ecija',
-  //     applicationRequirements: 'Requirements for Company C.\nRequirement 1\nRequirement 2\nRequirement 3',
-  //     expertise: 'C PHP Programmer',
-  //     MOAApprovalStatus: 'MOA Approved',
-  //     starRating: 4.8,
-  //     feedback: [
-  //       { student: 'Student 5', comment: 'Excellent!', date: '2023-05-01', profilePicture: 'https://via.placeholder.com/40' },
-  //       { student: 'Student 6', comment: 'Highly recommend.', date: '2023-06-01', profilePicture: 'https://via.placeholder.com/40' }
-  //     ]
-  //   },
-  //   {
-  //     name: 'ASKI Lending Corporation',
-  //     logo: 'https://i0.wp.com/vincerapisura.com/wp/wp-content/uploads/2019/10/aski-logo.png?fit=500%2C500&ssl=1',
-  //     contact: 'aski@example.com',
-  //     description: 'ASKI - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     location: 'Cabanatuan City, Nueva Ecija',
-  //     applicationRequirements: 'Requirements for Company D.\nRequirement 1\nRequirement 2\nRequirement 3',
-  //     expertise: 'D IT Tech Support',
-  //     MOAApprovalStatus: 'MOA Pending',
-  //     starRating: 4.2,
-  //     feedback: [
-  //       { student: 'Student 7', comment: 'Good learning experience.', date: '2023-07-01', profilePicture: 'https://via.placeholder.com/40' },
-  //       { student: 'Student 8', comment: 'Supportive environment.', date: '2023-08-01', profilePicture: 'https://via.placeholder.com/40' }
-  //     ]
-  //   }
-  // ];
-
-
-
-
-
-
-
-
-
 
   const handleCompanyClick = (company) => {
     setSelectedCompany(company);
@@ -320,7 +247,6 @@ function CoordinatorCompanies() {
     setFile(uploadedFile);
   };
 
-
   const formikConfig = {
     initialValues: {
       description: '',
@@ -350,7 +276,6 @@ function CoordinatorCompanies() {
         .min(11, 'Minimun of 11 character(s)')
         .required('Required field'),
       contact_email: Yup.string().email()
-
         .required('Required field'),
       list_of_requirements: Yup.array().required('Required'),
       MOA: Yup.string().required('Required'),
@@ -360,10 +285,6 @@ function CoordinatorCompanies() {
       { setSubmitting, setFieldValue, setErrorMessage, setErrors }
     ) => {
       try {
-
-
-
-
         // Create a new FormData instance
         const formData = new FormData();
         // Append fields to FormData
@@ -386,7 +307,6 @@ function CoordinatorCompanies() {
           url: 'company/create',
           data: formData
         });
-
 
         toast.success('Created Successfully', {
           position: 'top-right',
@@ -436,6 +356,46 @@ function CoordinatorCompanies() {
     );
   };
 
+  // Add new state for MOA modal
+  const [moaModalOpen, setMoaModalOpen] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+
+  // Handler for MOA button click
+  const handleMoaClick = (companyId) => {
+    setSelectedCompanyId(companyId);
+    setMoaModalOpen(true);
+  };
+
+  // Add new function to handle MOA approval
+  const handleMoaApproval = async (companyId, status) => {
+    try {
+      await axios.put(`/company/${companyId}/moa-status`, {
+        status: status
+      });
+
+      // Update local state
+      setCompanies(companies.map(company => {
+        if (company.id === companyId) {
+          return {
+            ...company,
+            MOAApprovalStatus: status === 'approved' ? 'Approved' : 'Rejected'
+          };
+        }
+        return company;
+      }));
+
+      // Close modal and show success message
+      setMoaModalOpen(false);
+      toast.success(`MOA ${status === 'approved' ? 'approved' : 'rejected'} successfully`);
+
+      // Refresh companies list
+      fetchCompanies();
+    } catch (error) {
+      console.error('Error updating MOA status:', error);
+      toast.error('Failed to update MOA status');
+    }
+  };
+
   return (
     <div>
       <Formik {...formikConfig}>
@@ -472,6 +432,10 @@ function CoordinatorCompanies() {
               </IconButton>
             </div>
 
+
+            {
+              console.log({ sortedCompanies })
+            }
             <div className="companies-container">
               {sortedCompanies.map((company, index) => (
                 <div key={index} className="company-box">
@@ -500,6 +464,14 @@ function CoordinatorCompanies() {
                       >
                         <FontAwesomeIcon icon={faMailBulk} />
                       </button>
+                      <button
+                        className="ml-4 moa-button bg-blue-500 text-white py-1 px-4 rounded-lg 
+                        hover:bg-indigo-600 transition duration-300"
+                        onClick={() => handleMoaClick(company.id)}
+                      >
+                        <FileText className="w-4 h-4 inline-block mr-1" />
+                        MOA
+                      </button>
                     </div>
 
                     {/* <Badge status={company.moa_status} /> */}
@@ -510,7 +482,7 @@ function CoordinatorCompanies() {
             </div>
 
             {isModalOpen && selectedCompany && (
-              <Dialog
+              <MuiDialog
                 open={isModalOpen}
                 onClose={closeModal}
                 fullWidth
@@ -523,7 +495,7 @@ function CoordinatorCompanies() {
                   },
                 }}
               >
-                <DialogTitle
+                <MuiDialogTitle
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -551,9 +523,9 @@ function CoordinatorCompanies() {
                   <Typography variant="body2" style={{ fontFamily: 'Poppins, sans-serif', color: '#1F41BB' }}>
                     {selectedCompany.MOAApprovalStatus}
                   </Typography>
-                </DialogTitle>
+                </MuiDialogTitle>
 
-                <DialogContent
+                <MuiDialogContent
                   dividers={false}
                   style={{
                     fontFamily: 'Poppins, sans-serif',
@@ -602,8 +574,8 @@ function CoordinatorCompanies() {
                       </Typography>
                     </div>
                   ))}
-                </DialogContent>
-                <DialogActions style={{ padding: '16px' }}>
+                </MuiDialogContent>
+                <MuiDialogActions style={{ padding: '16px' }}>
                   <Button
                     style={{
                       backgroundColor: '#ffffff',
@@ -617,12 +589,12 @@ function CoordinatorCompanies() {
                   >
                     Close
                   </Button>
-                </DialogActions>
-              </Dialog>
+                </MuiDialogActions>
+              </MuiDialog>
             )}
 
             {isSortModalOpen && (
-              <Dialog
+              <MuiDialog
                 open={isSortModalOpen}
                 onClose={closeSortModal}
                 fullWidth
@@ -635,13 +607,13 @@ function CoordinatorCompanies() {
                   },
                 }}
               >
-                <DialogTitle
+                <MuiDialogTitle
                   style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#000' }}
                 >
                   Sort Companies
-                </DialogTitle>
+                </MuiDialogTitle>
 
-                <DialogContent
+                <MuiDialogContent
                   dividers={false}
                   style={{
                     fontFamily: 'Poppins, sans-serif',
@@ -656,9 +628,9 @@ function CoordinatorCompanies() {
                     <FormControlLabel value="location" control={<Radio />} label="Location" />
                     <FormControlLabel value="expertise" control={<Radio />} label="Expertise" />
                   </RadioGroup>
-                </DialogContent>
+                </MuiDialogContent>
 
-                <DialogActions style={{ padding: '16px' }}>
+                <MuiDialogActions style={{ padding: '16px' }}>
                   <Button
                     style={{
                       backgroundColor: '#ffffff',
@@ -684,12 +656,12 @@ function CoordinatorCompanies() {
                   >
                     Apply
                   </Button>
-                </DialogActions>
-              </Dialog>
+                </MuiDialogActions>
+              </MuiDialog>
             )}
 
             {isAddCompanyModalOpen && (
-              <Dialog
+              <MuiDialog
                 open={isAddCompanyModalOpen}
                 onClose={closeAddCompanyModal}
                 fullWidth
@@ -702,7 +674,7 @@ function CoordinatorCompanies() {
                   },
                 }}
               >
-                <DialogTitle
+                <MuiDialogTitle
                   style={{
                     fontFamily: 'Poppins, sans-serif',
                     fontWeight: 600,
@@ -710,9 +682,9 @@ function CoordinatorCompanies() {
                   }}
                 >
                   Add Company
-                </DialogTitle>
+                </MuiDialogTitle>
 
-                <DialogContent
+                <MuiDialogContent
                   dividers={false}
                   style={{
                     fontFamily: 'Poppins, sans-serif',
@@ -935,8 +907,8 @@ function CoordinatorCompanies() {
                     onChange={handleFileChange}
                   />
                 </div> */}
-                </DialogContent>
-                <DialogActions style={{ padding: '16px' }}>
+                </MuiDialogContent>
+                <MuiDialogActions style={{ padding: '16px' }}>
                   <Button
                     style={{
                       backgroundColor: '#ffffff',
@@ -964,9 +936,47 @@ function CoordinatorCompanies() {
                   >
                     Save
                   </Button>
-                </DialogActions>
-              </Dialog>
+                </MuiDialogActions>
+              </MuiDialog>
             )}
+
+            {/* Update MOA Modal */}
+            <ShadcnDialog open={moaModalOpen} onOpenChange={setMoaModalOpen}>
+              <ShadcnDialogContent className="sm:max-w-[800px] h-[80vh] flex flex-col">
+                <ShadcnDialogHeader>
+                  <ShadcnDialogTitle>Memorandum of Agreement</ShadcnDialogTitle>
+                </ShadcnDialogHeader>
+                <div className="flex-1 overflow-hidden">
+                  {selectedCompanyId && (
+                    <FileManager
+                      readOnly={true}
+                      companyId={selectedCompanyId}
+                      filterTag="MOA"
+                    />
+                  )}
+                </div>
+                <DialogFooter className="flex justify-between items-center border-t pt-4">
+                  <div className="flex gap-2">
+                    <ButtonUI
+
+                      onClick={() => handleMoaApproval(selectedCompanyId, 'rejected')}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Reject MOA
+                    </ButtonUI>
+                    <ButtonUI
+
+                      onClick={() => handleMoaApproval(selectedCompanyId, 'approved')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Approve MOA
+                    </ButtonUI>
+                  </div>
+                </DialogFooter>
+              </ShadcnDialogContent>
+            </ShadcnDialog>
           </div>
 
         }}

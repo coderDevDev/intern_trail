@@ -15,58 +15,21 @@ import HTEProfile from './HTEProfile';
 import HTEApplications from './HTEApplications';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
+import AccountInfoPopup from '../components/AccountInfoPopup';
 
-function AccountInfoPopup({ onClose, onProfileOpen }) {
-  const popupRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
-
-  return (
-    <div className="account-info-popup" ref={popupRef}>
-      <div className="popup-content">
-        <div className="popup-header">
-          <img
-            src="../anyrgb.com.png"
-            alt="Profile"
-            className="popup-profile-picture"
-          />
-          <h6>Onin Aldrine Vincent Lance</h6>
-        </div>
-        <button onClick={onProfileOpen} className="options-button">
-          <SettingsIcon style={{ marginRight: '10px' }} />
-          Options
-        </button>
-        <button onClick={onClose} className="logout-button">
-          <LogoutIcon style={{ marginRight: '10px' }} />
-          Logout
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function AdditionalContent() {
   return (
     <div className="additional-content">
       <h5>Number of Trainees</h5>
-        <div className="student-num-box">
-          <div className="student-num-content">
-            <span style={{ fontWeight: 600, color: '#1F41BB', marginRight: '5px' }}>
-              4 Students
-            </span>
-          </div>
+      <div className="student-num-box">
+        <div className="student-num-content">
+          <span style={{ fontWeight: 600, color: '#1F41BB', marginRight: '5px' }}>
+            4 Students
+          </span>
         </div>
+      </div>
       <div className="calendar-container">
 
         <h5>Calendar</h5>
@@ -181,9 +144,9 @@ function HTEDashboard() {
                           className="profile-picture"
                         />
                         <div>
-                          <h5 className="user-name">Juan Dela Cruz 
+                          <h5 className="user-name">Juan Dela Cruz
                             <span className='notification-time'> • 5h</span>
-                            </h5>
+                          </h5>
                           <p className="user-message">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                           </p>
@@ -201,9 +164,9 @@ function HTEDashboard() {
                           className="profile-picture"
                         />
                         <div>
-                          <h5 className="user-name">Juan Dela Cruz 
+                          <h5 className="user-name">Juan Dela Cruz
                             <span className='notification-time'> • 12d</span>
-                            </h5>
+                          </h5>
                           <p className="user-message">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                           </p>
@@ -221,9 +184,9 @@ function HTEDashboard() {
                           className="profile-picture"
                         />
                         <div>
-                          <h5 className="user-name">Juan Dela Cruz 
+                          <h5 className="user-name">Juan Dela Cruz
                             <span className='notification-time'> • Jun 3</span>
-                            </h5>
+                          </h5>
                           <p className="user-message">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                           </p>
@@ -246,8 +209,8 @@ function HTEDashboard() {
           </Routes>
         </div>
 
-       {/* Render Additional Content only on /HTE/home route */}
-       {location.pathname === '/HTE/home' && <AdditionalContent />}
+        {/* Render Additional Content only on /HTE/home route */}
+        {location.pathname === '/HTE/home' && <AdditionalContent />}
       </div>
     </div>
   );

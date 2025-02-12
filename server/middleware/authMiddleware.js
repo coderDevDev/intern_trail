@@ -6,6 +6,7 @@ export const authenticateUserMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
+  console.log({ token });
   if (!token) {
     return res.sendStatus(401).json({ error: 'Access denied' });
   }
@@ -17,6 +18,7 @@ export const authenticateUserMiddleware = (req, res, next) => {
 
     next();
   } catch (error) {
+    console.log(error);
     res.status(401).json({ error: 'Invalid token' });
   }
 };

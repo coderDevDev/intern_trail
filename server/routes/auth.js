@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import bcrypt from 'bcrypt';
 import config from '../config.js';
 
 let db = config.mySqlDriver;
@@ -9,7 +10,9 @@ const router = express.Router();
 
 // Replace these with your environment variables or constants
 const JWT_SECRET = config.JWT_TOKEN_SECRET;
-const REACT_FRONT_END_URL = 'http://localhost:3000';
+
+console.log({ JWT_SECRET });
+const REACT_FRONT_END_URL = config.REACT_FRONT_END_URL;
 
 // Helper function for SQL queries
 const findUserByEmailQuery = email =>
@@ -97,7 +100,9 @@ router.post('/login', async (req, res) => {
       }
     }
 
-    if (password !== user.password) {
+    // Compare the hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res
         .status(401)
         .json({ success: false, message: 'Invalid email or password' });
@@ -114,17 +119,19 @@ router.post('/login', async (req, res) => {
       expiresIn: '1h'
     });
 
+    delete user.password;
     res.json({
       success: true,
       token,
       data: {
+        ...user,
         role: user.role,
         userId: user.userID,
         email: user.email
       }
     });
-  } catch (err) {
-    console.error('Login error:', err);
+  } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
@@ -171,14 +178,14 @@ router.post('/send-verification-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'dextermiranda441@gmail.com', // Replace with your email
-        pass: 'oczk mljj symm bjgc' // Replace with your email password
+        user: 'interntrailwup@gmail.com', // Replace with your email
+        pass: 'oclc xbbw agiq cdvl' // Replace with your email password
       }
     });
 
     // Email options
     const mailOptions = {
-      from: 'dextermiranda441@gmail.com',
+      from: 'interntrailwup@gmail.com',
       to: email,
       subject: 'Email Verification',
       html: `
@@ -215,6 +222,8 @@ router.get('/verify-email/:token', async (req, res) => {
 
   try {
     // Verify the token
+
+    console.log({ JWT_SECRET });
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
     const email = decodedToken.email;
@@ -277,13 +286,13 @@ router.post('/forgotPassword', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'dextermiranda441@gmail.com', // Replace with your email
-        pass: 'oczk mljj symm bjgc' // Replace with your email password
+        user: 'interntrailwup@gmail.com', // Replace with your email
+        pass: 'oclc xbbw agiq cdvl' // Replace with your email password
       }
     });
 
     const mailOptions = {
-      from: 'dextermiranda441@gmail.com',
+      from: 'interntrailwup@gmail.com',
       to: email,
       subject: 'Reset Password',
       html: `
@@ -332,7 +341,10 @@ router.post('/reset-password/:token', async (req, res) => {
       });
     }
 
-    await db.query(updatePasswordQuery(user.email, newPassword));
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await db.query(updatePasswordQuery(user.email, hashedPassword));
 
     res
       .status(200)

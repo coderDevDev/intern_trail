@@ -17,46 +17,9 @@ import LogoutIcon from '@mui/icons-material/ExitToApp';
 import CoordinatorTrainees from './CoordinatorList';
 import HTEList from './HTEList';
 import DeansList from './DeansList';
+import AccountInfoPopup from '../components/AccountInfoPopup';
 
-function AccountInfoPopup({ onClose, onProfileOpen }) {
-  const popupRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
-
-  return (
-    <div className="account-info-popup" ref={popupRef}>
-      <div className="popup-content">
-        <div className="popup-header">
-          <img
-            src="../anyrgb.com.png"
-            alt="Profile"
-            className="popup-profile-picture"
-          />
-          <h6>Admin Name</h6>
-        </div>
-        <button onClick={onProfileOpen} className="options-button">
-          <SettingsIcon style={{ marginRight: '10px' }} />
-          Options
-        </button>
-        <button onClick={onClose} className="logout-button">
-          <LogoutIcon style={{ marginRight: '10px' }} />
-          Logout
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function AdminHome() {
   const [expanded, setExpanded] = useState(false);

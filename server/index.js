@@ -11,6 +11,8 @@ import companyRoute from './routes/company.js';
 
 import collegeRoute from './routes/college.js';
 
+import announcementsRoute from './routes/announcements.js';
+import filesRoute from './routes/files.js';
 import bodyParser from 'body-parser';
 
 import path from 'path';
@@ -56,7 +58,8 @@ app.use('/api/auth', authRoute);
 app.use('/api/company', companyRoute);
 
 app.use('/api/college', collegeRoute);
-
+app.use('/api/announcements', announcementsRoute);
+app.use('/api/files', filesRoute);
 app.use(express.static('public'));
 app.use(express.static('files'));
 

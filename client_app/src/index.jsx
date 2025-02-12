@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import ProtectedRoute from './components/ProtectedRoute';
+import UnauthorizedPage from './components/UnauthorizedPage';
 
 // Main Dashboards
 import StudentDashboard from './Student/StudentDashboard';
@@ -23,6 +25,7 @@ import ResetConfirmation from './Login/ResetConfirmation';
 import ChangePassword from './Login/ChangePassword';
 import EmailVerified from './Login/EmailVerified';
 import PasswordChangedSuccess from './Login/PasswordChangedSuccess'; // Import the PasswordChangedSuccess component
+import ResetPasswordResult from './Login/ResetPasswordResult';
 
 import initializeApp from './app/init';
 
@@ -35,23 +38,44 @@ root.render(
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/email-verified" element={<EmailVerified />} />
         <Route path="/user-selection/" element={<UserSelection />} />
         <Route path="/account-creation/" element={<AccountCreation />} />
         <Route path="/sign-up-confirmation/" element={<SignUpConfirmation />} />
-        <Route path="/student/*" element={<StudentDashboard />} />
-        <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
-        <Route path="/dean/*" element={<DeanDashboard />} />
-        <Route path="/admin/*" element={<AdminHome />} />
-        <Route path="/HTE/*" element={<HTEDashboard />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/student/*"
+          element={<ProtectedRoute element={<StudentDashboard />} allowedRoles={['trainee']} />}
+        />
+        <Route
+          path="/coordinator/*"
+          element={<ProtectedRoute element={<CoordinatorDashboard />} allowedRoles={['ojt-coordinator']} />}
+        />
+        <Route
+          path="/dean/*"
+          element={<ProtectedRoute element={<DeanDashboard />} allowedRoles={['dean']} />}
+        />
+        <Route
+          path="/admin/*"
+          element={<ProtectedRoute element={<AdminHome />} allowedRoles={['admin']} />}
+        />
+        <Route
+          path="/HTE/*"
+          element={<ProtectedRoute element={<HTEDashboard />} allowedRoles={['hte-supervisor']} />}
+        />
+
+        {/* Public Routes */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* <Route path="/reset-password/:token" /> */}
+
         <Route path="/reset-confirmation" element={<ResetConfirmation />} />
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route
-          path="/password-changed-success"
-          element={<PasswordChangedSuccess />}
-        />
+        <Route path="/password-changed-success" element={<PasswordChangedSuccess />} />
         <Route path="/verify-email/:token" element={<AccountVerification />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordResult />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

@@ -34,8 +34,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'dextermiranda441@gmail.com', // Replace with your email
-    pass: 'oczk mljj symm bjgc' // Replace with your email password
+    user: 'interntrailwup@gmail.com', // Replace with your email
+    pass: 'oclc xbbw agiq cdvl' // Replace with your email password
   }
 });
 
@@ -47,7 +47,7 @@ const sendRegistrationEmail = async ({
 }) => {
   // Set the mail options
   const mailOptions = {
-    from: 'dextermiranda441@gmail.com',
+    from: 'interntrailwup@gmail.com',
     to: email,
     subject: '',
     html: ''
@@ -114,7 +114,7 @@ const sendRegistrationEmail = async ({
                 </div>
                 <div class="email-content">
                   <p>Dear ${fullName}</p>
-                  <p>We’re thrilled to inform you that your OJT application at ${companyName} has been approved! 🎉</p>
+                  <p>We're thrilled to inform you that your OJT application at ${companyName} has been approved! 🎉</p>
                   <p>We can't wait for you to start this journey with us. Our team will reach out with the next steps, including your schedule, orientation, and other essential details.</p>
                   <p>See you soon, and welcome aboard! 🚀</p>
                 </div>
@@ -379,46 +379,49 @@ router.post(
 router.get('/list', async (req, res) => {
   try {
     let checkIfApplied = req.query.checkIfApplied;
+    let [result] = [];
 
-    let result;
-    if (checkIfApplied === 'true') {
+    if (checkIfApplied) {
       [result] = await db.query(`
-WITH RankedApplications AS (
-    SELECT 
-        ia.*,
-        ROW_NUMBER() OVER (PARTITION BY ia.company_id ORDER BY ia.date_created DESC) AS rn
-    FROM inter_application AS ia
-)
-SELECT 
-    c.*, 
-    ia.trainee_user_id, 
-    ia.program_id, 
-    ia.course_id, 
-    ia.status, 
-    ia.resume_link, 
-    ia.date_created
-FROM 
-    companies AS c
-LEFT JOIN 
-    RankedApplications AS ia 
-    ON c.companyID = ia.company_id AND ia.rn = 1
-ORDER BY 
-    c.created_at DESC;
-
-            
-            `);
+        SELECT 
+          c.*,
+          ia.status,
+          ia.is_confirmed,
+          ia.trainee_user_id,
+          ia.resume_link,
+          ia.date_created as application_date,
+          ia.approval_date
+        FROM 
+          companies c
+        LEFT JOIN (
+          SELECT 
+            company_id,
+            trainee_user_id,
+            status,
+            is_confirmed,
+            resume_link,
+            date_created,
+            approval_date,
+            ROW_NUMBER() OVER (PARTITION BY company_id, trainee_user_id ORDER BY date_created DESC) as rn
+          FROM 
+            inter_application
+        ) ia ON c.companyID = ia.company_id AND ia.rn = 1
+        ORDER BY 
+          c.created_at DESC
+      `);
     } else {
       [result] = await db.query(`
         SELECT * from companies
-        order by created_at DESC
-            
-            `);
+        ORDER BY created_at DESC
+      `);
     }
 
     res.status(200).json({ success: true, data: result });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to fetch companies' });
   }
 });
 
@@ -442,6 +445,8 @@ router.post(
       );
 
       let companyID = result[0].companyID;
+
+      console.log({ companyID });
 
       let values = [companyID];
 
@@ -498,29 +503,31 @@ router.post(
 );
 
 router.put(
-  '/trainee/application/:id',
+  '/trainee/application/:userId',
   authenticateUserMiddleware,
   async (req, res) => {
     try {
-      const { id } = req.params;
-      const { companyId, status } = req.body;
+      const { userId } = req.params;
+      const { companyId, studentId, status } = req.body;
 
+      console.log({ companyId, studentId, status });
       const [result] = await db.query(
-        `UPDATE inter_application 
+        `
+        UPDATE inter_application 
          SET 
          status = ? 
          WHERE trainee_user_id  = ?
          AND company_id = ?
          
          `,
-        [status, id, companyId]
+        [status, studentId, companyId]
       );
 
       const [result2] = await db.query(
         `select * from users 
         where userID = ?
         `,
-        [id]
+        [userId]
       );
 
       const [result3] = await db.query(
@@ -553,6 +560,168 @@ router.put(
       res
         .status(500)
         .json({ success: false, message: 'Failed to fetch users' });
+    }
+  }
+);
+
+router.post(
+  '/trainee/application/company/join',
+  // authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { companyId, userId } = req.body;
+
+      // Check if application already exists
+      const [existingApplication] = await db.query(
+        `SELECT * FROM inter_application 
+         WHERE trainee_user_id = ?
+          AND company_id = ?
+          AND is_confirmed = 1
+          `,
+        [userId, companyId]
+      );
+
+      if (existingApplication.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'You have already applied to this company'
+        });
+      }
+
+      // Create new application
+      await db.query(
+        `
+        
+         UPDATE inter_application 
+         SET 
+         is_confirmed = ?
+         WHERE trainee_user_id  = ?
+         AND company_id = ?
+
+
+         
+         `,
+        [true, userId, companyId]
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Successfully joined the company'
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to join company'
+      });
+    }
+  }
+);
+
+// Update MOA status
+router.put('/:id/moa-status', authenticateUserMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate user role (optional)
+    if (req.user.role !== 'ojt-coordinator') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized to perform this action'
+      });
+    }
+
+    // Update company MOA status
+    await db.query(
+      `UPDATE companies 
+       SET moa_status = ?
+       WHERE companyID = ?`,
+      [status, id]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `MOA ${status} successfully`
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update MOA status'
+    });
+  }
+});
+
+// Get student requirements
+router.get(
+  '/student-requirements',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      let user = req.user;
+
+      let student_id = user.id;
+
+      // Get companies where student is approved
+      const [companies] = await db.query(
+        `SELECT 
+        c.companyID as id,
+        c.companyName as name,
+        c.list_of_requirements
+    
+       FROM companies c
+       JOIN inter_application ia ON c.companyID = ia.company_id
+       WHERE ia.trainee_user_id = ?
+       AND ia.status = 'Approved'
+       AND ia.is_confirmed = 1`,
+        [student_id]
+      );
+
+      // Get submitted requirements for each company
+      const companiesWithRequirements = await Promise.all(
+        companies.map(async company => {
+          const requirements = JSON.parse(company.list_of_requirements || '[]');
+
+          // Get submitted files for each requirement
+          const [files] = await db.query(
+            `SELECT 
+            tag,
+            created_at as submitted_date
+           FROM files
+           WHERE uploaded_by = ?
+           AND company_id = ?
+           AND tag IN (?)`,
+            [student_id, company.id, requirements.map(r => r.value)]
+          );
+
+          // Map requirements with submission status
+          const mappedRequirements = requirements.map(req => ({
+            ...req,
+            status: files.find(f => f.tag === req.value)
+              ? 'completed'
+              : 'pending',
+            submitted_date: files.find(f => f.tag === req.value)?.submitted_date
+          }));
+
+          return {
+            ...company,
+            requirements: mappedRequirements
+          };
+        })
+      );
+
+      res.status(200).json({
+        success: true,
+        data: companiesWithRequirements
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch requirements'
+      });
     }
   }
 );

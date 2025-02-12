@@ -122,6 +122,7 @@ function StudentCompanies() {
   const [sortCriteria, setSortCriteria] = useState('name');
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('Available');
 
   // const companies = [
   //   {
@@ -217,6 +218,7 @@ function StudentCompanies() {
           MOAApprovalStatus: company.moa_status === 'pending' ? 'Pending Approval' : 'Approved',
           starRating: 0, // Placeholder as the response doesn't include ratings
           feedback: [], // Placeholder as the response doesn't include feedback
+          is_confirmed: company.is_confirmed,
         }
       });
 
@@ -295,12 +297,13 @@ function StudentCompanies() {
 
   const handleEmailClick = (email) => {
 
+    console.log({ email })
+
     const subject = "Subject here"; // Replace with the subject
     const body = "Body of the email here"; // Replace with the email body
 
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`, "_blank");
+  }
 
   const formikConfig = {
     initialValues: {
@@ -377,17 +380,144 @@ function StudentCompanies() {
       // window.location.href = '/app/dashboard';
     }
   };
-  const Badge = ({ status }) => {
-    const badgeClass = status === "Approved"
-      ? "bg-green-500 text-white text-sm"
-      : "bg-yellow-500 text-white text-sm";
+  const Badge = ({ status, isConfirmed }) => {
+    let updatedstatus;
+    let badgeClass;
+
+    if (isConfirmed) {
+      updatedstatus = 'Joined';
+      badgeClass = "bg-blue-500 text-white text-sm";
+    } else if (status === null) {
+      updatedstatus = 'Available';
+      badgeClass = "bg-blue-500 text-white text-sm";
+    } else {
+      updatedstatus = status === "Approved" ? "Approved ✅" : "Pending ⏳"
+      badgeClass = status === "Approved"
+        ? "bg-green-500 text-white text-sm"
+        : "bg-yellow-500 text-white text-sm";
+    }
 
     return (
       <span className={`px-3 py-1 rounded-full ${badgeClass}`}>
-        {status === "Approved" ? "Approved ✅" : "Pending ⏳"}
+        {updatedstatus}
       </span>
     );
   };
+
+  // Filter companies based on active tab
+  const getFilteredCompaniesByStatus = () => {
+
+    console.log({ activeTab })
+    switch (activeTab) {
+      case 'Pending':
+        return sortedCompanies.filter(company =>
+          !company.is_confirmed &&
+          company.status === 'Pending');
+      case 'Approved':
+        return sortedCompanies.filter(company => company.status === 'Approved' && !company.is_confirmed);
+      case 'Joined':
+        return sortedCompanies.filter(company => company.is_confirmed === 1);
+      case 'Available':
+      default:
+        return sortedCompanies.filter(company => !company.status && !company.is_confirmed);
+    }
+  };
+
+  // Add these new state variables at the top of your component
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Add a new state for loading
+  const [isJoining, setIsJoining] = useState(false);
+
+  // Update the handleCompanySelection function
+  const handleCompanySelection = (companyId) => {
+    const company = companies.find(c => c.companyID === companyId);
+
+    // Only allow selection if the company is approved and has approval date
+    if (company.status === 'Approved') {
+      setSelectedCompanyId(companyId);
+    } else {
+      // toast.warning('You can only join approved companies with valid approval dates', {
+      //   position: 'top-right',
+      //   autoClose: 3000,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      //   theme: 'light'
+      // });
+    }
+  };
+
+  // Update the handleJoinConfirmation function
+  const handleJoinConfirmation = async () => {
+    setIsJoining(true);
+    try {
+
+      let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+      const response = await axios.post('/company/trainee/application/company/join', {
+        companyId: selectedCompanyId,
+        userId: loggedInUser.userId
+      });
+
+      if (response.data.success) {
+        toast.success(response.data.message, {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light'
+        });
+
+        setShowConfirmModal(false);
+        setSelectedCompanyId(null);
+        setActiveTab('Joined'); // Switch to Joined tab after successful join
+        fetchCompanies();
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to join the company. Please try again.';
+      toast.error(errorMessage, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light'
+      });
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  // Update the canJoinCompany function
+  const canJoinCompany = () => {
+    // Check if any company is already joined (is_confirmed === 1)
+    const hasJoinedCompany = companies.some(company => company.is_confirmed === 1);
+
+    // Check if we're in the Approved tab
+    const isApprovedTab = activeTab === 'Approved';
+
+    // Check if selected company exists and is approved
+    const selectedCompany = companies.find(company => company.companyID === selectedCompanyId);
+    const isSelectedCompanyApproved = selectedCompany && selectedCompany.status === 'Approved';
+
+    // Can only join if:
+    // 1. No company is already joined
+    // 2. We're in the Approved tab
+    // 3. Selected company is approved
+    return !hasJoinedCompany && isApprovedTab && isSelectedCompanyApproved;
+  };
+
+  // Add state for tooltip message
+  const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <div>
@@ -404,21 +534,75 @@ function StudentCompanies() {
           return <div>
             <h1>Companies</h1>
             <h5>Available affiliated companies</h5>
-            <div className="company-button-container">
-              <div className="search-bar">
-                <SearchIcon />
-                <input type="text" placeholder="Search Companies by name, location, or your expertise..." value={searchQuery} onChange={handleSearchChange} />
+            <div className="flex justify-between items-center mb-4">
+              <div className="company-button-container">
+                <div className="search-bar">
+                  <SearchIcon />
+                  <input type="text" placeholder="Search Companies by name, location, or your expertise..." value={searchQuery} onChange={handleSearchChange} />
+                </div>
+                <button className="company-icon-button" onClick={handleSort}><SortIcon /></button>
               </div>
-              <button className="company-icon-button" onClick={handleSort}><SortIcon /></button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowConfirmModal(true)}
+                  disabled={!selectedCompanyId || !canJoinCompany()}
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${selectedCompanyId && canJoinCompany()
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                  Join Selected Company
+                </button>
+                {showTooltip && !canJoinCompany() && (
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg whitespace-nowrap">
+                    {companies.some(company => company.is_confirmed === 1)
+                      ? "You have already joined a company"
+                      : !activeTab === 'Approved'
+                        ? "Please go to the Approved tab to join a company"
+                        : !selectedCompanyId
+                          ? "Please select a company to join"
+                          : "Selected company is not approved"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Add Tabs */}
+            <div className="flex space-x-4 mb-4 border-b">
+              {['Available', 'Pending', 'Approved', 'Joined'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-2 px-4 font-medium transition-colors duration-200 ${activeTab === tab
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-blue-600'
+                    }`}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
 
             <div className="companies-container">
-              {sortedCompanies.map((company, index) => (
-                <div key={index} className="company-box">
-                  <div className="company-header">
-                    <img src={company.logo} alt={`${company.name} Logo`} className="company-logo" style={{ boxShadow: '0 8px               16px rgba(0, 0, 0, 0.2)' }} />
-                    <h5 className="company-name">{company.name}</h5>
+              {getFilteredCompaniesByStatus().map((company, index) => (
+                <div
+                  key={index}
+                  className={`company-box cursor-pointer transition-all duration-200 `}
+                  onClick={() => handleCompanySelection(company.companyID)}
+                >
+                  <div className='flex justify-between items-center'>
+                    <div className="company-header">
+                      <img src={company.logo} alt={`${company.name} Logo`} className="company-logo" style={{ boxShadow: '0 8px               16px rgba(0, 0, 0, 0.2)' }} />
+                      <h5 className="company-name">{company.name}</h5>
+                    </div>
+                    {
+                      console.log(company.status)
+                    }
+                    <Badge status={company.status} isConfirmed={company.is_confirmed} />
                   </div>
+
                   <p className="company-description">{company.description}</p>
                   <p className="company-expertise" style={{ color: '#1F41BB' }}><span style={{ color: '#000' }}>Looking for: </span> {company.expertise}</p>
                   <p className="company-location" style={{ color: '#1F41BB' }}>{company.location}</p>
@@ -432,12 +616,15 @@ function StudentCompanies() {
                       <FontAwesomeIcon icon={faEye} />
                     </button>
 
+                    {
+                      console.log({ company })
+                    }
                     <button
-                      onClick={() => handleEmailClick(company.contact_email)}
+                      onClick={() => handleEmailClick(company.contact_email || company.contact)}
                       className="email-button bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
                       <FontAwesomeIcon icon={faMailBulk} />
                     </button>
-                    {
+                    {/* {
                       company.status ?
                         <Badge status={company.status} />
 
@@ -447,7 +634,7 @@ function StudentCompanies() {
                         >
                           <FontAwesomeIcon icon={faFileArrowUp} />
                         </button>
-                    }
+                    } */}
 
 
 
@@ -646,6 +833,58 @@ function StudentCompanies() {
                 </DialogActions>
               </Dialog>
             )}
+
+            {/* Confirmation Modal */}
+            <Dialog
+              open={showConfirmModal}
+              onClose={() => setShowConfirmModal(false)}
+              maxWidth="sm"
+              fullWidth
+            >
+              <div className="p-6">
+                <div className="text-center">
+                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+                    <svg
+                      className="h-6 w-6 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Confirm Company Selection
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-8">
+                    Are you sure you want to join this company? This action cannot be undone.
+                  </p>
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => setShowConfirmModal(false)}
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleJoinConfirmation}
+                      disabled={isJoining}
+                      className={`px-4 py-2 rounded-lg transition-colors duration-200 ${isJoining
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                        } text-white`}
+                    >
+                      {isJoining ? 'Joining...' : 'Confirm Join'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Dialog>
           </div>
         }}
 

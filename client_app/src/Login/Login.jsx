@@ -71,38 +71,19 @@ function Login() {
 
         console.log({ user })
 
-        let role = user.role;
-
-        if (role === 'trainee') {
-
-          window.location.href = '/student';
-        }
-
-        else if (role === 'ojt-coordinator') {
-          window.location.href = '/coordinator';
-
-        }
-
-        else if (role === 'hte-supervisor') {
-          window.location.href = '/HTE';
-
-        }
-
-        else if (role === 'dean') {
-          window.location.href = '/dean';
-
-        }
-
-        else if (role === 'admin') {
-          window.location.href = '/admin';
-
-        }
-
-
         localStorage.setItem('token', token);
         localStorage.setItem('loggedInUser', JSON.stringify(user));
 
-        // window.location.href = '/app/dashboard';
+        // Use navigate instead of window.location
+        const roleRoutes = {
+          'trainee': '/student',
+          'ojt-coordinator': '/coordinator',
+          'hte-supervisor': '/HTE',
+          'dean': '/dean',
+          'admin': '/admin'
+        };
+
+        navigate(roleRoutes[user.role]);
       } catch (error) {
         const errorMessage =
           error.response && error.response.data && error.response.data.message

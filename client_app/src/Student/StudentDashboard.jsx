@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Navbar } from 'react-bootstrap';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Calendar from 'react-calendar';
 import '../index.css';
@@ -14,59 +14,13 @@ import StudentReports from './StudentReports';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 import ProfileModal from './StudentProfile'; // Adjust if necessary
-
-function AccountInfoPopup({ onClose, onProfileOpen }) {
-  const popupRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
-
-  const handleProfileOpen = () => {
-    onProfileOpen();
-  };
-
-  async function logoutUser() {
-    // let res = await axios({
-    //   method: 'POST',
-    //   url: 'auth/logout',
-    //   data: {}
-    // });
-
-    localStorage.clear();
-    window.location.href = '/login';
-  }
-
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-  const email = loggedInUser.email;
-
-  return (
-    <div className="account-info-popup" ref={popupRef}>
-      <div className="popup-content">
-        <div className="popup-header">
-          <img src="../anyrgb.com.png" alt="Profile" className="popup-profile-picture" />
-          <h6>{email}</h6>
-        </div>
-        <button onClick={handleProfileOpen} className="options-button">
-          <SettingsIcon style={{ marginRight: '10px' }} />
-          Options
-        </button>
-        <button onClick={() => {
-          logoutUser()
-        }} className="logout-button">
-          <LogoutIcon style={{ marginRight: '10px' }} />
-          Logout
-        </button>
-      </div>
-    </div>
-  );
-}
+import AccountInfoPopup from '../components/AccountInfoPopup';
+import { ClipboardList, CheckCircle2, Circle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function AdditionalContent() {
   return (
@@ -89,7 +43,7 @@ function AdditionalContent() {
         <h5>Calendar</h5>
         <Calendar className="my-custom-calendar" />
       </div>
-      <div className="info-container">
+      {/* <div className="info-container">
         <h5 style={{ marginTop: '20px' }}>Requirements Checklist</h5>
         <div className="requirements-checklist">
           <ul>
@@ -113,16 +67,19 @@ function AdditionalContent() {
             </li>
           </ul>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
 
 function StudentDashboard() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false); // Define expanded state
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [requirements, setRequirements] = useState([]);
+  const [completedRequirements, setCompletedRequirements] = useState([]);
 
   const handleProfileClick = () => {
     setIsPopupOpen(true);
@@ -141,6 +98,39 @@ function StudentDashboard() {
     setIsProfileModalOpen(false);
   };
 
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+
+  // Fetch requirements from company
+  const fetchRequirements = async () => {
+    try {
+      const response = await axios.get('/company/student-requirements', {
+        params: {
+          student_id: loggedInUser.id
+        }
+      });
+
+      if (response.data.success) {
+        const companyReqs = response.data.data;
+        setRequirements(companyReqs);
+      }
+    } catch (error) {
+      console.error('Error fetching requirements:', error);
+      toast.error('Failed to fetch requirements');
+    }
+  };
+
+  useEffect(() => {
+    fetchRequirements();
+  }, []);
+
+  // Calculate progress
+  const calculateProgress = (requirements) => {
+    if (!requirements?.length) return 0;
+    const completed = requirements.filter(req => req.status === 'completed').length;
+    return (completed / requirements.length) * 100;
+  };
+
+  console.log({ loggedInUser })
   return (
     <div>
       {/* Navbar */}
@@ -158,7 +148,7 @@ function StudentDashboard() {
           </Navbar.Brand>
           <div className="account-info">
             <img
-              src="../anyrgb.com.png"
+              src={loggedInUser.proof_identity || "../anyrgb.com.png"}
               alt="Profile"
               className="profile-picture"
               onClick={handleProfileClick}
@@ -167,6 +157,8 @@ function StudentDashboard() {
               <AccountInfoPopup
                 onClose={handleClosePopup}
                 onProfileOpen={handleProfileOpen}
+                userEmail={loggedInUser.email}
+                loggedInUser={loggedInUser}
               />
             )}
           </div>
@@ -185,66 +177,63 @@ function StudentDashboard() {
               element={
                 <>
                   <h1>Dashboard</h1>
-                  <h5>Recent Notifications</h5>
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">
-                            Juan Dela Cruz
-                            <span className="notification-time"> • 5h</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">
-                            Juan Dela Cruz
-                            <span className="notification-time"> • 12d</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">
-                            Juan Dela Cruz
-                            <span className="notification-time"> • Jun 3</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="grid gap-4 md:grid-cols-1 mt-2">
+                    {requirements.map((company) => (
+                      <Card key={company.id} className="shadow-lg">
+                        <CardHeader className="space-y-1">
+                          <CardTitle className="text-2xl">
+                            {company.name}
+                          </CardTitle>
+                          <div className="text-sm text-gray-500">
+                            Requirements Progress
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="mb-4">
+                            <Progress
+                              value={calculateProgress(company.requirements)}
+                              className="h-2"
+                            />
+                            <div className="mt-1 text-sm text-gray-500">
+                              {calculateProgress(company.requirements)}% Complete
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            {company.requirements.map((req, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                              >
+                                {req.status === 'completed' ? (
+                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <Circle className="h-5 w-5 text-gray-300" />
+                                )}
+                                <div className="flex-1">
+                                  <div className="font-medium">{req.label}</div>
+                                  {req.status === 'completed' && (
+                                    <div className="text-sm text-gray-500">
+                                      Submitted on {new Date(req.submitted_date).toLocaleDateString()}
+                                    </div>
+                                  )}
+                                </div>
+                                {req.status !== 'completed' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      navigate('/student/files', { state: { companyId: company.id } });
+                                    }}
+                                  >
+                                    Go to Files
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </>
               }

@@ -16,66 +16,68 @@ import CoordinatorProfile from './CoordinatorProfile'; // Import the Coordinator
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 
-function AccountInfoPopup({ onClose, onProfileOpen }) {
-  const popupRef = useRef(null);
+import AccountInfoPopup from '../components/AccountInfoPopup';
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
+// function AccountInfoPopup({ onClose, onProfileOpen }) {
+//   const popupRef = useRef(null);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
+//   useEffect(() => {
+//     function handleClickOutside(event) {
+//       if (popupRef.current && !popupRef.current.contains(event.target)) {
+//         onClose();
+//       }
+//     }
 
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+//     document.addEventListener('mousedown', handleClickOutside);
+//     return () => {
+//       document.removeEventListener('mousedown', handleClickOutside);
+//     };
+//   }, [onClose]);
+
+//   let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
 
-  console.log({ loggedInUser })
+//   console.log({ loggedInUser })
 
-  async function logoutUser() {
-    // let res = await axios({
-    //   method: 'POST',
-    //   url: 'auth/logout',
-    //   data: {}
-    // });
+//   async function logoutUser() {
+//     // let res = await axios({
+//     //   method: 'POST',
+//     //   url: 'auth/logout',
+//     //   data: {}
+//     // });
 
-    localStorage.clear();
-    window.location.href = '/login';
-  }
+//     localStorage.clear();
+//     window.location.href = '/login';
+//   }
 
-  const email = loggedInUser.email;
+//   const email = loggedInUser.email;
 
-  return (
-    <div className="account-info-popup" ref={popupRef}>
-      <div className="popup-content">
-        <div className="popup-header">
-          <img
-            src="../anyrgb.com.png"
-            alt="Profile"
-            className="popup-profile-picture"
-          />
-          <h6>{email}
-          </h6>
-        </div>
-        <button onClick={onProfileOpen} className="options-button">
-          <SettingsIcon style={{ marginRight: '10px' }} />
-          Options
-        </button>
-        <button onClick={() => {
-          logoutUser()
-        }} className="logout-button">
-          <LogoutIcon style={{ marginRight: '10px' }} />
-          Logout
-        </button>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="account-info-popup" ref={popupRef}>
+//       <div className="popup-content">
+//         <div className="popup-header">
+//           <img
+//             src="../anyrgb.com.png"
+//             alt="Profile"
+//             className="popup-profile-picture"
+//           />
+//           <h6>{email}
+//           </h6>
+//         </div>
+//         <button onClick={onProfileOpen} className="options-button">
+//           <SettingsIcon style={{ marginRight: '10px' }} />
+//           Options
+//         </button>
+//         <button onClick={() => {
+//           logoutUser()
+//         }} className="logout-button">
+//           <LogoutIcon style={{ marginRight: '10px' }} />
+//           Logout
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
 
 function AdditionalContent() {
   return (

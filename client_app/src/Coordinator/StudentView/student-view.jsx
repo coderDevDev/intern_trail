@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { StudentModal } from "./student-modal"
+import StatusBadge from '@/components/StatusBadge'
 
 import axios from 'axios';
 
@@ -253,6 +254,12 @@ export default function StudentView({
                 Trainee ID
               </TableHead>
               <TableHead
+                onClick={() => handleSort("traineeID")}
+                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
+              >
+                Profile Picture
+              </TableHead>
+              <TableHead
                 onClick={() => handleSort("first_name")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
               >
@@ -329,13 +336,26 @@ export default function StudentView({
                 className="text-sm text-gray-700 border-b hover:bg-gray-50"
               >
                 <TableCell className="px-4 py-2">{student.traineeID}</TableCell>
+                <TableCell className="px-4 py-2">
+
+
+                  <img src={student.proof_identity || "../anyrgb.com.png"} alt="Profile" class="profile-picture" />
+
+
+                </TableCell>
                 <TableCell className="px-4 py-2">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</TableCell>
                 <TableCell className="px-4 py-2">{student.email}</TableCell>
                 <TableCell className="px-4 py-2">{student.collegeName}</TableCell>
                 <TableCell className="px-4 py-2">{student.progName}</TableCell>
                 <TableCell className="px-4 py-2">{student.remaining_hours}</TableCell>
-                <TableCell className="px-4 py-2">{student.is_verified ? "Yes" : "No"}</TableCell>
-                <TableCell className="px-4 py-2">{student.is_verified_by_coordinator ? "Yes" : "No"}</TableCell>
+                <TableCell className="px-4 py-2">
+
+                  <StatusBadge isActive={student.is_verified} />
+
+                </TableCell>
+                <TableCell className="px-4 py-2">
+                  <StatusBadge isActive={student.is_verified_by_coordinator} />
+                </TableCell>
                 <TableCell className="px-4 py-2">
                   <Button
 
