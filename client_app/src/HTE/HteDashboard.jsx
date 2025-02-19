@@ -17,7 +17,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 import AccountInfoPopup from '../components/AccountInfoPopup';
 
-
+import StudentProgress from '../Student/StudentProgress';
 
 function AdditionalContent() {
   return (
@@ -202,6 +202,11 @@ function HTEDashboard() {
             <Route path="/announcements" element={<HTEAnnouncements />} />
             <Route path="/files" element={<HTEFiles />} />
             <Route path="/progress-reports" element={<HTEProgress />} />
+
+
+            <Route path="/student-progress/:studentId" element={<StudentProgress />} />
+
+
             <Route path="/trainees" element={<HTETrainees />} />
             <Route path="/applications" element={<HTEApplications />} />
             <Route path="/emergency-reports" element={<HTEReports />} />

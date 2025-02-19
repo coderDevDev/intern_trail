@@ -11,6 +11,8 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
+import StudentDTR from './StudentDTR';
+
 function StudentProgress() {
   const [open, setOpen] = useState(false);
 
@@ -40,60 +42,13 @@ function StudentProgress() {
 
   return (
     <div>
-      <h1>Progress Reports</h1>
-      <h5>Update your Accomplishments</h5>
+      <h1 className='font-bold mb-4'>Progress Reports</h1>
+
       <div className="progress-container">
-        {reports.map((report, index) => (
-          <div key={index} className="progress-box">
-            <div className="progress-header">
-              {report.icon}
-              <h5 className="progress-title">{report.title}</h5>
-            </div>
-            <p className="progress-description">{report.description}</p>
-            {report.title === 'OJT Accomplishment Report' ? (
-              <button className="update-button" onClick={report.action}>
-                {report.buttonText}
-              </button>
-            ) : (
-              <button className="update-button">
-                {report.buttonText}
-              </button>
-            )}
-          </div>
-        ))}
+        <StudentDTR />
       </div>
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          Update OJT Accomplishment Report
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            style={{ position: 'absolute', right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <div style={{ marginBottom: 20 }}>
-            <Button
-              variant="outlined"
-              component="label"
-              startIcon={<UploadFileIcon />}
-            >
-              Upload File
-              <input type="file" hidden />
-            </Button>
-          </div>
-          <TextField
-            label="AI Generated Narrative Report"
-            multiline
-            rows={4}
-            variant="outlined"
-            fullWidth
-          />
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }

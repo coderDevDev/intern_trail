@@ -15,7 +15,7 @@ import CoordinatorTrainees from './CoordinatorTrainees';
 import CoordinatorProfile from './CoordinatorProfile'; // Import the CoordinatorProfile component
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
-
+import StudentProgress from '../Student/StudentProgress';
 import AccountInfoPopup from '../components/AccountInfoPopup';
 
 // function AccountInfoPopup({ onClose, onProfileOpen }) {
@@ -160,7 +160,7 @@ function CoordinatorDashboard() {
           <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" onClick={() => setExpanded(!expanded)} />
           <Navbar.Brand className="d-flex align-items-left p-4 mx-auto">
             <img
-              src="../logo.png"
+              src="/logo.png"
               width="auto"
               height="20"
               className="d-inline-block align-top me-1"
@@ -169,7 +169,7 @@ function CoordinatorDashboard() {
           </Navbar.Brand>
           <div className="account-info">
             <img
-              src="../anyrgb.com.png"
+              src="/anyrgb.com.png"
               alt="Profile"
               className="profile-picture"
               onClick={handleProfileClick}
@@ -226,6 +226,8 @@ function CoordinatorDashboard() {
             <Route path="/companies" element={<CoordinatorCompanies />} />
             <Route path="/files" element={<CoordinatorFiles />} />
             <Route path="/progress-reports" element={<CoordinatorProgress />} />
+
+            <Route path="/student-progress/:studentId" element={<StudentProgress />} />
             <Route path="/trainees" element={<CoordinatorTrainees />} />
             <Route path="/emergency-reports" element={<CoordinatorReports />} />
             <Route path="/profile" element={<CoordinatorProfile open={true} onClose={handleProfileModalClose} />} />

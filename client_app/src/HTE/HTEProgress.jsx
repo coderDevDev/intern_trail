@@ -1,47 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../index.css'; // Adjust the import path if necessary
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AssignmentIcon from '@mui/icons-material/TaskAltOutlined';
 import ReportIcon from '@mui/icons-material/EventAvailableOutlined';
 
+
+
+import axios from 'axios';
+import StudentView from "./HTEView/student-view"
+
 function HTEProgress() {
-  const reports = [
-    {
-      title: 'Daily Time Record',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      buttonText: 'Update',
-      icon: <AccessTimeIcon style={{ fontSize: 36 }} />,
-    },
-    {
-      title: 'Daily Accomplishment',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      buttonText: 'Update',
-      icon: <AssignmentIcon style={{ fontSize: 36 }} />,
-    },
-    {
-      title: 'Weekly Report',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      buttonText: 'Update',
-      icon: <ReportIcon style={{ fontSize: 36 }} />,
-    },
-  ];
+  const [searchTerm, setSearchTerm] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedTrainee, setSelectedTrainee] = useState(null);
+
+
+  const [trainees, setTrainees] = useState([]);
+
+
+  const fetchTrainees = async () => {
+    try {
+      const response = await axios.post('company/trainees/application/list', {
+        status: 'Approved'
+      });
+      let result = response.data.data
+      let mappedData = result.map((company) => {
+
+        let name = `${company.first_name} ${company.last_name}`
+        return {
+          ...company
+          // name: name,
+          // profilePicture: company.proof_identity,
+          // program: 'BSCpE',
+          // course: '4th Year',
+          // school: 'University A',
+          // resumeLink: company.resume_link,
+          // status: company.status
+        }
+      });
+
+      setTrainees(mappedData);
+
+
+    } catch (error) {
+      console.error("Error fetching trainees:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchTrainees();
+  }, []);
 
   return (
     <div>
-      <h1>Progress Reports</h1>
-      <h5>Update your Accomplishments</h5>
-      <div className="progress-container">
-        {reports.map((report, index) => (
-          <div key={index} className="progress-box">
-            <div className="progress-header">
-              {report.icon}
-              <h5 className="progress-title">{report.title}</h5>
-            </div>
-            <p className="progress-description">{report.description}</p>
-            <button className="update-button">{report.buttonText}</button>
-          </div>
-        ))}
-      </div>
+
+
+      <h1 className='font-bold mb-4'>Trainees</h1>
+      <StudentView
+        data={trainees || []}
+        fetchFunction={fetchTrainees}
+        viewProgress={true}
+
+      />
     </div>
   );
 }

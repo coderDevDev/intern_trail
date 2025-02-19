@@ -13,6 +13,7 @@ import {
 
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import OpenAI from 'openai';
 
 let db = config.mySqlDriver;
 
@@ -37,6 +38,11 @@ const transporter = nodemailer.createTransport({
     user: 'interntrailwup@gmail.com', // Replace with your email
     pass: 'oclc xbbw agiq cdvl' // Replace with your email password
   }
+});
+
+const openai = new OpenAI({
+  apiKey:
+    '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'
 });
 
 const sendRegistrationEmail = async ({
@@ -722,6 +728,321 @@ router.get(
         success: false,
         message: 'Failed to fetch requirements'
       });
+    }
+  }
+);
+
+// Get weekly report and feedback
+router.get('/weekly-report/:studentId/:weekNumber', async (req, res) => {
+  try {
+    const { studentId, weekNumber } = req.params;
+
+    // Get weekly feedback with user names
+    const [weeklyFeedback] = await db.query(
+      `SELECT wf.*, 
+        u.first_name, u.middle_initial, u.last_name,
+        DATE_FORMAT(wf.date, '%M %d, %Y') as formatted_date
+       FROM weekly_feedback wf
+       INNER JOIN users u ON wf.user_id = u.userID
+       WHERE wf.student_id = ? AND wf.week_number = ?`,
+      [studentId, weekNumber]
+    );
+
+    console.log({ weeklyFeedback });
+
+    // Get weekly report entries
+    const [weeklyReport] = await db.query(
+      `SELECT 
+      date,
+      day,
+      report,
+      time_in as timeIn,
+      time_out as timeOut,
+      week_number as weekNumber,
+      narrative,
+      status
+     FROM daily_reports
+     WHERE student_id = ?
+     AND week_number = ?
+     ORDER BY date ASC`,
+      [studentId, weekNumber]
+    );
+
+    // Format feedback data
+    const formattedFeedback = {
+      [weekNumber]: weeklyFeedback.map(feedback => ({
+        user: feedback.user_id,
+        role: feedback.role,
+        date: feedback.formatted_date,
+        feedback: feedback.feedback,
+        fullName: `${feedback.first_name} ${feedback.last_name}`
+      }))
+    };
+
+    res.status(200).json({
+      success: true,
+      data: {
+        weeklyReport,
+        weeklyFeedback: formattedFeedback
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch weekly report'
+    });
+  }
+});
+
+// Create/Update daily report
+router.post('/daily-report', authenticateUserMiddleware, async (req, res) => {
+  try {
+    const { date, report, timeIn, timeOut, weekNumber, narrative } = req.body;
+    const studentId = req.user.id;
+
+    // Get day name from date
+    const day = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+
+    // Check if report exists
+    const [existingReport] = await db.query(
+      `SELECT id FROM daily_reports 
+       WHERE student_id = ? AND date = ?`,
+      [studentId, date]
+    );
+
+    if (existingReport.length > 0) {
+      // Update existing report
+      await db.query(
+        `UPDATE daily_reports 
+         SET report = ?, 
+             time_in = ?, 
+             time_out = ?, 
+             narrative = ?,
+             updated_at = NOW()
+         WHERE student_id = ? AND date = ?`,
+        [report, timeIn, timeOut, narrative, studentId, date]
+      );
+    } else {
+      // Create new report
+      await db.query(
+        `INSERT INTO daily_reports 
+         (student_id, date, day, report, time_in, time_out, week_number, narrative)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [studentId, date, day, report, timeIn, timeOut, weekNumber, narrative]
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Daily report saved successfully'
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to save daily report' });
+  }
+});
+
+// Add weekly feedback
+router.post(
+  '/weekly-feedback',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { studentId, weekNumber, feedback, fromAI } = req.body;
+      const userId = req.user.id;
+      const userRole = fromAI ? 'AI' : req.user.role;
+
+      // Check if AI feedback already exists for this week
+      if (fromAI) {
+        const [existingAIFeedback] = await db.query(
+          `SELECT id FROM weekly_feedback 
+           WHERE student_id = ? 
+           AND week_number = ? 
+           AND role = 'AI'`,
+          [studentId, weekNumber]
+        );
+
+        if (existingAIFeedback.length > 0) {
+          // Update existing AI feedback
+          await db.query(
+            `UPDATE weekly_feedback 
+             SET feedback = ?, 
+                 date = CURDATE()
+             WHERE id = ?`,
+            [feedback, existingAIFeedback[0].id]
+          );
+        } else {
+          // Insert new AI feedback
+          await db.query(
+            `INSERT INTO weekly_feedback 
+             (student_id, user_id, role, week_number, feedback, date)
+             VALUES (?, ?, ?, ?, ?, CURDATE())`,
+            [studentId, userId, userRole, weekNumber, feedback]
+          );
+        }
+      } else {
+        // Insert new user feedback
+        await db.query(
+          `INSERT INTO weekly_feedback 
+           (student_id, user_id, role, week_number, feedback, date)
+           VALUES (?, ?, ?, ?, ?, CURDATE())`,
+          [studentId, userId, userRole, weekNumber, feedback]
+        );
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Feedback added successfully'
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to add feedback' });
+    }
+  }
+);
+
+// Delete daily report
+router.delete(
+  '/daily-report/:id',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const studentId = req.user.id;
+
+      await db.query(
+        `DELETE FROM daily_reports 
+       WHERE id = ? AND student_id = ?`,
+        [id, studentId]
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Daily report deleted successfully'
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to delete daily report' });
+    }
+  }
+);
+
+// Add route for generating AI feedback
+router.post(
+  '/generate-feedback',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { dailyReports, narrativeReport, weekNumber } = req.body;
+
+      const prompt = `Please analyze the following daily reports and narrative report from an intern:
+
+Daily Reports:
+${dailyReports}
+
+Weekly Narrative:
+${narrativeReport}
+
+Please provide constructive feedback about their performance, achievements, and areas for improvement.`;
+
+      const completion = await openai.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'gpt-3.5-turbo'
+      });
+
+      const aiFeedback = completion.choices[0].message.content;
+
+      res.status(200).json({
+        success: true,
+        feedback: aiFeedback
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to generate AI feedback' });
+    }
+  }
+);
+
+// Add update time endpoint
+router.put(
+  '/daily-report/update-time',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { date, timeIn, timeOut, studentId } = req.body;
+
+      // Check if report exists
+      const [existingReport] = await db.query(
+        `SELECT id FROM daily_reports 
+         WHERE student_id = ? AND date = ?`,
+        [studentId, date]
+      );
+
+      if (existingReport.length > 0) {
+        // Update existing report's time
+        await db.query(
+          `UPDATE daily_reports 
+           SET time_in = ?, 
+               time_out = ?, 
+               updated_at = NOW()
+           WHERE student_id = ? AND date = ?`,
+          [timeIn, timeOut, studentId, date]
+        );
+
+        res.status(200).json({
+          success: true,
+          message: 'Time updated successfully'
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'Report not found'
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to update time' });
+    }
+  }
+);
+
+// Update daily report status
+router.put(
+  '/daily-report/status',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { date, studentId, status } = req.body;
+
+      console.log({ date, studentId, status });
+      // Update the status of the daily report
+      await db.query(
+        `UPDATE daily_reports 
+       SET status = ?, updated_at = NOW()
+       WHERE student_id = ? AND date = ?`,
+        [status, studentId, date]
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `Entry ${status}d successfully`
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to update entry status' });
     }
   }
 );

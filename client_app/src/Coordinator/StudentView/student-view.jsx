@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 // import Image from "next/image"
-import { Grid, List, Eye, Filter } from "lucide-react"
+import { Grid, List, Eye, Filter, TrophyIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -16,7 +16,7 @@ import axios from 'axios';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useNavigate } from 'react-router-dom';
 // const students = [
 //   {
 //     traineeID: 3,
@@ -60,11 +60,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function StudentView({
   data,
-  fetchFunction
+  fetchFunction,
+  viewProgress
 }) {
 
   let students = data;
-
+  const navigate = useNavigate();
 
   const [view, setView] = useState("table")
   const [searchTerm, setSearchTerm] = useState("")
@@ -247,12 +248,12 @@ export default function StudentView({
         <Table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
           <TableHeader>
             <TableRow className="text-sm font-medium text-gray-700 bg-gray-100">
-              <TableHead
+              {/* <TableHead
                 onClick={() => handleSort("traineeID")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
               >
                 Trainee ID
-              </TableHead>
+              </TableHead> */}
               <TableHead
                 onClick={() => handleSort("traineeID")}
                 className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
@@ -335,7 +336,7 @@ export default function StudentView({
                 key={student.traineeID}
                 className="text-sm text-gray-700 border-b hover:bg-gray-50"
               >
-                <TableCell className="px-4 py-2">{student.traineeID}</TableCell>
+                {/* <TableCell className="px-4 py-2">{student.traineeID}</TableCell> */}
                 <TableCell className="px-4 py-2">
 
 
@@ -357,22 +358,43 @@ export default function StudentView({
                   <StatusBadge isActive={student.is_verified_by_coordinator} />
                 </TableCell>
                 <TableCell className="px-4 py-2">
-                  <Button
+                  <div className="flex items-center space-x-2">
+                    <Button
 
-                    color="blue"
-                    size="sm"
-                    onClick={() => {
+                      color="blue"
+                      size="sm"
+                      onClick={() => {
 
 
-                      console.log({ student })
-                      setIsModalOpen(true)
-                      handleViewInfo(student)
-                    }}
-                    className="flex items-center space-x-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span>View Info</span>
-                  </Button>
+                        console.log({ student })
+                        setIsModalOpen(true)
+                        handleViewInfo(student)
+                      }}
+                      className="flex items-center space-x-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span> Info</span>
+                    </Button>
+
+
+
+                    {
+                      viewProgress && (
+                        <Button
+                          className="bg-yellow-500 text-white"
+                          size="sm"
+                          onClick={() => {
+                            navigate(`/coordinator/student-progress/${student.userID}`)
+                          }}
+                        >
+                          <TrophyIcon className="h-4 w-4" />
+                          Progress Report
+                        </Button>
+                      )
+                    }
+
+                  </div>
+
                 </TableCell>
               </TableRow>
             ))}
