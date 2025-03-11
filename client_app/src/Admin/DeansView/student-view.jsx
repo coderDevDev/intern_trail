@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 // import Image from "next/image"
-import { Grid, List, Eye, Filter } from "lucide-react"
+import { Grid, List, Eye, Filter, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { StudentModal } from "./student-modal"
+import { Badge } from "@/components/ui/badge"
+import { Search } from "lucide-react"
 
 import axios from 'axios';
 
@@ -56,6 +58,13 @@ import 'react-toastify/dist/ReactToastify.css';
 //     ],
 //   },
 // ]
+
+// Add StatusBadge component
+const StatusBadge = ({ status, text }) => (
+  <Badge className={`${status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+    {text}
+  </Badge>
+);
 
 export default function StudentView({
   data,
@@ -222,153 +231,170 @@ export default function StudentView({
   )
 
   return (
-    <div className="">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-        <Input
-          type="text"
-          placeholder="Search ..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button variant={view === "table" ? "default" : "outline"} onClick={() => setView("table")}>
-            <List className="mr-2 h-4 w-4" /> Table
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Dean Applications</h1>
+          <p className="text-gray-500">Manage and review dean applications</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={view === "table" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("table")}
+          >
+            <List className="h-4 w-4 mr-1" />
+            Table
           </Button>
-          <Button variant={view === "grid" ? "default" : "outline"} onClick={() => setView("grid")}>
-            <Grid className="mr-2 h-4 w-4" /> Grid
+          <Button
+            variant={view === "grid" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("grid")}
+          >
+            <Grid className="h-4 w-4 mr-1" />
+            Grid
           </Button>
         </div>
       </div>
 
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <Input
+              placeholder="Search deans..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+              icon={<Search className="h-4 w-4" />}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Verification Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="unverified">Unverified</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
       {view === "table" ? (
-        <Table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-          <TableHeader>
-            <TableRow className="text-sm font-medium text-gray-700 bg-gray-100">
-              {/* <TableHead
-                onClick={() => handleSort("traineeID")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                ID
-              </TableHead> */}
-              <TableHead
-                onClick={() => handleSort("first_name")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Name
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("email")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Email
-              </TableHead>
-
-              <TableHead
-                onClick={() => handleSort("collegeName")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                College
-                <FilterPopover
-                  options={uniqueColleges}
-                  value={collegeFilter}
-                  onChange={setCollegeFilter}
-                  placeholder="Filter by College"
-                />
-              </TableHead>
-
-              <TableHead
-                onClick={() => handleSort("is_verified")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Verified
-                <FilterPopover
-                  options={["true", "false"]}
-                  value={verifiedFilter}
-                  onChange={setVerifiedFilter}
-                  placeholder="Filter by Verification"
-                />
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("is_verified")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Approved
-                <FilterPopover
-                  options={["true", "false"]}
-                  value={verifiedFilter}
-                  onChange={setVerifiedFilter}
-                  placeholder="Filter by Verification"
-                />
-              </TableHead>
-
-              <TableHead className="px-4 py-2 text-left">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedStudents.map((student) => (
-              <TableRow
-                key={student.coordinatorID}
-                className="text-sm text-gray-700 border-b hover:bg-gray-50"
-              >
-                {/* <TableCell className="px-4 py-2">{student.traineeID}</TableCell> */}
-                <TableCell className="px-4 py-2">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</TableCell>
-                <TableCell className="px-4 py-2">{student.email}</TableCell>
-                <TableCell className="px-4 py-2">{student.collegeName}</TableCell>
-
-                <TableCell className="px-4 py-2 font-bold">{student.is_verified ? "Yes" : "No"}</TableCell>
-                <TableCell className="px-4 py-2 font-bold">{student.is_approved_by_admin ? "Yes" : "No"}</TableCell>
-                <TableCell className="px-4 py-2">
-                  <Button
-
-                    color="blue"
-                    size="sm"
-                    onClick={() => {
-
-
-                      console.log({ student })
-                      setIsModalOpen(true)
-                      handleViewInfo(student)
-                    }}
-                    className="flex items-center space-x-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span>View Info</span>
-                  </Button>
-                </TableCell>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("first_name")}
+                >
+                  <div className="flex items-center gap-2">
+                    Name
+                    <ArrowUpDown className="h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("email")}
+                >
+                  <div className="flex items-center gap-2">
+                    Email
+                    <ArrowUpDown className="h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("collegeName")}
+                >
+                  <div className="flex items-center gap-2">
+                    College
+                    <ArrowUpDown className="h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
+            </TableHeader>
+            <TableBody>
+              {sortedStudents.map((student) => (
+                <TableRow key={student.deanID}>
+                  <TableCell className="font-medium">
+                    {`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}
+                  </TableCell>
+                  <TableCell>{student.email}</TableCell>
+                  <TableCell>{student.collegeName}</TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <StatusBadge
+                        status={student.is_verified}
+                        text={student.is_verified ? "Verified" : "Unverified"}
+                      />
+                      <StatusBadge
+                        status={student.is_approved_by_admin}
+                        text={student.is_approved_by_admin ? "Approved" : "Pending"}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedStudent(student);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedStudents.map((student) => (
-            <Card key={student.traineeID}>
-              <CardHeader>
-                <CardTitle>{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</CardTitle>
+            <Card key={student.deanID} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex justify-between items-start">
+                  <div>
+                    {`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}
+                  </div>
+                  <div className="space-y-1">
+                    <StatusBadge
+                      status={student.is_verified}
+                      text={student.is_verified ? "Verified" : "Unverified"}
+                    />
+                  </div>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="relative mb-4">
-                  <img
-                    src={student.proof_identity || "/placeholder.svg"}
-                    alt={`${student.first_name} ${student.last_name}`}
-                    fill
-                    className="object-cover rounded-md h-20"
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="font-medium">{student.email}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500">College</p>
+                    <p className="font-medium">{student.collegeName}</p>
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedStudent(student);
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
                 </div>
-                <p>
-                  <strong>Email:</strong> {student.email}
-                </p>
-                <p>
-                  <strong>College:</strong> {student.collegeName}
-                </p>
-                <p>
-                  <strong>Program:</strong> {student.progName}
-                </p>
-                <Button variant="outline" className="mt-4 w-full" onClick={() => handleViewInfo(student)}>
-                  <Eye className="h-4 w-4 mr-2" /> View Info
-                </Button>
               </CardContent>
             </Card>
           ))}

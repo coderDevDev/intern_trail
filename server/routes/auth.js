@@ -88,8 +88,12 @@ router.post('/login', async (req, res) => {
         [user.userID]
       );
 
+      console.log({ query2 });
       let is_approved =
-        query2[0].is_approved_by_admin || query2[0].is_verified_by_coordinator;
+        query2.length > 0
+          ? query2[0].is_approved_by_admin ||
+            query2[0].is_verified_by_coordinator
+          : 0;
 
       console.log({ is_approved });
       if (!is_approved || is_approved < 1) {

@@ -12,6 +12,14 @@ import companyRoute from './routes/company.js';
 import collegeRoute from './routes/college.js';
 
 import announcementsRoute from './routes/announcements.js';
+
+import evaluationsRoute from './routes/evaluations.js';
+import certificatesRouter from './routes/certificates.js';
+
+import emergencyRoute from './routes/emergency-reports.js';
+
+import systemLogsRoute from './routes/system-logs.js';
+
 import filesRoute from './routes/files.js';
 import bodyParser from 'body-parser';
 
@@ -60,6 +68,13 @@ app.use('/api/company', companyRoute);
 app.use('/api/college', collegeRoute);
 app.use('/api/announcements', announcementsRoute);
 app.use('/api/files', filesRoute);
+app.use('/api/evaluations', evaluationsRoute);
+app.use('/api/certificates', certificatesRouter);
+
+app.use('/api/emergency-reports', emergencyRoute);
+
+app.use('/api/system-logs', systemLogsRoute);
+
 app.use(express.static('public'));
 app.use(express.static('files'));
 

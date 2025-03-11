@@ -48,15 +48,20 @@ function AccountCreation() {
   const fetchColleges = async () => {
     try {
       const response = await axios.get('college/list');
-      let result = response.data.data
+      let result = response.data.data;
 
+      // Set colleges directly since it's already in the correct format
+      setColleges(result);
 
-      setColleges(result.colleges);
-      setPrograms(result.programs)
-      setIsLoaded(true)
+      // Get programs from first college by default
+      if (result && result.length > 0) {
+        setPrograms(result[0].programs);
+      }
 
+      setIsLoaded(true);
     } catch (error) {
-      console.error("Error fetching trainees:", error);
+      console.error("Error fetching colleges:", error);
+      toast.error("Failed to fetch colleges and programs");
     }
   };
 
@@ -376,46 +381,47 @@ function AccountCreation() {
                 <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="">
                     <label htmlFor="college">College</label>
-                    <select id="college" className="form-control"
+                    <select
+                      id="college"
+                      className="form-control"
                       onChange={(e) => {
-
                         let value = e.target.value;
-
-
                         setFieldValue('college', value);
 
+                        // Update programs when college changes
+                        const selectedCollege = colleges.find(c => c.collegeID.toString() === value);
+                        if (selectedCollege) {
+                          setPrograms(selectedCollege.programs);
+                          // Reset program selection
+                          setFieldValue('program', '');
+                        }
                       }}
                     >
-
-
-                      {colleges.map((company) => (
-                        <option key={company.collegeID} value={company.collegeID}>
-                          {company.collegeName}
+                      <option value="">Select College</option>
+                      {colleges.map((college) => (
+                        <option key={college.collegeID} value={college.collegeID}>
+                          {college.collegeName}
                         </option>
                       ))}
-
                     </select>
                   </div>
                   {userType !== 'university-dean' && (
                     <div className="">
                       <label htmlFor="program">Program / Course</label>
-                      <select id="program" className="form-control"
-
+                      <select
+                        id="program"
+                        className="form-control"
                         onChange={(e) => {
-
                           let value = e.target.value;
-
-
                           setFieldValue('program', value);
-
                         }}
                       >
-                        {programs.map((company) => (
-                          <option key={company.programID} value={company.programID}>
-                            {company.progName}
+                        <option value="">Select Program</option>
+                        {programs.map((program) => (
+                          <option key={program.programID} value={program.programID}>
+                            {program.programName}
                           </option>
                         ))}
-
                       </select>
                     </div>
                   )}

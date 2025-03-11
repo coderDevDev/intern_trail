@@ -29,7 +29,7 @@ function UserSelection() {
             <option value="student">Student</option>
             <option value="ojt-coordinator">OJT Coordinator</option>
             <option value="hte-supervisor">HTE Supervisor</option>
-            <option value="university-dean">University Dean</option>
+            <option value="dean">University Dean</option>
           </select>
         </div>
         <button className="submit-button" onClick={handleContinueClick}>Continue</button>
