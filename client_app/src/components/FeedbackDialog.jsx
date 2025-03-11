@@ -31,6 +31,7 @@ function FeedbackDialog({ isOpen, onClose, company, onFeedbackSubmitted, feedbac
         setRating(0);
         setComment('');
         onFeedbackSubmitted();
+        onClose();
       } else {
         toast.error(response.data.message || 'Failed to submit feedback');
       }

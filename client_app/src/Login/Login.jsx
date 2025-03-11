@@ -74,6 +74,9 @@ function Login() {
         localStorage.setItem('token', token);
         localStorage.setItem('loggedInUser', JSON.stringify(user));
 
+        // Update axios default headers immediately after storing the token
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
         // Use navigate instead of window.location
         const roleRoutes = {
           'trainee': '/student',

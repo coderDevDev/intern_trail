@@ -5,6 +5,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ProtectedRoute from './components/ProtectedRoute';
 import UnauthorizedPage from './components/UnauthorizedPage';
+// import App from './App';
+import { initializeApp } from './app/init';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Main Dashboards
 import StudentDashboard from './Student/StudentDashboard';
@@ -27,16 +31,15 @@ import EmailVerified from './Login/EmailVerified';
 import PasswordChangedSuccess from './Login/PasswordChangedSuccess'; // Import the PasswordChangedSuccess component
 import ResetPasswordResult from './Login/ResetPasswordResult';
 
-import initializeApp from './app/init';
-
 initializeApp();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <ToastContainer />
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        {/* <Route path="/" element={<App />} /> */}
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/email-verified" element={<EmailVerified />} />

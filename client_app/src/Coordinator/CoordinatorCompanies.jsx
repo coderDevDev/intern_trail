@@ -54,6 +54,7 @@ import { faCoffee, faEye, faEyeDropper, faMailBulk, faMailReply, faSms } from '@
 import {
   Building, Search, CloudLightning, FileText, Check, X, CheckCircle2, XCircle, HourglassIcon, Trash2, Loader2, Plus,
   Phone,
+  InfoIcon,
 
 
 
@@ -68,6 +69,8 @@ import { Upload } from "lucide-react"
 import FeedbackDialog from '../components/FeedbackDialog';
 import FeedbackList from '../components/FeedbackList';
 import FileUploader from '../components/FileUploader';
+import { Progress } from "@/components/ui/progress";
+import { AlertTriangle } from "lucide-react"
 
 function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -101,40 +104,23 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     multiple: false,
   });
 
-  const DropzoneArea = ({ fieldName, label, onFileSelect, acceptedTypes, currentFile }) => {
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-      onDrop: (files) => onFileSelect(files[0]),
+  const DropzoneArea = ({ fieldName, acceptedTypes, onFileSelect, currentFile }) => {
+    const { getRootProps, getInputProps } = useDropzone({
       accept: acceptedTypes,
-      multiple: false
+      onDrop: (acceptedFiles) => {
+        if (acceptedFiles.length > 0) {
+          onFileSelect(acceptedFiles[0]);
+        }
+      },
     });
 
     return (
-      <div>
-        {!currentFile ? (
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors
-              ${isDragActive
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-blue-500'}`}
-          >
-            <input {...getInputProps()} />
-            <CloudUploadIcon className="mx-auto h-8 w-8 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">
-              {isDragActive
-                ? "Drop the file here"
-                : "Drag and drop a file here, or click to select"}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {acceptedTypes ? `Accepted formats: ${acceptedTypes}` : 'All file types accepted'}
-            </p>
-          </div>
-        ) : (
+      <div {...getRootProps()} className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors hover:border-blue-500">
+        <input {...getInputProps()} />
+        {currentFile ? (
           <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-500" />
-              <span className="text-sm text-gray-600">{currentFile.name}</span>
-            </div>
+            <FileText className="h-5 w-5 text-blue-500" />
+            <span className="text-sm text-gray-600">{currentFile.name}</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -145,6 +131,8 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
               <X className="h-4 w-4" />
             </button>
           </div>
+        ) : (
+          <p className="text-sm text-gray-500">Drag & drop a file here, or click to select one</p>
         )}
       </div>
     );
@@ -919,10 +907,9 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
   // Update the CompanyCard component
   const CompanyCard = ({ company }) => {
-
-    console.log({ company })
-    const application = isTrainee ?
-      userApplications.find(app => app.company_id === company.companyID) : null;
+    const application = isTrainee
+      ? userApplications.find(app => app.company_id === company.companyID)
+      : null;
 
     return (
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100">
@@ -959,77 +946,43 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
               <h4 className="text-sm font-medium text-gray-900 mb-1">MOA Status</h4>
               <span
                 className={`px-2 py-1 text-xs font-medium rounded-full ${company.moa_status === 'approved'
-                    ? 'bg-green-100 text-green-800'
-                    : company.moa_status === 'rejected'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-yellow-100 text-yellow-800'
+                  ? 'bg-green-100 text-green-800'
+                  : company.moa_status === 'rejected'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
                   }`}
               >
                 {company.moa_status.charAt(0).toUpperCase() + company.moa_status.slice(1)}
               </span>
             </div>
 
-
-            {/* Show application status or apply button for trainees */}
-            {isTrainee ? (
-              application ? (
-                <div
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium ${application.is_confirmed
+            {/* Application Status */}
+            {isTrainee && application && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-1">Application Status</h4>
+                <span
+                  className={`px-2 py-1 text-xs font-medium rounded-full ${application.status === 'approved'
                     ? 'bg-green-100 text-green-800'
-                    : application.status === 'approved'
-                      ? 'bg-blue-100 text-blue-800'
-                      : application.status === 'rejected'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                    : application.status === 'rejected'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
                     }`}
                 >
-                  {application.is_confirmed
-                    ? 'Joined'
-                    : application.status === 'approved'
-                      ? 'Approved'
-                      : application.status === 'rejected'
-                        ? 'Rejected'
-                        : 'Pending'}
-                </div>
-              ) : (
-                company.moa_status === 'approved' && (
-                  <ButtonUI
-                    onClick={() => handleApplyClick(company)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    size="sm"
-                  >
-                    Apply Now
-                  </ButtonUI>
-                )
-              )
-            ) : (
-              // Show existing actions for coordinator/dean
-              <div className="flex gap-2">
-                {/* {canEditCompany && (
-                  <ButtonUI
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(company)}
-                    className="text-gray-600"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </ButtonUI>
-                )}
-
-                <ButtonUI
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEmail(company)}
-                  className="text-green-600"
-                >
-                  <Mail className="h-4 w-4 mr-1" />
-                  Email
-                </ButtonUI> */}
+                  {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                </span>
               </div>
             )}
-
           </div>
+
+          {/* Show application status or apply button for trainees */}
+          {isTrainee && !application && company.moa_status === 'approved' && (
+            <ButtonUI
+              onClick={() => handleApplyClick(company)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 shadow-sm transition-all hover:shadow-md"
+            >
+              Apply Now
+            </ButtonUI>
+          )}
 
           {/* Rating Section */}
           <div className="pt-4 border-t">
@@ -1061,7 +1014,9 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                 <Star className="h-4 w-4 mr-1" />
                 Rate
               </ButtonUI>
+
             </div>
+
           </div>
 
           {/* Actions */}
@@ -1174,12 +1129,12 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
       // Append files for each requirement
       selectedCompany.list_of_requirements.forEach(req => {
-        if (applicationFiles[req.id]) {
-          formData.append(`file_${req.id}`, applicationFiles[req.id]);
+        if (applicationFiles[req.id]?.file) {
+          formData.append(`file_${req.id}`, applicationFiles[req.id].file);
         }
       });
 
-      const response = await axios.post('company/applyNow', formData, {
+      const response = await axios.post('/company/applyNow', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -1235,6 +1190,153 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     setIsMoaConfirmDialogOpen(true);
   };
 
+  // Add this function to handle file uploads with progress
+  const handleFileUploadWithProgress = (reqId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    axios.post('/upload-endpoint', formData, {
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setApplicationFiles(prev => ({
+          ...prev,
+          [reqId]: { file, progress }
+        }));
+      }
+    }).then(response => {
+      // Handle successful upload
+      toast.success('File uploaded successfully');
+    }).catch(error => {
+      // Handle upload error
+      toast.error('Failed to upload file');
+    });
+  };
+
+  // Update the application dialog to include file upload on submission
+  const ApplicationDialog = ({ isOpen, onClose, company }) => {
+    const [applicationFiles, setApplicationFiles] = useState({});
+    const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
+    company.list_of_requirements = company.list_of_requirements.map(req => ({
+      ...req,
+      id: req.value,
+      required: true
+    }));
+    const allRequirementsMet = () => {
+      return company.list_of_requirements.every(req => {
+        if (req.required) {
+          return applicationFiles[req.id]?.file;
+        }
+        return true;
+      });
+    };
+
+    const handleFileSelect = (reqId, file) => {
+      setApplicationFiles(prev => ({
+        ...prev,
+        [reqId]: { file }
+      }));
+      setErrors(prev => ({
+        ...prev,
+        [reqId]: file ? '' : 'This field is required'
+      }));
+    };
+
+    const handleSubmitApplication = async () => {
+      const newErrors = {};
+      company.list_of_requirements.forEach(req => {
+        if (req.required && !applicationFiles[req.id]?.file) {
+          newErrors[req.id] = 'This field is required';
+        }
+      });
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const formData = new FormData();
+        formData.append('companyID', company.companyID);
+
+        company.list_of_requirements.forEach(req => {
+          if (applicationFiles[req.id]?.file) {
+            formData.append(`file_${req.id}`, applicationFiles[req.id].file);
+          }
+        });
+
+        const response = await axios.post('/company/applyNow', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Application submitted successfully');
+          onClose();
+          setApplicationFiles({});
+          fetchUserApplications();
+        }
+      } catch (error) {
+        console.error('Error submitting application:', error);
+        toast.error(error.response?.data?.message || 'Failed to submit application');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    return (
+      <ShadcnDialog open={isOpen} onOpenChange={onClose}>
+        <ShadcnDialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+          <ShadcnDialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b">
+            <ShadcnDialogTitle className="text-xl font-bold flex items-center gap-2">
+              <InfoIcon className="h-5 w-5 text-green-500" />
+              Apply to {company.companyName}
+            </ShadcnDialogTitle>
+            <p className="text-sm text-gray-500 mt-1">
+              Please upload the required documents to complete your application.
+            </p>
+          </ShadcnDialogHeader>
+          <div className="py-4">
+            <div className="space-y-4">
+              {company.list_of_requirements?.map((req, index) => (
+                <div key={index} className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow ${errors[req.id] ? 'border-red-500' : ''}`}>
+                  <label className="text-sm font-medium text-gray-700">
+                    {req.label}
+                    {req.required && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+                  <div className="mt-2">
+                    <DropzoneArea
+                      fieldName={`file_${req.id}`}
+                      acceptedTypes={req.file_types}
+                      onFileSelect={(file) => handleFileSelect(req.id, file)}
+                      currentFile={applicationFiles[req.id]?.file}
+                    />
+                    {errors[req.id] && <p className="text-red-500 text-sm mt-1">{errors[req.id]}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <ShadcnDialogFooter>
+            <ButtonUI variant="outline" onClick={onClose}>
+              Cancel
+            </ButtonUI>
+            <ButtonUI
+              onClick={handleSubmitApplication}
+              disabled={!allRequirementsMet() || isLoading}
+              className={`bg-blue-600 hover:bg-blue-700 text-white ${!allRequirementsMet() || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isLoading ? 'Submitting...' : 'Submit Application'}
+            </ButtonUI>
+          </ShadcnDialogFooter>
+        </ShadcnDialogContent>
+      </ShadcnDialog>
+    );
+  };
 
   console.log({ role })
   return (
@@ -1296,7 +1398,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              {/* <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /> */}
               <Input
                 type="text"
                 placeholder="Search companies..."
@@ -1348,70 +1450,11 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       </div>
 
       {isModalOpen && selectedCompany && (
-        <ShadcnDialog open={isModalOpen} onOpenChange={closeModal}>
-          <ShadcnDialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-            {isApplying ? (
-              <div>
-                <ShadcnDialogHeader>
-                  <ShadcnDialogTitle>Apply to {selectedCompany.name}</ShadcnDialogTitle>
-                </ShadcnDialogHeader>
-                <div className="py-4">
-                  <div className="space-y-4">
-                    {selectedCompany.list_of_requirements?.map((req) => (
-                      <div key={req.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            {req.label}
-                            {req.required && <span className="text-red-500 ml-1">*</span>}
-                          </label>
-                          <input
-                            type="checkbox"
-                            checked={selectedRequirements.includes(req.id)}
-                            onChange={() => handleRequirementToggle(req.id)}
-                            className="rounded border-gray-300"
-                          />
-                        </div>
-                        {req.file_required && (
-                          <div className="mt-2">
-                            <DropzoneArea
-                              fieldName={`file_${req.id}`}
-                              acceptedTypes={req.file_types}
-                              onFileSelect={(file) => handleFileUpload(req.id, file)}
-                              currentFile={applicationFiles[req.id]}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <ShadcnDialogFooter>
-                  <ButtonUI variant="outline" onClick={closeModal}>
-                    Cancel
-                  </ButtonUI>
-                  <ButtonUI
-                    onClick={handleSubmitApplication}
-                    disabled={!canSubmitApplication()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Submit Application
-                  </ButtonUI>
-                </ShadcnDialogFooter>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center mb-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
-                  <img
-                    src={selectedCompany.logo || '/company-placeholder.png'}
-                    alt={selectedCompany.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">{selectedCompany.name}</h2>
-              </div>
-            )}
-          </ShadcnDialogContent>
-        </ShadcnDialog>
+        <ApplicationDialog
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          company={selectedCompany}
+        />
       )}
 
       {
@@ -1616,3 +1659,4 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 }
 
 export default CoordinatorCompanies;
+

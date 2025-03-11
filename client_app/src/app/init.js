@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 let VITE_REACT_APP_BASE_URL = 'http://localhost:5000';
 
-const initializeApp = () => {
+export const initializeApp = () => {
   console.log(import.meta.env);
   // Setting base URL for all API request via axios
 
@@ -29,6 +30,10 @@ const initializeApp = () => {
     },
     function (error) {
       document.body.classList.remove('loading-indicator');
+      if (error.response && error.response.data.error === 'Invalid token') {
+        toast.error('Session expired. Please log in again.');
+        window.location.href = '/login';
+      }
       return Promise.reject(error);
     }
   );
@@ -37,5 +42,3 @@ const initializeApp = () => {
 
   console.log({ api: VITE_REACT_APP_BASE_URL });
 };
-
-export default initializeApp;
