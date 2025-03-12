@@ -498,26 +498,72 @@ router.post(
     }
   }
 );
-
-router.get('/trainees/list', async (req, res) => {
+router.get('/trainees/list', authenticateUserMiddleware, async (req, res) => {
   try {
-    const [users] = await db.query(`
-  SELECT t.*, u.userID, u.email,
-    u.first_name, u.middle_initial, 
-    u.last_name, u.phone, u.is_verified, 
-    u.proof_identity, 
-    u.role,
-     u.last_login_at, u.created_at, 
-     u.updated_at, 
-     c.collegeID, c.collegeName, c.collegeCode, 
-     p.programID, p.programName as progName, p.programID
-FROM trainee t
-INNER JOIN users u ON t.userID = u.userID
-INNER JOIN colleges c ON t.collegeID = c.collegeID
-INNER JOIN programs p ON t.programID = p.programID;
+    const userId = req.user.id;
+    const userRole = req.user.role;
 
-      
-      `);
+    console.log({ userId, userRole });
+
+    let scopeData = null;
+    let condition = '';
+    let values = [];
+
+    switch (userRole) {
+      case 'ojt-coordinator':
+        const [coordinator] = await db.query(
+          `SELECT c.programID 
+           FROM coordinators c
+           WHERE c.userID = ?`,
+          [userId]
+        );
+
+        if (coordinator.length > 0) {
+          scopeData = { programID: coordinator[0].programID };
+          condition = 'AND t.programID = ?';
+          values.push(scopeData.programID);
+        }
+        break;
+
+      case 'trainee':
+        condition = 'AND t.userID = ?';
+        values.push(userId);
+        break;
+
+      case 'dean':
+        const [dean] = await db.query(
+          `SELECT d.collegeID 
+           FROM deans d
+           WHERE d.userID = ?`,
+          [userId]
+        );
+
+        if (dean.length > 0) {
+          scopeData = { collegeID: dean[0].collegeID };
+          condition = 'AND t.collegeID = ?';
+          values.push(scopeData.collegeID);
+        }
+        break;
+    }
+
+    console.log({ scopeData });
+
+    const [users] = await db.query(
+      `SELECT t.*, u.userID, u.email, 
+        u.first_name, u.middle_initial, 
+        u.last_name, u.phone, u.is_verified, 
+        u.proof_identity, u.role, 
+        u.last_login_at, u.created_at, 
+        u.updated_at, 
+        c.collegeID, c.collegeName, c.collegeCode, 
+        p.programID, p.programName as progName
+      FROM trainee t
+      INNER JOIN users u ON t.userID = u.userID
+      INNER JOIN colleges c ON t.collegeID = c.collegeID
+      INNER JOIN programs p ON t.programID = p.programID
+      WHERE 1=1 ${condition}`,
+      values
+    );
 
     res.status(200).json({ success: true, data: users });
   } catch (err) {
@@ -530,6 +576,7 @@ router.put('/trainee/:id', async (req, res) => {
   const { id } = req.params;
   const { is_verified_by_coordinator, remaining_hours } = req.body;
 
+  console.log({ is_verified_by_coordinator });
   try {
     const [result] = await db.query(
       `UPDATE trainee 

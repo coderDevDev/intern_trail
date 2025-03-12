@@ -18,7 +18,7 @@ import LogoutIcon from '@mui/icons-material/ExitToApp';
 import AccountInfoPopup from '../components/AccountInfoPopup';
 
 import StudentProgress from '../Student/StudentProgress';
-
+import StudentDTR from '../Student/StudentDTR';
 function AdditionalContent() {
   return (
     <div className="additional-content">

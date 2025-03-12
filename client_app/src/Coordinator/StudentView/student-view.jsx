@@ -23,13 +23,14 @@ const StatusBadge = ({ status, text }) => (
 export default function StudentView({
   data,
   fetchFunction,
-  viewProgress,
+  viewProgress = true,
   viewCompanies,
   userApplications,
   isTrainee,
   onApplyCompany,
   ...props
 }) {
+
   const students = data;
   const [view, setView] = useState("table")
   const [searchTerm, setSearchTerm] = useState("")
@@ -48,22 +49,12 @@ export default function StudentView({
     }
   }
 
-  const filteredStudents = students.filter(
-    (student) =>
-      Object.values(student).some(
-        (value) => value && value.toString().toLowerCase().includes(searchTerm.toLowerCase()),
-      ) &&
-      (verifiedFilter === "all" || (student.is_verified && verifiedFilter === "verified") || (!student.is_verified && verifiedFilter === "unverified"))
-  )
+  const filteredStudents = students;
 
-  const sortedStudents = [...filteredStudents].sort((a, b) => {
-    if (sortColumn) {
-      if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1
-      if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1
-    }
-    return 0
-  })
+  const sortedStudents = [...filteredStudents];
 
+
+  console.log({ sortedStudents })
   const handleApprove = async (studentId) => {
     console.log(`Approving student ${studentId}`)
     // setIsModalOpen(false)

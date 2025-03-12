@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 // import Image from "next/image"
-import { Grid, List, Eye, Filter, TrophyIcon, MoreHorizontal } from "lucide-react"
+import { Grid, List, Eye, Filter, TrophyIcon, MoreHorizontal, Users, Search, CheckCircle2, XCircle, FileText, Award, Download, UserCheck, Clock } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -26,7 +26,11 @@ import {
 import EvaluationForm from "@/components/EvaluationForm/EvaluationForm";
 import CertificateUpload from "@/components/CertificateUpload/CertificateUpload";
 import { Label } from "@/components/ui/label";
-import { FileText, Award } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClipboardList, UserCog, ChartLine } from "lucide-react";
+
+import { Dialog, DialogContent } from '@radix-ui/react-dialog';
 
 // const students = [
 //   {
@@ -75,9 +79,10 @@ export default function StudentView({
   viewProgress
 }) {
 
-  let students = data;
+
   const navigate = useNavigate();
 
+  const [students, setStudents] = useState([]);
   const [view, setView] = useState("table")
   const [searchTerm, setSearchTerm] = useState("")
   const [sortColumn, setSortColumn] = useState(null)
@@ -87,10 +92,15 @@ export default function StudentView({
   const [collegeFilter, setCollegeFilter] = useState(null)
   const [programFilter, setProgramFilter] = useState(null)
   const [verifiedFilter, setVerifiedFilter] = useState(null)
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState('applications');
   const [isEvaluationFormOpen, setIsEvaluationFormOpen] = useState(false);
   const [evaluationData, setEvaluationData] = useState(null);
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+
+  const [applications, setApplications] = useState([]);
+  const [activeTrainees, setActiveTrainees] = useState([]);
+  const [progressReports, setProgressReports] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -120,8 +130,8 @@ export default function StudentView({
   })
 
   const handleViewInfo = (student) => {
-    setIsModalOpen(true)
     setSelectedStudent(student)
+    setIsModalOpen(true)
   }
 
   const handleApprove = async (studentData, status = 'Approved') => {
@@ -177,11 +187,23 @@ export default function StudentView({
   };
 
   const handleCloseModal = () => {
-    // Ensure body is interactive before closing modal
-    document.body.style.pointerEvents = '';
-    document.body.removeAttribute('aria-hidden');
+    // First set the modal to closed
     setIsModalOpen(false);
-    setSelectedStudent(null);
+
+    // Then use a timeout to clear the selected student after the modal animation completes
+    setTimeout(() => {
+      setSelectedStudent(null);
+    }, 300);
+  };
+
+  const handleViewDocuments = (student) => {
+    // Implement document viewing functionality
+    console.log("View documents for:", student);
+  };
+
+  const handleDownloadReport = (student) => {
+    // Implement report download functionality
+    console.log("Download report for:", student);
   };
 
   const uniqueColleges = Array.from(new Set(students.map((s) => s.collegeName)))
@@ -217,299 +239,459 @@ export default function StudentView({
     </Popover>
   )
 
+  const fetchAllData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch data for the active tab
+      if (activeTab === "applications") {
+        await fetchApplications();
+      } else if (activeTab === "trainees") {
+        await fetchActiveTrainees();
+      } else if (activeTab === "progress") {
+        await fetchProgressReports();
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchApplications = async () => {
+    try {
+      const response = await axios.post("/company/trainees/applications/all");
+      if (response.data.success) {
+        setApplications(response.data.data);
+        setStudents(response.data.data); // Update the main students array for compatibility
+      }
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+      toast.error("Failed to load applications");
+    }
+  };
+
+  const fetchActiveTrainees = async () => {
+    try {
+      const response = await axios.post("/company/trainees/active");
+      if (response.data.success) {
+        setActiveTrainees(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching active trainees:", error);
+      toast.error("Failed to load active trainees");
+    }
+  };
+
+  const fetchProgressReports = async () => {
+    try {
+      const response = await axios.post("/company/trainees/progress");
+      if (response.data.success) {
+        setProgressReports(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching progress reports:", error);
+      toast.error("Failed to load progress reports");
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setStudents(data);
+      setApplications(data);
+    } else {
+      fetchAllData();
+    }
+  }, [data]);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
   return (
-    <div className="relative">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder="Search students..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64"
-          />
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Filters</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Filter students by college, program, and verification status.
-                  </p>
-                </div>
-                <div className="grid gap-2">
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <Label htmlFor="college">College</Label>
-                    <Select
-                      value={collegeFilter || ""}
-                      onValueChange={(value) => setCollegeFilter(value || null)}
-                    >
-                      <SelectTrigger className="col-span-2">
-                        <SelectValue placeholder="All Colleges" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Colleges</SelectItem>
-                        {Array.from(new Set(students.map((s) => s.collegeName))).map((college) => (
-                          <SelectItem key={college} value={college}>
-                            {college}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <Label htmlFor="program">Program</Label>
-                    <Select
-                      value={programFilter || ""}
-                      onValueChange={(value) => setProgramFilter(value || null)}
-                    >
-                      <SelectTrigger className="col-span-2">
-                        <SelectValue placeholder="All Programs" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Programs</SelectItem>
-                        {Array.from(new Set(students.map((s) => s.progName))).map((program) => (
-                          <SelectItem key={program} value={program}>
-                            {program}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <Label htmlFor="verified">Verified</Label>
-                    <Select
-                      value={verifiedFilter || ""}
-                      onValueChange={(value) => setVerifiedFilter(value || null)}
-                    >
-                      <SelectTrigger className="col-span-2">
-                        <SelectValue placeholder="All Students" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Students</SelectItem>
-                        <SelectItem value="true">Verified</SelectItem>
-                        <SelectItem value="false">Not Verified</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+    <div className="p-6 space-y-6">
+      {/* Header with icon */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-full">
+            <Users className="h-6 w-6 text-blue-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800">Trainee Management</h1>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant={view === "table" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setView("table")}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={view === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setView("grid")}
-          >
-            <Grid className="h-4 w-4" />
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search students..."
+              className="pl-9 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
           </Button>
         </div>
       </div>
 
-      {view === "table" ? (
-        <Table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-          <TableHeader>
-            <TableRow className="text-sm font-medium text-gray-700 bg-gray-100">
-              <TableHead
-                onClick={() => handleSort("traineeID")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Profile Picture
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("first_name")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Name
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("email")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Email
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("collegeName")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                College
-                <FilterPopover
-                  options={uniqueColleges}
-                  value={collegeFilter}
-                  onChange={setCollegeFilter}
-                  placeholder="Filter by College"
-                />
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("progName")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Program
-                <FilterPopover
-                  options={uniquePrograms}
-                  value={programFilter}
-                  onChange={setProgramFilter}
-                  placeholder="Filter by Program"
-                />
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("remaining_hours")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Remaining Hours
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("is_verified")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Verified
-                <FilterPopover
-                  options={["true", "false"]}
-                  value={verifiedFilter}
-                  onChange={setVerifiedFilter}
-                  placeholder="Filter by Verification"
-                />
-              </TableHead>
-              <TableHead
-                onClick={() => handleSort("is_verified")}
-                className="cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
-              >
-                Approved
-                <FilterPopover
-                  options={["true", "false"]}
-                  value={verifiedFilter}
-                  onChange={setVerifiedFilter}
-                  placeholder="Filter by Verification"
-                />
-              </TableHead>
-              <TableHead className="px-4 py-2 text-left">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedStudents.map((student) => (
-              <TableRow
-                key={student.traineeID}
-                className="text-sm text-gray-700 border-b hover:bg-gray-50"
-              >
-                <TableCell className="px-4 py-2">
-                  <img src={student.proof_identity || "../anyrgb.com.png"} alt="Profile" className="profile-picture" />
-                </TableCell>
-                <TableCell className="px-4 py-2">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</TableCell>
-                <TableCell className="px-4 py-2">{student.email}</TableCell>
-                <TableCell className="px-4 py-2">{student.collegeName}</TableCell>
-                <TableCell className="px-4 py-2">{student.progName}</TableCell>
-                <TableCell className="px-4 py-2">{student.remaining_hours}</TableCell>
-                <TableCell className="px-4 py-2">
-                  <StatusBadge isActive={student.is_verified} />
-                </TableCell>
-                <TableCell className="px-4 py-2">
-                  <StatusBadge isActive={student.status === 'Approved'} />
-                </TableCell>
-                <TableCell className="px-4 py-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleViewInfo(student)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Info
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEvaluationForm(student)}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Evaluation Form
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleUploadCertificate(student)}>
-                        <Award className="h-4 w-4 mr-2" />
-                        Certificate Management
-                      </DropdownMenuItem>
-                      {viewProgress && (
-                        <DropdownMenuItem onClick={() => navigate(`/HTE/student-progress/${student.trainee_user_id}`)}>
-                          <TrophyIcon className="h-4 w-4 mr-2" />
-                          Progress Report
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sortedStudents.map((student) => (
-            <Card key={student.traineeID}>
-              <CardHeader>
-                <CardTitle>{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="relative mb-4">
-                  <img
-                    src={student.proof_identity || "/placeholder.svg"}
-                    alt={`${student.first_name} ${student.last_name}`}
-                    fill
-                    className="object-cover rounded-md h-20"
-                  />
+      {/* Tabs for different sections */}
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="applications" className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" />
+            <span>Applications {applications.length > 0 && `(${applications.length})`}</span>
+          </TabsTrigger>
+          <TabsTrigger value="trainees" className="flex items-center gap-2">
+            <UserCog className="h-4 w-4" />
+            <span>Active Trainees {activeTrainees.length > 0 && `(${activeTrainees.length})`}</span>
+          </TabsTrigger>
+          <TabsTrigger value="progress" className="flex items-center gap-2">
+            <ChartLine className="h-4 w-4" />
+            <span>Progress Reports {progressReports.length > 0 && `(${progressReports.length})`}</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Applications Tab Content */}
+        <TabsContent value="applications" className="space-y-6">
+          {/* Status summary cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="p-3 bg-blue-50 rounded-full">
+                  <Users className="h-5 w-5 text-blue-600" />
                 </div>
-                <p>
-                  <strong>Email:</strong> {student.email}
-                </p>
-                <p>
-                  <strong>College:</strong> {student.collegeName}
-                </p>
-                <p>
-                  <strong>Program:</strong> {student.progName}
-                </p>
-                <div className="flex flex-col space-y-2 mt-4">
-                  <Button variant="outline" onClick={() => handleViewInfo(student)}>
-                    <Eye className="h-4 w-4 mr-2" /> View Info
-                  </Button>
-                  <Button variant="outline" onClick={() => handleEvaluationForm(student)}>
-                    <FileText className="h-4 w-4 mr-2" /> Evaluation Form
-                  </Button>
-                  <Button variant="outline" onClick={() => handleUploadCertificate(student)}>
-                    <Award className="h-4 w-4 mr-2" /> Certificate Management
-                  </Button>
-                  {viewProgress && (
-                    <Button
-                      variant="outline"
-                      className="bg-yellow-500 text-white hover:bg-yellow-600"
-                      onClick={() => navigate(`/HTE/student-progress/${student.trainee_user_id}`)}
-                    >
-                      <TrophyIcon className="h-4 w-4 mr-2" /> Progress Report
-                    </Button>
-                  )}
+                <div>
+                  <p className="text-sm text-gray-500">Total Applications</p>
+                  <p className="text-2xl font-bold">
+                    {applications.filter(app => app.status === 'pending').length}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
 
-      <StudentModal
-        student={selectedStudent}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onApprove={handleApprove}
-        onReject={handleApprove}
-      />
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="p-3 bg-green-50 rounded-full">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Approved</p>
+                  <p className="text-2xl font-bold">
+
+                    {
+                      console.log({ applications })
+                    }
+                    {applications.filter(app => app.status === 'approved').length}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="p-3 bg-yellow-50 rounded-full">
+                  <Clock className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Pending</p>
+                  <p className="text-2xl font-bold">
+                    {applications.filter(app => app.status === 'pending').length}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="p-3 bg-red-50 rounded-full">
+                  <XCircle className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Rejected</p>
+                  <p className="text-2xl font-bold">
+                    {applications.filter(app => app.status === 'rejected').length}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Student table */}
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50 py-4">
+              <CardTitle className="text-lg font-medium">Student List</CardTitle>
+            </CardHeader>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[250px]">Student</TableHead>
+
+                    <TableHead>College</TableHead>
+                    <TableHead>Program</TableHead>
+
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {applications
+                    .filter(app => app.status === 'pending')
+                    .filter(student =>
+                      `${student.first_name} ${student.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      student.email.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              {student.avatar ? (
+                                <img src={student.avatar} alt={`${student.first_name} ${student.last_name}`} className="h-10 w-10 rounded-full object-cover" />
+                              ) : (
+                                <UserCheck className="h-5 w-5 text-gray-500" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</p>
+                              <p className="text-xs text-gray-500">{student.email}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{student.collegeName}</TableCell>
+                        <TableCell>{student.programName}</TableCell>
+
+                        <TableCell>
+                          <StatusBadge isActive={student.status === 'approved'} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewInfo(student)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                onClick={() => {
+
+
+                                  console.log({ student })
+
+                                  window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer");
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Progress Report
+                              </DropdownMenuItem>
+
+
+                              <DropdownMenuItem onClick={() => handleEvaluationForm(student)}>
+                                <FileText className="h-4 w-4 mr-2" />
+                                View Evaluation
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUploadCertificate(student)}>
+                                <Download className="h-4 w-4 mr-2" />
+                                View Certificate
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Active Trainees Tab Content */}
+        <TabsContent value="trainees" className="space-y-6">
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50 py-4">
+              <CardTitle className="text-lg font-medium">Active Trainees</CardTitle>
+            </CardHeader>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[250px]">Trainee</TableHead>
+                    <TableHead>College</TableHead>
+                    <TableHead>Program</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>Hours Completed</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {activeTrainees
+                    .filter(student =>
+                      `${student.first_name} ${student.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      student.email.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              {student.avatar ? (
+                                <img src={student.avatar} alt={`${student.first_name} ${student.last_name}`} className="h-10 w-10 rounded-full object-cover" />
+                              ) : (
+                                <UserCheck className="h-5 w-5 text-gray-500" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</p>
+                              <p className="text-xs text-gray-500">{student.email}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{student.collegeName}</TableCell>
+                        <TableCell>{student.programName}</TableCell>
+                        <TableCell>{student.deployment_date ? new Date(student.deployment_date).toLocaleDateString() : 'Not started'}</TableCell>
+                        <TableCell>{student.hours_completed || '0'} / {student.remaining_hours || '360'}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewInfo(student)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                onClick={() => {
+
+
+                                  console.log({ student })
+
+                                  window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer");
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Progress Report
+                              </DropdownMenuItem>
+
+
+                              <DropdownMenuItem onClick={() => handleEvaluationForm(student)}>
+                                <FileText className="h-4 w-4 mr-2" />
+                                View Evaluation
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUploadCertificate(student)}>
+                                <Download className="h-4 w-4 mr-2" />
+                                View Certificate
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Progress Reports Tab Content */}
+        <TabsContent value="progress" className="space-y-6">
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50 py-4">
+              <CardTitle className="text-lg font-medium">Progress Reports</CardTitle>
+            </CardHeader>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[250px]">Trainee</TableHead>
+                    <TableHead>Progress</TableHead>
+                    <TableHead>Last Update</TableHead>
+                    <TableHead>Remaining Hours</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {progressReports
+                    .filter(student =>
+                      `${student.first_name} ${student.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      student.email.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              {student.avatar ? (
+                                <img src={student.avatar} alt={`${student.first_name} ${student.last_name}`} className="h-10 w-10 rounded-full object-cover" />
+                              ) : (
+                                <UserCheck className="h-5 w-5 text-gray-500" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{`${student.first_name} ${student.middle_initial || ""} ${student.last_name}`}</p>
+                              <p className="text-xs text-gray-500">{student.email}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full"
+                              style={{ width: `${Math.min(100, (parseInt(student.hours_completed || 0) / parseInt(student.remaining_hours || 360)) * 100)}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {Math.min(100, Math.round((parseInt(student.hours_completed || 0) / parseInt(student.remaining_hours || 360)) * 100))}% Complete
+                          </p>
+                        </TableCell>
+                        <TableCell>{student.last_update ? new Date(student.last_update).toLocaleDateString() : 'No updates'}</TableCell>
+                        <TableCell>{student.remaining_hours || '360'} hours</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer");
+                            }}
+                          >
+                            <ChartLine className="h-4 w-4 mr-1" />
+                            View Progress
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Student Modal */}
+      {selectedStudent && (
+        <StudentModal
+          student={selectedStudent}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onApprove={handleApprove}
+          onReject={handleApprove}
+        />
+      )}
 
       {selectedStudent && (
         <EvaluationForm

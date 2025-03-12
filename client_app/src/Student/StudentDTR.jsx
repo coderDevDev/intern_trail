@@ -562,104 +562,344 @@ function StudentDTR() {
   const renderReportsTab = () => (
     <div className="space-y-4">
       {weeklyReport.map((entry, index) => (
-        <Card key={index} className="overflow-hidden transition-shadow hover:shadow-lg">
-          <CardHeader className="space-y-1">
+        <Card key={index} className="overflow-hidden border border-gray-100 hover:shadow-sm transition-all duration-200">
+          <CardHeader className="bg-gray-50/50 pb-3">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-lg">{entry.day} - {format(new Date(entry.date), 'PPP')}</h3>
-                <Badge className="bg-blue-500 text-white" variant="default">
-                  Week {entry.weekNumber} - {entry.timeIn} - {entry.timeOut}
-                </Badge>
-
+              <div className="space-y-1">
+                <h3 className="font-medium text-gray-900">{entry.day}</h3>
+                <p className="text-sm text-gray-500">{format(new Date(entry.date), 'MMMM d, yyyy')}</p>
               </div>
-              <div>
-
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-600">
+                  {entry.timeIn} - {entry.timeOut}
+                </div>
                 <Badge
-                  className={`uppercase text-white ${entry.status === 'approve'
-                    ? 'bg-green-500'
-                    : entry.status === 'reject'
-                      ? 'bg-red-500'
-                      : 'bg-yellow-500'
+                  className={`px-2 py-1 text-xs font-medium ${entry.status === 'approve'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : entry.status === 'reject'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200'
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}
-                  variant="default"
+                  variant="outline"
                 >
                   {entry.status || 'Pending'}
                 </Badge>
-
-
-                {
-
-                  !showButtons && <Badge
+                {!showButtons && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleApproveReject(entry)}
-                    className="uppercase bg-gray-500 text-white" variant="default">
-                    <Edit2 className="w-2 h-3" />
-                  </Badge>
-
-                }
-                {/* <Button
-                  className="ml-2 bg-green-500 text-white py-1 px-2 h-6"
-                  onClick={() => handleApproveReject(entry)}
-                >
-                  <Edit2 className="w-4 h-4" />
-
-                </Button> */}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <Textarea
               value={entry.report}
               onChange={(e) => updateReport(entry.date, e.target.value)}
-              placeholder="Add your report here..."
-              className="mt-2 h-20"
+              placeholder="Add your daily report here..."
+              className="min-h-[100px] resize-none focus:ring-1 focus:ring-blue-200"
             />
-          </CardContent>
-          <CardFooter className="flex justify-end gap-2">
-
-            {
-              showButtons && <Button
-                className="bg-blue-500 text-white"
-                variant="default"
+            {showButtons && isReportEdited[entry.date] && (
+              <Button
+                className="mt-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
                 size="sm"
                 onClick={() => handleSave(entry.date, entry.report)}
-                disabled={!isReportEdited[entry.date]}
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Report
+                Save Changes
               </Button>
-            }
-
-          </CardFooter>
+            )}
+          </CardContent>
         </Card>
       ))}
 
-      <Card className="overflow-hidden transition-shadow hover:shadow-lg">
-        <CardHeader>
-          <h3 className="font-semibold text-lg">Weekly Narrative Report</h3>
+      <Card className="border border-gray-100 mt-6">
+        <CardHeader className="bg-gray-50/50">
+          <h3 className="font-medium text-gray-900">Weekly Narrative Report</h3>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <Textarea
             value={narrativeReport}
             onChange={(e) => handleNarrativeChange(e.target.value)}
             placeholder="Add your weekly narrative report here..."
-            className="mt-2 min-h-[100px]"
+            className="min-h-[150px] resize-none focus:ring-1 focus:ring-blue-200"
           />
-        </CardContent>
-        <CardFooter className="flex justify-end">
-
-          {
-            showButtons && <Button
-              className="bg-blue-500 text-white"
+          {showButtons && isNarrativeEdited && (
+            <Button
+              className="mt-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
               onClick={() => handleSave(format(selectedDate, 'yyyy-MM-dd'), null)}
-              disabled={!isNarrativeEdited}
             >
               <Save className="w-4 h-4 mr-2" />
               Save Narrative
             </Button>
-          }
-
-        </CardFooter>
+          )}
+        </CardContent>
       </Card>
+    </div>
+  );
+
+  const renderFeedbacksTab = () => (
+    <div className="space-y-4">
+      {(weeklyFeedback[weeklyReport[0]?.weekNumber] || []).map((feedback, index) => (
+        <Card key={index} className="border border-gray-100 hover:shadow-sm transition-all duration-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-8 h-8 bg-gray-100">
+                  <span className="text-sm font-medium text-gray-600">
+                    {feedback.fullName?.charAt(0) || feedback.role?.charAt(0)}
+                  </span>
+                </Avatar>
+                <div>
+                  {feedback.role === 'AI' ? (
+                    <p className="text-sm text-gray-600">AI Assistant</p>
+                  ) : (
+                    <p className="font-medium text-gray-900">{feedback.fullName}</p>
+                  )}
+                  <Badge
+                    className="mt-1 bg-gray-50 text-gray-600 border-gray-200"
+                    variant="outline"
+                  >
+                    {feedback.role}
+                  </Badge>
+                </div>
+              </div>
+              <Badge
+                variant="outline"
+                className="bg-gray-50 text-gray-600 border-gray-200"
+              >
+                {format(new Date(feedback.date), 'MMM d, yyyy')}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 whitespace-pre-line">{feedback.feedback}</p>
+          </CardContent>
+        </Card>
+      ))}
+
+      <Card className="border border-gray-100 mt-6">
+        <CardHeader className="bg-gray-50/50">
+          <h3 className="font-medium text-gray-900">Add Feedback</h3>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <Textarea
+            value={currentFeedback}
+            onChange={(e) => setCurrentFeedback(e.target.value)}
+            placeholder="Write your feedback here..."
+            className="min-h-[100px] resize-none focus:ring-1 focus:ring-blue-200"
+          />
+          <Button
+            className="mt-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
+            onClick={() => handleFeedbackSubmit(weeklyReport[0]?.weekNumber)}
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Submit Feedback
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const handlePrintClick = () => {
+    setIsDialogOpen(true);
+  };
+
+  console.log({ weeklyReport, weeklyFeedback });
+  return (
+    <div className="container mx-auto p-4 max-w-7xl">
+
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Progress Overview */}
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Progress Overview</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrintClick}
+                  className="flex items-center gap-2"
+                >
+                  <Printer className="h-4 w-4" /> Print Report
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Monthly Progress</span>
+                    <span className="font-medium">{monthlyHours}/360 hours</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min((parseFloat(monthlyHours) / 360) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-blue-50 p-3 rounded-lg text-center">
+                    <p className="text-sm text-blue-600">Daily</p>
+                    <p className="text-lg font-bold text-blue-700">{dailyHours}h</p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg text-center">
+                    <p className="text-sm text-green-600">Weekly</p>
+                    <p className="text-lg font-bold text-green-700">
+                      {weeklyReport.reduce((total, entry) =>
+                        total + calculateHours(entry.timeIn, entry.timeOut), 0).toFixed(2)}h
+                    </p>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-lg text-center">
+                    <p className="text-sm text-purple-600">Monthly</p>
+                    <p className="text-lg font-bold text-purple-700">{monthlyHours}h</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Calendar */}
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <Calendar
+                onChange={setSelectedDate}
+                value={selectedDate}
+                className="w-full border-none"
+                tileClassName={({ date }) => {
+                  const formattedDate = format(date, 'yyyy-MM-dd');
+                  const entry = weeklyReport?.find(r => r?.date === formattedDate);
+                  return `
+                    ${entry?.status === 'approve' ? 'bg-green-50 hover:bg-green-100' : ''}
+                    ${entry?.status === 'reject' ? 'bg-red-50 hover:bg-red-100' : ''}
+                    ${entry && !entry.status ? 'bg-yellow-50 hover:bg-yellow-100' : ''}
+                    rounded-lg transition-colors
+                  `;
+                }}
+                tileContent={({ date }) => {
+                  if (!weeklyReport) return null;
+
+                  const formattedDate = format(date, 'yyyy-MM-dd');
+                  const entry = weeklyReport.find(r => r?.date === formattedDate);
+
+                  if (entry && entry.timeIn && entry.timeOut &&
+                    entry.timeIn !== 'N/A' && entry.timeOut !== 'N/A') {
+                    return (
+                      <div className="text-xs mt-1 font-medium text-gray-600">
+                        {calculateHours(entry.timeIn, entry.timeOut).toFixed(1)}h
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+                tileDisabled={({ date }) => date.getDay() === 0 || date.getDay() === 6}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Time Entry */}
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Time Entry</h2>
+                <Badge variant="outline" className="text-sm">
+                  {format(selectedDate, 'EEEE, MMMM d')}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time In</label>
+                  <input
+                    type="time"
+                    value={timeIn}
+                    onChange={handleTimeInChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time Out</label>
+                  <input
+                    type="time"
+                    value={timeOut}
+                    onChange={handleTimeOutChange}
+                    disabled={!timeIn}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+              </div>
+
+              {showButtons && (
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                  onClick={() => handleUpdateTime(selectedDate)}
+                  disabled={!timeIn}
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Update Time
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="lg:col-span-2">
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">Reports & Feedback</h2>
+                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+                  <button
+                    className={`px-4 py-2 text-sm font-medium transition-colors
+                      ${activeTab === 'reports'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('reports')}
+                  >
+                    Reports
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium transition-colors
+                      ${activeTab === 'feedbacks'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('feedbacks')}
+                  >
+                    Feedbacks
+                  </button>
+                </div>
+              </div>
+
+              {activeTab === 'reports' ? renderReportsTab() : renderFeedbacksTab()}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Keep all existing dialogs unchanged */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[925px] h-screen overflow-y-auto">
+          <DialogHeader>
+            <DialogDescription>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="">
+            <WeeklyReport weeklyReport={weeklyReport} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
         <DialogContent>
@@ -671,188 +911,6 @@ function StudentDTR() {
             <Button onClick={() => confirmAction('approve')} className="bg-blue-500 text-white">Approve</Button>
             <Button onClick={() => confirmAction('reject')} className="bg-red-500 text-white">Reject</Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-
-  const renderFeedbacksTab = () => (
-    <div>
-      <div className="space-y-4">
-        {(weeklyFeedback[weeklyReport[0]?.weekNumber] || []).map((feedback, index) => (
-          <Card key={index} className="overflow-hidden transition-shadow hover:shadow-lg">
-            <CardHeader className="space-y-1">
-              <div className="flex items-center justify-between">
-                <div className='flex items-center space-x-3'>
-
-                  {
-                    feedback.role === 'AI' ? <h3 className="font-semibold"></h3> : <h3 className="font-semibold">{feedback.fullName}</h3>
-                  }
-                  <Badge
-                    className="bg-yellow-500 text-white"
-                    variant="default"> {feedback.role}</Badge>
-                </div>
-                <Badge
-                  className="bg-gray-500 text-white"
-                  variant="default"> {feedback.date}</Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">{feedback.feedback}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <Card key={'your_feedback'} className="mt-2 overflow-hidden transition-shadow hover:shadow-lg">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg">Your Feedback</h3>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={currentFeedback}
-            onChange={(e) => setCurrentFeedback(e.target.value)}
-            placeholder="Add your feedback here..."
-            className="mt-2"
-          />
-        </CardContent>
-        <CardFooter className="flex justify-end gap-2">
-          <Button
-            className="bg-green-500 text-white"
-            variant="outline"
-            size="sm"
-            onClick={() => handleFeedbackSubmit(weeklyReport[0]?.weekNumber)}
-          >
-            <MessageCircle className="mr-2" /> Submit Feedback
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
-  );
-
-  const handlePrintClick = () => {
-    setIsDialogOpen(true);
-  };
-
-  console.log({ weeklyReport, weeklyFeedback });
-  return (
-    <div className="p-4 max-w-l">
-      <h1 className="text-2xl font-bold mb-4 text-center">Daily Time Record</h1>
-      <Calendar
-        onChange={setSelectedDate}
-        value={selectedDate}
-        tileContent={({ date, view }) =>
-          view === 'month' && weeklyReport.some(report =>
-            format(new Date(report.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-          ) && (
-            <div className="text-xs text-center">
-              {calculateHours(
-                weeklyReport.find(r => format(new Date(r.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))?.timeIn || 'N/A',
-                weeklyReport.find(r => format(new Date(r.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))?.timeOut || 'N/A'
-              ).toFixed(2)} hrs
-            </div>
-          )
-        }
-        tileDisabled={({ date }) => date.getDay() === 0 || date.getDay() === 6}
-        className="mx-auto"
-      />
-      <div className='border border-gray-900 rounded-lg p-4 mt-2'>
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex gap-2">
-            <Badge variant="outline" className="bg-blue-100 text-blue-800">
-              Daily: {dailyHours} hrs
-            </Badge>
-            <Badge variant="outline" className="bg-green-100 text-green-800">
-              Weekly: {weeklyReport.reduce((total, report) =>
-                total + calculateHours(report.timeIn, report.timeOut), 0
-              ).toFixed(2)} hrs
-            </Badge>
-            <Badge variant="outline" className="bg-purple-100 text-purple-800">
-              Monthly: {monthlyHours} hrs
-            </Badge>
-          </div>
-          <Button
-            className="bg-gray-500 text-white flex items-center"
-            onClick={handlePrintClick}
-          >
-            <Printer className="mr-2" /> Print
-          </Button>
-        </div>
-
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold text-start">
-            {format(selectedDate, 'PPP')}
-          </h2>
-          <div className="flex flex-col md:flex-row gap-4 mt-2">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700">Time In</label>
-              <input
-                type="time"
-                value={timeIn}
-                onChange={handleTimeInChange}
-                className="mt-1 py-2 p-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700">Time Out</label>
-              <input
-                type="time"
-                value={timeOut}
-                onChange={handleTimeOutChange}
-                disabled={!timeIn}
-                className="mt-1 py-2 p-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-            <div className="flex-1 flex items-end">
-
-              {
-                showButtons && <Button
-                  className="bg-blue-500 text-white w-full"
-                  onClick={() => handleUpdateTime(selectedDate)}
-                  disabled={!timeIn}
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Update Time
-                </Button>
-              }
-
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <div className="flex space-x-4 mb-4">
-            <Button
-              className={`flex-1
-                hover:bg-blue-700 hover:text-white
-                ${activeTab === 'reports' ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-700'}`}
-              onClick={() => setActiveTab('reports')}
-            >
-              Reports
-            </Button>
-            <Button
-              className={`flex-1 
-                        hover:bg-blue-700 hover:text-white
-                ${activeTab === 'feedbacks' ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-700'}`}
-              onClick={() => setActiveTab('feedbacks')}
-            >
-              Feedbacks
-            </Button>
-          </div>
-          {activeTab === 'reports' ? renderReportsTab() : renderFeedbacksTab()}
-        </div>
-      </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[925px] h-screen overflow-y-auto">
-          <DialogHeader>
-            <DialogDescription>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="">
-            <WeeklyReport weeklyReport={weeklyReport} />
-          </div>
         </DialogContent>
       </Dialog>
     </div>

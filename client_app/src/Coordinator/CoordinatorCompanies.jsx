@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import InputText from './../components/Input/InputText';
 
 import { Button } from "@/components/ui/button";
@@ -55,10 +55,7 @@ import {
   Building, Search, CloudLightning, FileText, Check, X, CheckCircle2, XCircle, HourglassIcon, Trash2, Loader2, Plus,
   Phone,
   InfoIcon,
-
-
-
-
+  AlertCircle
 } from "lucide-react"
 import FileManager from "@/components/FileManager"
 import TextAreaInput from './../components/Input/TextAreaInput';
@@ -80,6 +77,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
   // Add states for trainee features
   const [userApplications, setUserApplications] = useState([]);
+  const [approvedApplications, setApprovedApplications] = useState([]);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [companyToApply, setCompanyToApply] = useState(null);
 
@@ -191,6 +189,9 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
   // Add state for user scope
   const [userScope, setUserScope] = useState(null);
 
+  // Add state to track which company is being joined
+  const [joiningCompanyId, setJoiningCompanyId] = useState(null);
+
   // Fetch user's scope based on role
   const fetchUserScope = async () => {
     try {
@@ -242,6 +243,8 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       const response = await axios.get('company/applications/user');
       if (response.data.success) {
         setUserApplications(response.data.data);
+        const approved = response.data.data.filter(app => app.status === 'approved');
+        setApprovedApplications(approved);
         // Check if user has already joined a company
         const joinedApp = response.data.data.find(app => app.is_confirmed);
         setHasJoinedCompany(!!joinedApp);
@@ -906,10 +909,28 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
   };
 
   // Update the CompanyCard component
+
+  // Add this function to check if user has already joined a company
+  const hasUserJoinedAnyCompany = () => {
+    return userApplications.some(app => app.is_confirmed === 1);
+  };
+
+  // Get the joined company name for better UX
+  const getJoinedCompanyName = () => {
+    const joinedApp = userApplications.find(app => app.is_confirmed === 1);
+    return joinedApp ? joinedApp.companyName : '';
+  };
+
   const CompanyCard = ({ company }) => {
     const application = isTrainee
       ? userApplications.find(app => app.company_id === company.companyID)
       : null;
+
+    const isJoining = joiningCompanyId === company.companyID;
+    const canJoin = application?.status === 'approved' && !application?.is_confirmed;
+    const userHasJoinedOtherCompany = hasUserJoinedAnyCompany() && !application?.is_confirmed;
+    const joinedCompanyName = getJoinedCompanyName();
+
 
     return (
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100">
@@ -1052,8 +1073,62 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
               className="text-blue-600"
             >
               <FileText className="h-4 w-4 mr-1" />
-              View MOA
+              MOA
             </ButtonUI>
+            {/* Join Company Button - Only show for approved applications */}
+            {isTrainee && canJoin && (
+              userHasJoinedOtherCompany ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <ButtonUI
+                          variant="default"
+                          size="sm"
+                          disabled={true}
+                          className="flex items-center gap-1 bg-gray-400 text-white cursor-not-allowed opacity-60"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Join
+                        </ButtonUI>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>You have already joined {joinedCompanyName}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <ButtonUI
+                  variant="default"
+                  size="sm"
+                  onClick={() => handleJoinCompany(company.companyID)}
+                  disabled={isJoining}
+                  className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isJoining ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Joining...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      Join
+                    </>
+                  )}
+                </ButtonUI>
+              )
+            )}
+
+            {/* Joined Indicator */}
+            {isTrainee && application?.is_confirmed ? (
+              <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm">
+                <CheckCircle2 className="h-4 w-4" />
+                Joined
+              </div>
+            ) : null}
+
           </div>
         </div>
       </div>
@@ -1218,7 +1293,9 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-    company.list_of_requirements = company.list_of_requirements.map(req => ({
+
+    console.log({ company })
+    company.list_of_requirements = (company.list_of_requirements || []).map(req => ({
       ...req,
       id: req.value,
       required: true
@@ -1338,32 +1415,60 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     );
   };
 
+  // Update the handleJoinCompany function to use the correct API endpoint
+  const handleJoinCompany = async (companyId) => {
+    try {
+      setJoiningCompanyId(companyId); // Track which company is being joined
+
+      const response = await axios.post('company/trainee/application/company/join', { companyId });
+
+      if (response.data.success) {
+        toast.success('Successfully joined the company');
+        fetchUserApplications(); // Refresh applications to update UI
+      }
+    } catch (error) {
+      console.error('Error joining company:', error);
+      toast.error(error.response?.data?.message || 'Failed to join company');
+    } finally {
+      setJoiningCompanyId(null); // Reset joining state
+    }
+  };
+
   console.log({ role })
   return (
     <div className="p-6 space-y-6">
-      {/* User Scope Badge */}
+      {/* User Scope Badge - Modern Design */}
       {userScope && (
-        <div className="mb-6 p-4 bg-white border rounded-lg shadow-sm">
-          <div className="flex items-center gap-2">
+        <div className="mb-6 p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            {/* Left side - User scope information */}
             <div className="flex-1">
+
+
               {role === 'ojt-coordinator' || role === 'trainee' ? (
                 <>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                  <div className="flex items-center gap-2 mt-3 mb-2">
+
+                    <Building className="h-5 w-5 text-blue-600" />
+                    <span className="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                       {userScope.collegeName}
                     </span>
-                    <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    <span className="px-3 py-1.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
                       {userScope.programName}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    You are viewing companies for {role === 'ojt-coordinator' ? 'your assigned' : 'your'} program
-                  </p>
+                  {isTrainee && hasUserJoinedAnyCompany() && (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-100 rounded-lg">
+                      <p className="text-sm text-gray-700">
+                        You have joined <span className="font-semibold text-green-700">{getJoinedCompanyName()}</span> for your internship.
+                      </p>
+                    </div>
+                  )}
                 </>
               ) : role === 'dean' ? (
                 <>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                  <div className="flex items-center gap-2 mt-3 mb-2">
+                    <span className="px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                       {userScope.collegeName}
                     </span>
                   </div>
@@ -1373,8 +1478,8 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                 </>
               ) : role === 'hte-supervisor' ? (
                 <>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                  <div className="flex items-center gap-2 mt-3 mb-2">
+                    <span className="px-3 py-1.5 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
                       {userScope.companyName}
                     </span>
                   </div>
@@ -1383,6 +1488,26 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                   </p>
                 </>
               ) : null}
+            </div>
+
+            {/* Right side - Joined company information (only for trainees who have joined) */}
+
+          </div>
+        </div>
+      )}
+
+      {/* Multiple applications alert - Modern Design */}
+      {isTrainee && approvedApplications.length > 1 && !hasUserJoinedAnyCompany() && (
+        <div className="mb-6 p-5 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="bg-amber-100 p-2.5 rounded-full shrink-0">
+              <AlertCircle className="h-6 w-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-amber-800 text-lg mb-1">Multiple Approved Applications</h3>
+              <p className="text-sm text-amber-700 leading-relaxed">
+                Congratulations! You have been approved by multiple companies. Please choose one company to join by clicking the <span className="font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Join</span> button on your preferred company.
+              </p>
             </div>
           </div>
         </div>
@@ -1654,6 +1779,10 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
           </ShadcnDialogFooter>
         </ShadcnDialogContent>
       </ShadcnDialog>
+
+
+
+
     </div >
   );
 }

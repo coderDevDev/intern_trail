@@ -243,6 +243,10 @@ router.post(
 
       console.log({ list_of_requirements });
 
+      const parsedRequirements = JSON.parse(
+        JSON.stringify(list_of_requirements) || '[]'
+      );
+
       const [result] = await db.query(
         `INSERT INTO companies 
         (companyName, 
@@ -263,7 +267,7 @@ router.post(
           address,
           contact_phone,
           contact_email,
-          JSON.stringify(list_of_requirements),
+          parsedRequirements,
           description,
           collegeID,
           programID
@@ -401,16 +405,68 @@ router.post(
 
 router.get('/list', authenticateUserMiddleware, async (req, res) => {
   try {
-    // Get companies with feedback summary
-    const [companies] = await db.query(`
-      SELECT 
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    console.log({ userId, userRole });
+
+    let condition = '';
+    let values = [];
+
+    switch (userRole) {
+      case 'hte-supervisor':
+        const [supervisor] = await db.query(
+          `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+          [userId]
+        );
+
+        if (supervisor.length > 0) {
+          condition = 'WHERE c.companyID = ?';
+          values.push(supervisor[0].companyID);
+        }
+        break;
+
+      case 'ojt-coordinator':
+        const [coordinator] = await db.query(
+          `SELECT p.collegeID 
+           FROM coordinators c
+           JOIN programs p ON c.programID = p.programID
+           WHERE c.userID = ?`,
+          [userId]
+        );
+
+        if (coordinator.length > 0) {
+          condition = `JOIN programs p ON c.collegeID = p.collegeID 
+                       WHERE p.collegeID = ?`;
+          values.push(coordinator[0].collegeID);
+        }
+        break;
+
+      case 'dean':
+        const [dean] = await db.query(
+          `SELECT collegeID FROM deans WHERE userID = ?`,
+          [userId]
+        );
+
+        if (dean.length > 0) {
+          condition = `JOIN programs p ON c.collegeID = p.collegeID 
+                       WHERE p.collegeID = ?`;
+          values.push(dean[0].collegeID);
+        }
+        break;
+    }
+
+    const [companies] = await db.query(
+      `SELECT 
         c.*,
         COUNT(cf.id) as totalFeedback,
         AVG(cf.rating) as averageRating
       FROM companies c
       LEFT JOIN company_feedback cf ON c.companyID = cf.company_id
-      GROUP BY c.companyID
-    `);
+      ${condition}
+      GROUP BY c.companyID`,
+      values
+    );
 
     res.status(200).json({
       success: true,
@@ -424,10 +480,8 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
     });
   }
 });
-
 router.post(
   '/trainees/application/list',
-
   authenticateUserMiddleware,
   async (req, res) => {
     try {
@@ -437,10 +491,8 @@ router.post(
 
       let [result] = await db.query(
         `
-       SELECT * from hte_supervisors where userID = ? 
-
-            
-            `,
+        SELECT * FROM hte_supervisors WHERE userID = ?
+        `,
         [id]
       );
 
@@ -458,37 +510,28 @@ router.post(
 
       let [result2] = await db.query(
         `
-              SELECT 
-              ia.*, 
-              u.*,
-      c.collegeID, c.collegeName, c.collegeCode, 
-     p.programID, p.programName as progName, p.progCode
-          FROM 
-              inter_application AS ia
-          INNER JOIN 
-              users AS u ON ia.trainee_user_id = u.userID
-
-    INNER JOIN trainee t ON t.userID = u.userID
-    INNER JOIN colleges c ON t.collegeID = c.collegeID
-    INNER JOIN programs p ON t.programID = p.programID
-
-
-          WHERE 
-              ia.company_id = ?
-
-              ${
-                !!status
-                  ? 'AND  ia.status = ? '
-                  : `AND  ia.status <> 'Approved'`
-              }
-
-             
-
-      GROUP BY 
+        SELECT 
+          ia.*, 
+          u.userID, u.first_name, u.last_name, u.email, u.phone, u.proof_identity,
+          c.collegeID, c.collegeName, c.collegeCode, 
+          p.programID, p.programName, 
+          t.remaining_hours
+        FROM 
+          inter_application AS ia
+        INNER JOIN 
+          users AS u ON ia.trainee_user_id = u.userID
+        INNER JOIN 
+          trainee AS t ON t.userID = u.userID
+        INNER JOIN 
+          colleges AS c ON t.collegeID = c.collegeID
+        INNER JOIN 
+          programs AS p ON t.programID = p.programID
+        WHERE 
+          ia.company_id = ?
+          ${status ? 'AND ia.status = ?' : 'AND ia.status <> "approved"'}
+        GROUP BY 
           u.userID
-
-            
-            `,
+        `,
         values
       );
 
@@ -566,11 +609,12 @@ router.put(
 
 router.post(
   '/trainee/application/company/join',
-  // authenticateUserMiddleware,
+  authenticateUserMiddleware,
   async (req, res) => {
     try {
       const loggedInUser = req.user;
-      const { companyId, userId } = req.body;
+      const { companyId } = req.body;
+      let userId = loggedInUser.id;
 
       // Check if application already exists
       const [existingApplication] = await db.query(
@@ -1094,7 +1138,9 @@ router.put(
         list_of_requirements
       } = req.body;
 
-      const parsedRequirements = JSON.stringify(list_of_requirements);
+      const parsedRequirements = JSON.parse(
+        JSON.stringify(list_of_requirements) || '[]'
+      );
 
       // Check if company exists
       const [companyResult] = await db.query(
@@ -1465,6 +1511,341 @@ router.get(
       res.status(500).json({
         success: false,
         message: 'Failed to fetch application files'
+      });
+    }
+  }
+);
+
+// Add these new routes to support the tabbed interface
+
+// 1. For the Applications tab - Get all applications regardless of status
+router.post(
+  '/trainees/applications/all',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { id } = loggedInUser;
+
+      // Get company ID if user is HTE supervisor
+      const [supervisor] = await db.query(
+        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+        [id]
+      );
+
+      if (supervisor.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not associated with any company'
+        });
+      }
+
+      const companyID = supervisor[0].companyID;
+
+      // Get all applications for the company
+      const [applications] = await db.query(
+        `SELECT 
+          ia.*, 
+          u.userID, u.first_name, u.last_name, u.middle_initial, u.email, u.phone, u.proof_identity,
+          u.created_at, u.updated_at,
+          c.collegeID, c.collegeName, c.collegeCode, 
+          p.programID, p.programName, 
+          t.remaining_hours, t.deployment_date
+        FROM 
+          inter_application AS ia
+        INNER JOIN 
+          users AS u ON ia.trainee_user_id = u.userID
+        INNER JOIN 
+          trainee AS t ON t.userID = u.userID
+        INNER JOIN 
+          colleges AS c ON t.collegeID = c.collegeID
+        INNER JOIN 
+          programs AS p ON t.programID = p.programID
+         WHERE 
+          ia.company_id = ? 
+     
+        GROUP BY 
+          u.userID
+        ORDER BY ia.created_at DESC`,
+        [companyID]
+      );
+
+      console.log({ applications });
+      res.status(200).json({
+        success: true,
+        data: applications
+      });
+    } catch (error) {
+      console.error('Error fetching trainee applications:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch trainee applications',
+        error: error.message
+      });
+    }
+  }
+);
+
+// 2. For the Active Trainees tab - Get only approved trainees
+router.post(
+  '/trainees/active',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { id } = loggedInUser;
+
+      // Get company ID if user is HTE supervisor
+      const [supervisor] = await db.query(
+        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+        [id]
+      );
+
+      if (supervisor.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not associated with any company'
+        });
+      }
+
+      const companyID = supervisor[0].companyID;
+
+      console.log({ companyID });
+
+      // Get only approved trainees for the company
+      const [activeTrainees] = await db.query(
+        `SELECT 
+          ia.*, 
+          u.userID, u.first_name, u.last_name, u.middle_initial, u.email, u.phone, u.proof_identity,
+          u.created_at, u.updated_at,
+          c.collegeID, c.collegeName, c.collegeCode, 
+          p.programID, p.programName, 
+          t.traineeID, t.remaining_hours, t.deployment_date
+        FROM 
+          inter_application AS ia
+        INNER JOIN 
+          users AS u ON ia.trainee_user_id = u.userID
+        INNER JOIN 
+          trainee AS t ON t.userID = u.userID
+        INNER JOIN 
+          colleges AS c ON t.collegeID = c.collegeID
+        INNER JOIN 
+          programs AS p ON t.programID = p.programID
+        WHERE 
+          ia.company_id = ? AND ia.status = 'approved' 
+          AND ia.is_confirmed = 1
+        GROUP BY 
+          u.userID
+        ORDER BY t.deployment_date DESC`,
+        [companyID]
+      );
+
+      res.status(200).json({
+        success: true,
+        data: activeTrainees
+      });
+    } catch (error) {
+      console.error('Error fetching active trainees:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch active trainees',
+        error: error.message
+      });
+    }
+  }
+);
+
+// 3. For the Progress Reports tab - Get trainees with progress data
+router.post(
+  '/trainees/progress',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { id } = loggedInUser;
+
+      // Get company ID if user is HTE supervisor
+      const [supervisor] = await db.query(
+        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+        [id]
+      );
+
+      if (supervisor.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not associated with any company'
+        });
+      }
+
+      const companyID = supervisor[0].companyID;
+
+      // Get trainees with progress data
+      const [traineeProgress] = await db.query(
+        `SELECT 
+          ia.*, 
+          u.userID, u.first_name, u.last_name, u.middle_initial, u.email, u.phone, u.proof_identity,
+          u.created_at, u.updated_at,
+          c.collegeID, c.collegeName, c.collegeCode, 
+          p.programID, p.programName, 
+          t.traineeID, t.remaining_hours, t.deployment_date,
+          (SELECT MAX(created_at) FROM daily_reports WHERE student_id = t.traineeID) as last_update,
+          (SELECT COUNT(*) FROM dtrs WHERE traineeID = t.traineeID AND status = 'approved') as hours_completed
+        FROM 
+          inter_application AS ia
+        INNER JOIN 
+          users AS u ON ia.trainee_user_id = u.userID
+        INNER JOIN 
+          trainee AS t ON t.userID = u.userID
+        INNER JOIN 
+          colleges AS c ON t.collegeID = c.collegeID
+        INNER JOIN 
+          programs AS p ON t.programID = p.programID
+        WHERE 
+          ia.company_id = ? AND ia.status = 'approved' AND ia.is_confirmed = 1
+        GROUP BY 
+          u.userID
+        ORDER BY last_update DESC`,
+        [companyID]
+      );
+
+      res.status(200).json({
+        success: true,
+        data: traineeProgress
+      });
+    } catch (error) {
+      console.error('Error fetching trainee progress:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch trainee progress',
+        error: error.message
+      });
+    }
+  }
+);
+
+// 4. Get trainee evaluations
+router.post(
+  '/trainees/evaluations',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { id } = loggedInUser;
+      const { traineeId } = req.body;
+
+      // Get company ID if user is HTE supervisor
+      const [supervisor] = await db.query(
+        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+        [id]
+      );
+
+      if (supervisor.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not associated with any company'
+        });
+      }
+
+      const companyID = supervisor[0].companyID;
+
+      // Get evaluations for a specific trainee or all trainees
+      let query = `
+        SELECT 
+          te.*,
+          u.first_name, u.last_name, u.email,
+          t.remaining_hours
+        FROM 
+          trainee_evaluations AS te
+        INNER JOIN 
+          trainee AS t ON te.traineeID = t.traineeID
+        INNER JOIN 
+          users AS u ON t.userID = u.userID
+        INNER JOIN 
+          hte_supervisors AS hs ON te.hteID = hs.hteID
+        WHERE 
+          hs.companyID = ?
+      `;
+
+      const queryParams = [companyID];
+
+      if (traineeId) {
+        query += ` AND te.traineeID = ?`;
+        queryParams.push(traineeId);
+      }
+
+      query += ` ORDER BY te.eval_date DESC`;
+
+      const [evaluations] = await db.query(query, queryParams);
+
+      res.status(200).json({
+        success: true,
+        data: evaluations
+      });
+    } catch (error) {
+      console.error('Error fetching trainee evaluations:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch trainee evaluations',
+        error: error.message
+      });
+    }
+  }
+);
+
+// 5. Get trainee certificates
+router.post(
+  '/trainees/certificates',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { id } = loggedInUser;
+
+      // Get company ID if user is HTE supervisor
+      const [supervisor] = await db.query(
+        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+        [id]
+      );
+
+      if (supervisor.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not associated with any company'
+        });
+      }
+
+      const companyID = supervisor[0].companyID;
+
+      // Get certificates for trainees
+      const [certificates] = await db.query(
+        `SELECT 
+          te.traineeID, te.certificate_url, te.eval_date,
+          u.first_name, u.last_name, u.email,
+          t.remaining_hours
+        FROM 
+          trainee_evaluations AS te
+        INNER JOIN 
+          trainee AS t ON te.traineeID = t.traineeID
+        INNER JOIN 
+          users AS u ON t.userID = u.userID
+        INNER JOIN 
+          hte_supervisors AS hs ON te.hteID = hs.hteID
+        WHERE 
+          hs.companyID = ? AND te.certificate_url IS NOT NULL
+        ORDER BY te.eval_date DESC`,
+        [companyID]
+      );
+
+      res.status(200).json({
+        success: true,
+        data: certificates
+      });
+    } catch (error) {
+      console.error('Error fetching trainee certificates:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch trainee certificates',
+        error: error.message
       });
     }
   }

@@ -30,7 +30,22 @@ export const initializeApp = () => {
     },
     function (error) {
       document.body.classList.remove('loading-indicator');
-      if (error.response && error.response.data.error === 'Invalid token') {
+
+      const publicRoutes = [
+        'login',
+        'register',
+        'user-selection',
+        'account-creation'
+      ];
+      const isPublicRoute = publicRoutes.some(route =>
+        error.config.url.includes(route)
+      );
+
+      if (
+        isPublicRoute &&
+        error.response &&
+        error.response.data.error === 'Invalid token'
+      ) {
         toast.error('Session expired. Please log in again.');
         window.location.href = '/login';
       }

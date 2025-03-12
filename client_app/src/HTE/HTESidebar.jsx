@@ -47,11 +47,11 @@ function HTESidebar({ expanded, setExpanded }) {
             <Link to="/HTE/applications" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">
                 <ApplicationsIcon className="custom-icon" />
-                <span>Applications</span>
+                <span>Trainees</span>
               </div>
             </Link>
           </Nav.Item>
-          <Nav.Item>
+          {/* <Nav.Item>
             <Link to="/HTE/trainees" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">
                 <TraineesIcon className="custom-icon" />
@@ -66,7 +66,7 @@ function HTESidebar({ expanded, setExpanded }) {
                 <span>Progress Reports</span>
               </div>
             </Link>
-          </Nav.Item>
+          </Nav.Item> */}
           <Nav.Item>
             <Link to="/HTE/emergency-reports" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">
