@@ -43,7 +43,7 @@ const questions = [
   }
 ];
 
-function EvaluationForm({ isOpen, onClose, student, existingData = null }) {
+function EvaluationForm({ isOpen, onClose, student, existingData = null, }) {
   const [answers, setAnswers] = useState(
     existingData?.answers ||
     questions.reduce((acc, _, index) => {
@@ -169,7 +169,7 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null }) {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Program:</p>
-                <p className="font-medium">{student?.progName}</p>
+                <p className="font-medium">{student?.programName}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">College:</p>
@@ -272,9 +272,9 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null }) {
         <DialogFooter className="mt-6 space-x-2">
           {viewOnly ? (
             <>
-              <Button onClick={() => setViewOnly(false)} variant="outline">
+              {/* <Button onClick={() => setViewOnly(false)} variant="outline">
                 Edit Evaluation
-              </Button>
+              </Button> */}
               <Button onClick={onClose}>
                 Close
               </Button>

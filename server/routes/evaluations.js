@@ -44,18 +44,26 @@ router.post('/create', authenticateUserMiddleware, async (req, res) => {
 router.get('/:studentId', authenticateUserMiddleware, async (req, res) => {
   try {
     const { studentId } = req.params;
-    const evaluatorId = req.user.id;
 
-    // Get the most recent evaluation by this evaluator for this student
+    // Get the most recent evaluation with student info
     const [evaluations] = await db.query(
-      `SELECT * FROM evaluations 
-       WHERE student_id = ? 
-       ORDER BY evaluation_date DESC 
+      `SELECT e.*, 
+              t.student_id,
+              p.programName as programName,
+              c.collegeName as collegeName,
+              u.first_name,
+              u.last_name
+       FROM evaluations e
+       JOIN trainee t ON t.userID = e.student_id
+       JOIN programs p ON p.programID = t.programID
+       JOIN colleges c ON c.collegeID = t.collegeID
+       JOIN users u ON u.userID = e.student_id
+       WHERE e.student_id = ? 
+       ORDER BY e.evaluation_date DESC 
        LIMIT 1`,
-      [studentId, evaluatorId]
+      [studentId]
     );
 
-    console.log({ evaluations });
     if (evaluations.length === 0) {
       return res.status(404).json({
         success: false,
@@ -70,13 +78,24 @@ router.get('/:studentId', authenticateUserMiddleware, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: evaluation
+      data: {
+        ...evaluation,
+        // Format the student data as expected by EvaluationForm
+        student: {
+          userID: evaluation.student_id,
+          first_name: evaluation.first_name,
+          last_name: evaluation.last_name,
+          programName: evaluation.programName,
+          collegeName: evaluation.collegeName
+        }
+      }
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ success: false, message: 'Failed to fetch evaluation' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch evaluation'
+    });
   }
 });
 

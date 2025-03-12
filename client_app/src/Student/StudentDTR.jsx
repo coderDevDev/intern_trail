@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { toast } from 'react-toastify';
-import { Check, CheckCircle, Save, MessageCircle, FileText, Printer, Clock, Edit2 } from 'lucide-react';
+import { Check, CheckCircle, Save, MessageCircle, FileText, Printer, Clock, Edit2, Eye, Download, Award } from 'lucide-react';
 import FeedbackThread from './FeedbackThread';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,15 +22,15 @@ import {
 import WeeklyReport from './WeeklyReport';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import EvaluationForm from '@/components/EvaluationForm/EvaluationForm';
+import CertificateUpload from '@/components/CertificateUpload/CertificateUpload';
+
 function StudentDTR() {
   const { studentId } = useParams();
 
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const showButtons = !studentId || loggedInUser.userID === studentId;
-
-
-
 
   const [records, setRecords] = useState({});
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -50,6 +50,10 @@ function StudentDTR() {
   const [isNarrativeEdited, setIsNarrativeEdited] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [evaluation, setEvaluation] = useState(null);
+  const [certificate, setCertificate] = useState(null);
+  const [studentData, setStudentData] = useState(null);
+  const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
 
   useEffect(() => {
     const storedRecords = JSON.parse(localStorage.getItem('dtrRecords')) || {};
@@ -164,6 +168,56 @@ function StudentDTR() {
 
     fetchWeeklyData();
   }, [selectedDate]);
+
+  useEffect(() => {
+    const fetchEvaluationAndCertificate = async () => {
+      try {
+        // Fetch evaluation data
+        const evaluationResponse = await axios.get(`/evaluations/${studentId || loggedInUser.userID}`);
+        if (evaluationResponse.data.success && evaluationResponse.data.data) {
+          setEvaluation(evaluationResponse.data.data);
+        } else {
+          setEvaluation(null);
+        }
+
+        // Fetch certificates
+        const certificateResponse = await axios.get(`/certificates/${studentId || loggedInUser.userID}`);
+        if (certificateResponse.data.success) {
+          setCertificate(certificateResponse.data.data);
+        } else {
+          setCertificate(null);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setEvaluation(null);
+        setCertificate(null);
+      }
+    };
+
+    fetchEvaluationAndCertificate();
+  }, [studentId, loggedInUser.userID]);
+
+  // useEffect(() => {
+  //   const fetchStudentData = async () => {
+  //     try {
+  //       const response = await axios.get(`/students/${studentId || loggedInUser.userID}`);
+  //       if (response.data.success) {
+  //         setStudentData({
+  //           ...response.data.data,
+  //           userID: studentId || loggedInUser.userID,
+  //           first_name: response.data.data.firstName,
+  //           last_name: response.data.data.lastName,
+  //           progName: response.data.data.program,
+  //           collegeName: response.data.data.college
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching student data:", error);
+  //     }
+  //   };
+
+  //   fetchStudentData();
+  // }, [studentId, loggedInUser.userID]);
 
   const handleTimeInChange = (e) => {
     setTimeIn(e.target.value);
@@ -575,10 +629,10 @@ function StudentDTR() {
                 </div>
                 <Badge
                   className={`px-2 py-1 text-xs font-medium ${entry.status === 'approve'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : entry.status === 'reject'
-                        ? 'bg-rose-50 text-rose-700 border-rose-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : entry.status === 'reject'
+                      ? 'bg-rose-50 text-rose-700 border-rose-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}
                   variant="outline"
                 >
@@ -650,11 +704,18 @@ function StudentDTR() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Avatar className="w-8 h-8 bg-gray-100">
+                <Avatar className="w-8 h-8 bg-gray-100 flex items-center justify-center">
                   <span className="text-sm font-medium text-gray-600">
-                    {feedback.fullName?.charAt(0) || feedback.role?.charAt(0)}
+                    {feedback.fullName
+                      ? feedback.fullName
+                        .split(' ')
+                        .map((name) => name.charAt(0).toUpperCase())
+                        .join('')
+                      : feedback.role?.charAt(0).toUpperCase()}
                   </span>
                 </Avatar>
+
+
                 <div>
                   {feedback.role === 'AI' ? (
                     <p className="text-sm text-gray-600">AI Assistant</p>
@@ -706,6 +767,94 @@ function StudentDTR() {
     </div>
   );
 
+  const renderEvaluationTab = () => (
+    <div className="space-y-4">
+      {evaluation ? (
+        <Card className="border border-gray-100">
+          <CardHeader className="bg-gray-50/50">
+            <h3 className="font-medium text-gray-900">Performance Evaluation</h3>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <Button
+              onClick={() => setIsEvaluationOpen(true)}
+              className="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
+            >
+              View Evaluation
+            </Button>
+
+
+            <EvaluationForm
+              isOpen={isEvaluationOpen}
+              onClose={() => setIsEvaluationOpen(false)}
+              student={evaluation}
+              existingData={evaluation}
+              isReadOnly={true}
+            />
+
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          No evaluation available yet
+        </div>
+      )}
+    </div>
+  );
+
+  const renderCertificateTab = () => (
+    <div className="space-y-4">
+      {certificate ? (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Uploaded Certificates</h3>
+          {certificate.map((cert) => (
+            <Card key={cert.id} className="border border-gray-100 hover:shadow-md transition-all duration-200">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">{cert.name}</h4>
+                    <p className="text-sm text-gray-500">
+                      Uploaded on {new Date(cert.created_at).toLocaleDateString()} by {cert.first_name} {cert.last_name}
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(cert.file_url, '_blank')}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = cert.file_url;
+                        link.download = cert.name;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 border rounded-lg bg-gray-50">
+          <Award className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+          <p className="text-gray-500">No certificates available yet</p>
+        </div>
+      )}
+    </div>
+  );
+
   const handlePrintClick = () => {
     setIsDialogOpen(true);
   };
@@ -713,8 +862,6 @@ function StudentDTR() {
   console.log({ weeklyReport, weeklyFeedback });
   return (
     <div className="container mx-auto p-4 max-w-7xl">
-
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-1 space-y-6">
@@ -879,10 +1026,30 @@ function StudentDTR() {
                   >
                     Feedbacks
                   </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium transition-colors
+                      ${activeTab === 'evaluation'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('evaluation')}
+                  >
+                    Evaluation
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium transition-colors
+                      ${activeTab === 'certificate'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('certificate')}
+                  >
+                    Certificate
+                  </button>
                 </div>
               </div>
 
-              {activeTab === 'reports' ? renderReportsTab() : renderFeedbacksTab()}
+              {activeTab === 'reports' ? renderReportsTab() : activeTab === 'feedbacks' ? renderFeedbacksTab() : activeTab === 'evaluation' ? renderEvaluationTab() : renderCertificateTab()}
             </CardContent>
           </Card>
         </div>

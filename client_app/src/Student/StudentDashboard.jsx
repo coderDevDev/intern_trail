@@ -125,9 +125,12 @@ function StudentDashboard() {
 
   // Calculate progress
   const calculateProgress = (requirements) => {
-    if (!requirements?.length) return 0;
-    const completed = requirements.filter(req => req.status === 'completed').length;
-    return (completed / requirements.length) * 100;
+    if (!requirements || requirements.length === 0) return 1; // Default to 1% if there are no requirements
+
+    const completed = requirements.filter((req) => req.status === "completed").length;
+    const progress = (completed / requirements.length) * 100;
+
+    return progress > 0 ? progress : 100; // Ensure minimum progress is 1%
   };
 
   console.log({ loggedInUser })
@@ -204,11 +207,7 @@ function StudentDashboard() {
                                 key={index}
                                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
                               >
-                                {req.status === 'completed' ? (
-                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                ) : (
-                                  <Circle className="h-5 w-5 text-gray-300" />
-                                )}
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
                                 <div className="flex-1">
                                   <div className="font-medium">{req.label}</div>
                                   {req.status === 'completed' && (
@@ -221,11 +220,11 @@ function StudentDashboard() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => {
-                                      navigate('/student/files', { state: { companyId: company.id } });
-                                    }}
+                                  // onClick={() => {
+                                  //   navigate('/student/files', { state: { companyId: company.id } });
+                                  // }}
                                   >
-                                    Go to Files
+                                    View
                                   </Button>
                                 )}
                               </div>

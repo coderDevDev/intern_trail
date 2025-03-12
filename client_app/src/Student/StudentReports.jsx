@@ -20,7 +20,7 @@ import {
   RefreshCw,
   Info,
   Eye,
-
+  Loader2,
 } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -36,7 +36,6 @@ import { Badge } from "@/components/ui/badge";
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
-
 
 import {
   Tooltip,
@@ -58,6 +57,7 @@ function StudentReports() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedReport, setSelectedReport] = useState(null);
+  const [userScope, setUserScope] = useState(null);
 
   console.log({ loggedInUser: loggedInUser.first_name })
   const [formData, setFormData] = useState({
@@ -68,7 +68,9 @@ function StudentReports() {
     emergencyType: '',
     severity: '',
     details: '',
-    status: 'pending'
+    status: 'pending',
+    company_id: '',
+    companyName: ''
   });
 
   // Add check for logged in user
@@ -80,9 +82,67 @@ function StudentReports() {
     }
   }, []);
 
+
+  // Add these states
+  const [userApplications, setUserApplications] = useState([]);
+  const [joinedCompany, setJoinedCompany] = useState({});
+
+  // Add this useEffect to fetch user applications
+  useEffect(() => {
+    const fetchUserApplications = async () => {
+      try {
+        const response = await axios.get('company/applications/user');
+        if (response.data.success) {
+          setUserApplications(response.data.data);
+
+
+          // Check if user has already joined a company
+          const joinedApp = response.data.data.find(app => app.is_confirmed);
+
+
+          setJoinedCompany(joinedApp);
+
+
+
+        }
+      } catch (error) {
+        console.error('Error fetching user applications:', error);
+      }
+    };
+
+    fetchUserApplications();
+  }, []);
+
+  // Add this helper function
+  const getJoinedCompanyName = () => {
+    const joinedApp = userApplications.find(app => app.is_confirmed === 1);
+    return joinedApp ? joinedApp.companyName : '';
+  };
+
+
+
   // Fetch reports on component mount
   useEffect(() => {
     fetchReports();
+  }, []);
+
+  // Add this useEffect to fetch user scope
+  useEffect(() => {
+
+    const fetchUserScope = async () => {
+      try {
+        const response = await axios.get('college/user-scope');
+
+        console.log({ response })
+        if (response.data.success) {
+          setUserScope(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user scope:', error);
+      }
+    };
+
+    fetchUserScope();
   }, []);
 
   const fetchReports = async () => {
@@ -116,7 +176,9 @@ function StudentReports() {
       emergencyType: '',
       severity: '',
       details: '',
-      status: 'pending'
+      status: 'pending',
+      company_id: joinedCompany?.company_id || '',
+      companyName: joinedCompany?.companyName || ''
     });
   };
 
@@ -131,7 +193,9 @@ function StudentReports() {
         location: formData.location,
         emergency_type: formData.emergencyType,
         severity: formData.severity,
-        details: formData.details
+        details: formData.details,
+        company_id: joinedCompany?.company_id,
+        companyName: joinedCompany?.companyName
       };
 
       if (selectedReport) {
@@ -163,7 +227,9 @@ function StudentReports() {
       emergencyType: report.emergencyType,
       severity: report.severity,
       details: report.details,
-      status: report.status
+      status: report.status,
+      company_id: report.company_id,
+      companyName: report.companyName
     });
     setIsModalOpen(true);
   };
@@ -323,6 +389,36 @@ function StudentReports() {
             </Button>
           </div>
 
+          {/* Add userScope display */}
+          {userScope && (
+            <div className="mb-6 p-4 bg-white border border-gray-100 rounded-xl">
+              <div className="flex flex-col md:flex-row md:items-start gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mt-2">
+                    <Building className="h-5 w-5 text-blue-600" />
+                    <span className="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                      {userScope.collegeName}
+                    </span>
+                    <span className="px-3 py-1.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                      {userScope.programName}
+                    </span>
+                  </div>
+
+                  {
+                    console.log({ joinedCompany })
+                  }
+                  {joinedCompany.companyName && (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-100 rounded-lg">
+                      <p className="text-sm text-gray-700">
+                        Currently assigned to <span className="font-semibold text-green-700">{joinedCompany.companyName}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -448,6 +544,27 @@ function StudentReports() {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6 py-4">
+            {/* Company Information */}
+            {joinedCompany && (
+              <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
+                <div className="flex-shrink-0">
+                  {joinedCompany.avatar_photo ? (
+                    <img
+                      src={joinedCompany.avatar_photo}
+                      alt={joinedCompany.companyName}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <Building className="w-10 h-10 text-blue-600" />
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-medium text-blue-900">{joinedCompany.companyName}</h4>
+                  <p className="text-sm text-blue-700">Reporting for this company</p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
