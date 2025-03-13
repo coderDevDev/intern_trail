@@ -27,6 +27,16 @@ function AdminSidebar({ expanded, setExpanded }) {
 
 
           <Nav.Item>
+            <Link to="/admin/dashboard" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
+              <div className="d-flex align-items-center">
+                <UsersIcon className="custom-icon" />
+                <span>Dashboard</span>
+              </div>
+            </Link>
+          </Nav.Item>
+
+
+          <Nav.Item>
             <Link to="/admin/coordinators" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">
                 <UsersIcon className="custom-icon" />

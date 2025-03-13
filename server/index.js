@@ -27,6 +27,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import cron from 'node-cron';
+import adminRouter from './routes/admin.js';
 // const { cypherQuerySession } = config;
 // import { mergeUserQuery } from './cypher/child.js';
 // import { v4 as uuidv4 } from 'uuid';
@@ -74,6 +75,8 @@ app.use('/api/certificates', certificatesRouter);
 app.use('/api/emergency-reports', emergencyRoute);
 
 app.use('/api/system-logs', systemLogsRoute);
+
+app.use('/api/admin', adminRouter);
 
 app.use(express.static('public'));
 app.use(express.static('files'));

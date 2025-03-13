@@ -7,10 +7,11 @@ import MenuItem from '@mui/material/Menu';
 import AdminSidebar from './AdminSidebar';
 import SystemLogs from './SystemLogs';
 import AdminProfileModal from './AdminProfileModal'; // Import the AdminProfileModal component
+import AdminDashboard from './AdminDashboard';
 import "../index.css";
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
-
+import { Link } from 'react-router-dom';
 
 
 
@@ -183,6 +184,8 @@ function AdminHome() {
               </>
             }
           />
+
+          <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/system-logs" element={<SystemLogs />} />
 
 

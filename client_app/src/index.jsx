@@ -30,6 +30,7 @@ import ChangePassword from './Login/ChangePassword';
 import EmailVerified from './Login/EmailVerified';
 import PasswordChangedSuccess from './Login/PasswordChangedSuccess'; // Import the PasswordChangedSuccess component
 import ResetPasswordResult from './Login/ResetPasswordResult';
+import LandingPage from './Landing/LandingPage';
 
 initializeApp();
 
@@ -39,7 +40,7 @@ root.render(
     <ToastContainer />
     <BrowserRouter>
       <Routes>
-        {/* <Route path="/" element={<App />} /> */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/email-verified" element={<EmailVerified />} />
