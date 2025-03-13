@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "build": "cd client_app && npm install && npm run build && cd ../server && npm install"
+  },
+  "engines": {
+    "node": "18.17.0"
+  }
+}
