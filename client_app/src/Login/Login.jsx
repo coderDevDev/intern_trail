@@ -79,11 +79,11 @@ function Login() {
 
         // Use navigate instead of window.location
         const roleRoutes = {
-          'trainee': '/student',
-          'ojt-coordinator': '/coordinator',
-          'hte-supervisor': '/HTE',
-          'dean': '/dean',
-          'admin': '/admin'
+          'trainee': '/student/home',
+          'ojt-coordinator': '/coordinator/home',
+          'hte-supervisor': '/HTE/home',
+          'dean': '/dean/home',
+          'admin': '/admin/dashboard'
         };
 
         navigate(roleRoutes[user.role]);

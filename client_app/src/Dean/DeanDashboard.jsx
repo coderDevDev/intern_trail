@@ -13,6 +13,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 
 import AccountInfoPopup from '../components/AccountInfoPopup';
+import DeanHome from './DeanDashboard/DeanHome';
 
 function AdditionalContent() {
   return (
@@ -105,77 +106,7 @@ function DeanDashboard() {
         <DeanSidebar expanded={expanded} setExpanded={setExpanded} />
         <div className="main-content">
           <Routes>
-            <Route
-              path="/home"
-              element={
-                <>
-                  {/* Main Content */}
-                  <h1>University Dean Dashboard</h1>
-                  <h5>Recent Notifications</h5>
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">Juan Dela Cruz
-                            <span className='notification-time'> • 5h</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">Juan Dela Cruz
-                            <span className='notification-time'> • 12d</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">Juan Dela Cruz
-                            <span className='notification-time'> • Jun 3</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </>
-              }
-            />
-            {/* Additional Routes */}
+            <Route path="/home" element={<DeanHome />} />
             <Route path="/announcements" element={<DeanAnnouncements />} />
             <Route path="/companies" element={<DeanCompanies />} />
             <Route path="/trainees" element={<DeanTrainees />} />

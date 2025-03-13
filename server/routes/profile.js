@@ -184,6 +184,8 @@ router.put(
         }
 
         const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        console.log({ hashedPassword });
         await db.query('UPDATE users SET password = ? WHERE userID = ?', [
           hashedPassword,
           userId

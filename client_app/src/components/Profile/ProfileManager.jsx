@@ -9,7 +9,9 @@ import {
   Save,
   X,
   School,
-  GraduationCap
+  GraduationCap,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -64,6 +66,11 @@ function ProfileManager({ open, onClose }) {
     confirm_password: ''
   });
   const [errors, setErrors] = useState({});
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
 
   useEffect(() => {
     if (open) {
@@ -108,26 +115,107 @@ function ProfileManager({ open, onClose }) {
     }
   };
 
+  const validateField = (name, value) => {
+    try {
+      // Create a temporary object with all current form data plus the new value
+      const tempFormData = {
+        ...formData,
+        [name]: value
+      };
+
+      if (activeTab === "general") {
+        // Only validate the specific field for general tab
+        if (name in generalFormSchema.shape) {
+          const fieldSchema = generalFormSchema.shape[name];
+          fieldSchema.parse(value);
+          setErrors(prev => ({ ...prev, [name]: undefined }));
+        }
+      } else if (activeTab === "security") {
+        // For security tab, validate password matching if relevant
+        if (name === 'new_password' || name === 'confirm_password') {
+          if (tempFormData.new_password || tempFormData.confirm_password) {
+            // Only validate if either password field has content
+            if (tempFormData.new_password !== tempFormData.confirm_password) {
+              setErrors(prev => ({
+                ...prev,
+                confirm_password: "Passwords don't match"
+              }));
+              return;
+            } else {
+              setErrors(prev => ({
+                ...prev,
+                confirm_password: undefined
+              }));
+            }
+          }
+
+          // Validate individual password field if it's not empty
+          if (value) {
+            const fieldSchema = securityFormSchema.shape[name];
+            if (fieldSchema) {
+              fieldSchema.parse(value);
+              setErrors(prev => ({ ...prev, [name]: undefined }));
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log({ error });
+      if (error.errors && error.errors.length > 0) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: error.errors[0].message
+        }));
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          [name]: 'Invalid input'
+        }));
+      }
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
+
   const validateForm = () => {
     try {
       if (activeTab === "general") {
-        generalFormSchema.parse(formData);
-      } else if (activeTab === "security" && (formData.new_password || formData.current_password)) {
-        securityFormSchema.parse(formData);
+        // Only validate required fields for general tab
+        const { first_name, last_name, phone } = formData;
+        const generalData = { first_name, last_name, phone };
+        generalFormSchema.parse(generalData);
+      } else if (activeTab === "security") {
+        // Only validate security fields if any password field is filled
+        if (formData.new_password || formData.current_password) {
+          const securityData = {
+            current_password: formData.current_password || '',
+            new_password: formData.new_password || '',
+            confirm_password: formData.confirm_password || ''
+          };
+          securityFormSchema.parse(securityData);
+        }
       }
-      setErrors({});
       return true;
     } catch (error) {
-      const formattedErrors = {};
-      error.errors.forEach((err) => {
-        formattedErrors[err.path[0]] = err.message;
-      });
-      setErrors(formattedErrors);
+      if (error.errors) {
+        const newErrors = {};
+        error.errors.forEach(err => {
+          if (err.path && err.path.length > 0) {
+            newErrors[err.path[0]] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
       return false;
     }
   };
 
   const handleSubmit = async (e) => {
+    console.log("Dexxx")
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -239,11 +327,12 @@ function ProfileManager({ open, onClose }) {
                         </label>
                         <input
                           type="text"
+                          name="first_name"
                           value={formData.first_name}
-                          onChange={(e) =>
-                            setFormData({ ...formData, first_name: e.target.value })
-                          }
-                          className={`w-full p-2 border rounded-lg ${errors.first_name ? 'border-red-500' : 'border-gray-300'
+                          onChange={handleChange}
+                          className={`w-full p-2 border rounded-lg transition-colors ${errors?.first_name
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                             }`}
                         />
                         {errors.first_name && (
@@ -257,10 +346,9 @@ function ProfileManager({ open, onClose }) {
                         </label>
                         <input
                           type="text"
+                          name="middle_initial"
                           value={formData.middle_initial}
-                          onChange={(e) =>
-                            setFormData({ ...formData, middle_initial: e.target.value })
-                          }
+                          onChange={handleChange}
                           className="w-full p-2 border border-gray-300 rounded-lg"
                         />
                       </div>
@@ -271,10 +359,9 @@ function ProfileManager({ open, onClose }) {
                         </label>
                         <input
                           type="text"
+                          name="last_name"
                           value={formData.last_name}
-                          onChange={(e) =>
-                            setFormData({ ...formData, last_name: e.target.value })
-                          }
+                          onChange={handleChange}
                           className={`w-full p-2 border rounded-lg ${errors.last_name ? 'border-red-500' : 'border-gray-300'
                             }`}
                         />
@@ -289,7 +376,9 @@ function ProfileManager({ open, onClose }) {
                         </label>
                         <input
                           type="email"
+                          name="email"
                           value={formData.email}
+                          onChange={handleChange}
                           disabled
                           className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100"
                         />
@@ -304,10 +393,9 @@ function ProfileManager({ open, onClose }) {
                         </label>
                         <input
                           type="tel"
+                          name="phone"
                           value={formData.phone}
-                          onChange={(e) =>
-                            setFormData({ ...formData, phone: e.target.value })
-                          }
+                          onChange={handleChange}
                           className={`w-full p-2 border rounded-lg ${errors.phone ? 'border-red-500' : 'border-gray-300'
                             }`}
                         />
@@ -372,19 +460,34 @@ function ProfileManager({ open, onClose }) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Current Password
                       </label>
-                      <input
-                        type="password"
-                        value={formData.current_password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, current_password: e.target.value })
-                        }
-                        className={`w-full p-2 border rounded-lg ${errors.current_password ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPasswords.current ? "text" : "password"}
+                          name="current_password"
+                          value={formData.current_password}
+                          onChange={handleChange}
+                          className={`w-full p-2 border rounded-lg pr-10 transition-colors ${errors.current_password
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                            }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords(prev => ({
+                            ...prev,
+                            current: !prev.current
+                          }))}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showPasswords.current ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
                       {errors.current_password && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.current_password}
-                        </p>
+                        <p className="text-red-500 text-sm mt-1">{errors.current_password}</p>
                       )}
                     </div>
 
@@ -392,33 +495,69 @@ function ProfileManager({ open, onClose }) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         New Password
                       </label>
-                      <input
-                        type="password"
-                        value={formData.new_password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, new_password: e.target.value })
-                        }
-                        className="w-full p-2 border border-gray-300 rounded-lg"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPasswords.new ? "text" : "password"}
+                          name="new_password"
+                          value={formData.new_password}
+                          onChange={handleChange}
+                          className={`w-full p-2 border rounded-lg pr-10 transition-colors ${errors.new_password
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                            }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords(prev => ({
+                            ...prev,
+                            new: !prev.new
+                          }))}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showPasswords.new ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      {errors.new_password && (
+                        <p className="text-red-500 text-sm mt-1">{errors.new_password}</p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Confirm Password
                       </label>
-                      <input
-                        type="password"
-                        value={formData.confirm_password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, confirm_password: e.target.value })
-                        }
-                        className={`w-full p-2 border rounded-lg ${errors.confirm_password ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPasswords.confirm ? "text" : "password"}
+                          name="confirm_password"
+                          value={formData.confirm_password}
+                          onChange={handleChange}
+                          className={`w-full p-2 border rounded-lg pr-10 transition-colors ${errors.confirm_password
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                            }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords(prev => ({
+                            ...prev,
+                            confirm: !prev.confirm
+                          }))}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showPasswords.confirm ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
                       {errors.confirm_password && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.confirm_password}
-                        </p>
+                        <p className="text-red-500 text-sm mt-1">{errors.confirm_password}</p>
                       )}
                     </div>
                   </div>

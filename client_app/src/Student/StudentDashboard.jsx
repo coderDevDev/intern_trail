@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button"
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+import StudentHome from './StudentDashboard/StudentHome';
+
 function AdditionalContent() {
   return (
     <div className="additional-content">
@@ -178,63 +180,64 @@ function StudentDashboard() {
             <Route
               path="/home"
               element={
-                <>
-                  <h1>Dashboard</h1>
-                  <div className="grid gap-4 md:grid-cols-1 mt-2">
-                    {requirements.map((company) => (
-                      <Card key={company.id} className="shadow-lg">
-                        <CardHeader className="space-y-1">
-                          <CardTitle className="text-2xl">
-                            {company.name}
-                          </CardTitle>
-                          <div className="text-sm text-gray-500">
-                            Requirements Progress
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="mb-4">
-                            <Progress
-                              value={calculateProgress(company.requirements)}
-                              className="h-2"
-                            />
-                            <div className="mt-1 text-sm text-gray-500">
-                              {calculateProgress(company.requirements)}% Complete
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            {company.requirements.map((req, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
-                              >
-                                <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                <div className="flex-1">
-                                  <div className="font-medium">{req.label}</div>
-                                  {req.status === 'completed' && (
-                                    <div className="text-sm text-gray-500">
-                                      Submitted on {new Date(req.submitted_date).toLocaleDateString()}
-                                    </div>
-                                  )}
-                                </div>
-                                {req.status !== 'completed' && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                  // onClick={() => {
-                                  //   navigate('/student/files', { state: { companyId: company.id } });
-                                  // }}
-                                  >
-                                    View
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </>
+                <StudentHome />
+                // <>
+                //   <h1>Dashboard</h1>
+                //   <div className="grid gap-4 md:grid-cols-1 mt-2">
+                //     {requirements.map((company) => (
+                //       <Card key={company.id} className="shadow-lg">
+                //         <CardHeader className="space-y-1">
+                //           <CardTitle className="text-2xl">
+                //             {company.name}
+                //           </CardTitle>
+                //           <div className="text-sm text-gray-500">
+                //             Requirements Progress
+                //           </div>
+                //         </CardHeader>
+                //         <CardContent>
+                //           <div className="mb-4">
+                //             <Progress
+                //               value={calculateProgress(company.requirements)}
+                //               className="h-2"
+                //             />
+                //             <div className="mt-1 text-sm text-gray-500">
+                //               {calculateProgress(company.requirements)}% Complete
+                //             </div>
+                //           </div>
+                //           <div className="space-y-4">
+                //             {company.requirements.map((req, index) => (
+                //               <div
+                //                 key={index}
+                //                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                //               >
+                //                 <CheckCircle2 className="h-5 w-5 text-green-500" />
+                //                 <div className="flex-1">
+                //                   <div className="font-medium">{req.label}</div>
+                //                   {req.status === 'completed' && (
+                //                     <div className="text-sm text-gray-500">
+                //                       Submitted on {new Date(req.submitted_date).toLocaleDateString()}
+                //                     </div>
+                //                   )}
+                //                 </div>
+                //                 {req.status !== 'completed' && (
+                //                   <Button
+                //                     size="sm"
+                //                     variant="outline"
+                //                   // onClick={() => {
+                //                   //   navigate('/student/files', { state: { companyId: company.id } });
+                //                   // }}
+                //                   >
+                //                     View
+                //                   </Button>
+                //                 )}
+                //               </div>
+                //             ))}
+                //           </div>
+                //         </CardContent>
+                //       </Card>
+                //     ))}
+                //   </div>
+                // </>
               }
             />
             <Route path="/announcements" element={<StudentAnnouncements />} />
@@ -244,10 +247,18 @@ function StudentDashboard() {
             <Route path="/emergency-reports" element={<StudentReports />} />
           </Routes>
         </div>
-        {location.pathname === '/student/home' && <AdditionalContent />}
+        {/* {location.pathname === '/student/home' && <AdditionalContent />} */}
       </div>
     </div>
   );
 }
 
+
+// function StudentDashboardV2() {
+//   return (
+//     <div>
+//       <StudentHome />
+//     </div>
+//   );
+// }
 export default StudentDashboard;

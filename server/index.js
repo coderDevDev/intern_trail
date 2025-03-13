@@ -31,6 +31,8 @@ import adminRouter from './routes/admin.js';
 import hteRouter from './routes/hte.js';
 import coordinatorRouter from './routes/coordinator.js';
 import profileRouter from './routes/profile.js';
+import deanRouter from './routes/dean.js';
+import studentRouter from './routes/student.js';
 // const { cypherQuerySession } = config;
 // import { mergeUserQuery } from './cypher/child.js';
 // import { v4 as uuidv4 } from 'uuid';
@@ -83,7 +85,8 @@ app.use('/api/admin', adminRouter);
 app.use('/api/hte', hteRouter);
 app.use('/api/coordinator', coordinatorRouter);
 app.use('/api/profile', profileRouter);
-
+app.use('/api/dean', deanRouter);
+app.use('/api/student', studentRouter);
 app.use(express.static('public'));
 app.use(express.static('files'));
 
