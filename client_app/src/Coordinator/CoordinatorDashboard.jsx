@@ -17,6 +17,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
 import StudentProgress from '../Student/StudentProgress';
 import AccountInfoPopup from '../components/AccountInfoPopup';
+import CoordinatorHome from './CoordinatorDashboard/CoordinatorHome';
 
 // function AccountInfoPopup({ onClose, onProfileOpen }) {
 //   const popupRef = useRef(null);
@@ -191,6 +192,7 @@ function CoordinatorDashboard() {
         <CoordinatorSidebar expanded={expanded} setExpanded={setExpanded} />
         <div className="main-content">
           <Routes>
+            <Route path="/home" element={<CoordinatorHome />} />
             <Route
               path="/home"
               element={
@@ -235,7 +237,7 @@ function CoordinatorDashboard() {
         </div>
 
         {/* Render Additional Content only on /coordinator/home route */}
-        {location.pathname === '/coordinator/home' && <AdditionalContent />}
+        {/* {location.pathname === '/coordinator/home' && <AdditionalContent />} */}
       </div>
     </div>
   );

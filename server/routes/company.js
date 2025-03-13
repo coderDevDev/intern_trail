@@ -649,6 +649,19 @@ router.post(
         [true, userId, companyId]
       );
 
+      await db.query(
+        `
+        
+         UPDATE trainee 
+         SET 
+         companyID   = ?
+         WHERE userID   = ?
+ 
+         
+         `,
+        [companyId, userId]
+      );
+
       res.status(200).json({
         success: true,
         message: 'Successfully joined the company'

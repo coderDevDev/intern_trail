@@ -19,6 +19,9 @@ import AccountInfoPopup from '../components/AccountInfoPopup';
 
 import StudentProgress from '../Student/StudentProgress';
 import StudentDTR from '../Student/StudentDTR';
+
+import HTEDashboardHome from './HTEDashboard/HTEHome';
+
 function AdditionalContent() {
   return (
     <div className="additional-content">
@@ -130,72 +133,7 @@ function HTEDashboard() {
             <Route
               path="/home"
               element={
-                <>
-                  {/* Main Content */}
-                  <h1>HTE Dashboard</h1>
-                  <h5>Recent Notifications</h5>
-
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">Juan Dela Cruz
-                            <span className='notification-time'> • 5h</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">Juan Dela Cruz
-                            <span className='notification-time'> • 12d</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="notification-panel">
-                    <div className="notification-content">
-                      <div className="notification-user">
-                        <img
-                          src="../anyrgb.com.png"
-                          alt="User Profile"
-                          className="profile-picture"
-                        />
-                        <div>
-                          <h5 className="user-name">Juan Dela Cruz
-                            <span className='notification-time'> • Jun 3</span>
-                          </h5>
-                          <p className="user-message">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </>
+                <HTEDashboardHome />
               }
             />
             {/* Additional Routes */}
@@ -215,7 +153,7 @@ function HTEDashboard() {
         </div>
 
         {/* Render Additional Content only on /HTE/home route */}
-        {location.pathname === '/HTE/home' && <AdditionalContent />}
+        {/* {location.pathname === '/HTE/home' && <AdditionalContent />} */}
       </div>
     </div>
   );

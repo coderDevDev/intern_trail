@@ -31,18 +31,23 @@ export const initializeApp = () => {
     function (error) {
       document.body.classList.remove('loading-indicator');
 
+      console.log('Dex');
       const publicRoutes = [
         'login',
         'register',
         'user-selection',
         'account-creation'
       ];
+
+      console.log({ publicRoutes, error: error.config.url.includes('dex') });
       const isPublicRoute = publicRoutes.some(route =>
         error.config.url.includes(route)
       );
 
+      console.log({ isPublicRoute });
+
       if (
-        isPublicRoute &&
+        !isPublicRoute &&
         error.response &&
         error.response.data.error === 'Invalid token'
       ) {
