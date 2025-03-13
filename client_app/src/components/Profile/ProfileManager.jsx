@@ -28,7 +28,7 @@ const generalFormSchema = z.object({
   last_name: z.string()
     .min(2, 'Last name must be at least 2 characters')
     .max(50, 'Last name must be less than 50 characters'),
-  email: z.string().email('Invalid email format'),
+  // email: z.string().email('Invalid email format'),
   phone: z.string()
     .min(10, 'Phone number must be at least 10 digits')
     .max(20, 'Phone number must be less than 20 digits')
@@ -331,8 +331,8 @@ function ProfileManager({ open, onClose }) {
                           value={formData.first_name}
                           onChange={handleChange}
                           className={`w-full p-2 border rounded-lg transition-colors ${errors?.first_name
-                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                             }`}
                         />
                         {errors.first_name && (

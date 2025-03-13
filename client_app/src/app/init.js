@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-let VITE_REACT_APP_BASE_URL = 'http://localhost:5000';
+let VITE_REACT_APP_BASE_URL = 'https://intern-trail-backend.onrender.com';
 
 export const initializeApp = () => {
   console.log(import.meta.env);

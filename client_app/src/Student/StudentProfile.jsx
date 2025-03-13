@@ -16,6 +16,10 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import '../index.css'; // Adjust the import path if necessary
 
+
+
+import ProfileManager from '../components/Profile/ProfileManager';
+
 function ProfileModal({ open, onClose }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isEditable, setIsEditable] = useState(false); // State to control editability
@@ -154,7 +158,7 @@ function ProfileModal({ open, onClose }) {
             Edit Profile
           </Button>
 
-          <h5 style={{marginBottom:'0', marginTop:'20px'}}>User Information</h5>
+          <h5 style={{ marginBottom: '0', marginTop: '20px' }}>User Information</h5>
 
           {/* Text Field Styles */}
           <FormControl margin="normal" fullWidth>
@@ -656,9 +660,9 @@ function ProfileModal({ open, onClose }) {
               }}
             />
           </FormControl>
-          
 
-          <h5 style={{marginBottom:'0', marginTop:'20px'}}>Change Password</h5>
+
+          <h5 style={{ marginBottom: '0', marginTop: '20px' }}>Change Password</h5>
 
           <FormControl margin="normal" fullWidth>
             <FormLabel
@@ -837,4 +841,4 @@ function ProfileModal({ open, onClose }) {
   );
 }
 
-export default ProfileModal;
+export default ProfileManager;

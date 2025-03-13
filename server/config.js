@@ -59,11 +59,23 @@ try {
     //   ssl: false // Disable SSL connection
     // });
 
+    // const pool = await mysql.createPool({
+    //   host: 'localhost',
+    //   user: 'root',
+    //   password: '',
+    //   database: 'intern_trail',
+    //   port: 3306,
+    //   waitForConnections: true,
+    //   connectionLimit: 0, // Max number of connections in the pool
+    //   queueLimit: 0,
+    //   ssl: false // Disable SSL connection
+    // });
+
     const pool = await mysql.createPool({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'intern_trail',
+      host: 'bymw0ngk0zcrb7gwu3dv-mysql.services.clever-cloud.com',
+      user: 'unlmdaxhizkdqjp5',
+      password: '66t96mx1g412yr5bi52n',
+      database: 'bymw0ngk0zcrb7gwu3dv',
       port: 3306,
       waitForConnections: true,
       connectionLimit: 0, // Max number of connections in the pool
