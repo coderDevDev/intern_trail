@@ -480,6 +480,31 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
     });
   }
 });
+
+router.get('/list/allCompanies/get', async (req, res) => {
+  try {
+    const [companies] = await db.query(
+      `SELECT 
+        c.*,
+        COUNT(cf.id) as totalFeedback,
+        AVG(cf.rating) as averageRating
+      FROM companies c
+      LEFT JOIN company_feedback cf ON c.companyID = cf.company_id
+      GROUP BY c.companyID`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: companies
+    });
+  } catch (error) {
+    console.error('Error fetching all companies:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch companies'
+    });
+  }
+});
 router.post(
   '/trainees/application/list',
   authenticateUserMiddleware,

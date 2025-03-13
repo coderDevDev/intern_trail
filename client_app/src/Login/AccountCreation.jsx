@@ -32,7 +32,7 @@ function AccountCreation() {
 
   const fetchCompanies = async () => {
     try {
-      const response = await axios.get('company/list');
+      const response = await axios.get('company/list/allCompanies/get');
       let result = response.data.data
 
 
