@@ -42,9 +42,10 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+console.log({ dex: process.env.OPENAI_APIKEY });
+
 const openai = new OpenAI({
-  apiKey:
-    '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'
+  apiKey: process.env.OPENAI_APIKEY
 });
 
 const sendRegistrationEmail = async ({
