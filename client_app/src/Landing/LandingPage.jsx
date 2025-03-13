@@ -33,9 +33,9 @@ function LandingPage() {
             <div className="hidden md:block">
               <div className="ml-10 flex items-center space-x-4">
                 <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">Features</a>
-                <a href="#how-it-works" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">How It Works</a>
-                <a href="#testimonials" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">Testimonials</a>
-                <a href="#faq" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">FAQ</a>
+                {/* <a href="#how-it-works" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">How It Works</a>
+                <a href="#testimonials" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">Testimonials</a> */}
+                {/* <a href="#faq" className="text-gray-600 dark:text-gray-300 hover:text-blue-600">FAQ</a> */}
                 <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">Login</Link>
                 <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
                   {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
