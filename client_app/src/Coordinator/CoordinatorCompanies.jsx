@@ -251,7 +251,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast.error('Failed to fetch your applications');
+      //toast.error('Failed to fetch your applications');
     }
   };
 

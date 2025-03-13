@@ -28,7 +28,7 @@ function StudentCompanies() {
       }
     } catch (error) {
       console.error('Error fetching user applications:', error);
-      toast.error('Failed to fetch your applications');
+      //toast.error('Failed to fetch your applications');
     }
   };
 
