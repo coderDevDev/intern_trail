@@ -133,55 +133,64 @@ function StudentHome() {
         {requirements.map((company) => (
           <Card key={company.id} className="shadow-lg">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl">
-                {company.name}
-              </CardTitle>
-              <div className="text-sm text-gray-500">
-                Requirements Progress
-              </div>
+              <CardTitle className="text-2xl">{company.name}</CardTitle>
+              <div className="text-sm text-gray-500">Requirements Progress</div>
             </CardHeader>
             <CardContent>
+              {/* Progress Bar */}
               <div className="mb-4">
-                <Progress
-                  value={calculateProgress(company.requirements)}
-                  className="h-2"
-                />
+                <Progress value={calculateProgress(company.requirements)} className="h-2" />
                 <div className="mt-1 text-sm text-gray-500">
                   {calculateProgress(company.requirements)}% Complete
                 </div>
               </div>
+
+              {/* Requirements List */}
               <div className="space-y-4">
                 {company.requirements.map((req, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
                   >
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    {/* Status Icon */}
+                    <CheckCircle2
+                      className={`h-5 w-5 ${req.status === "completed" ? "text-green-500" : "text-gray-400"
+                        }`}
+                    />
+
+                    {/* Requirement Details */}
                     <div className="flex-1">
-                      <div className="font-medium">{req.label}</div>
-                      {req.status === 'completed' && (
+                      <div className="font-medium">
+                        {req.label}{" "}
+                        <span
+                          className={`text-xs font-semibold ${req.isRequired ? "text-red-500" : "text-gray-500"
+                            }`}
+                        >
+                          ({req.isRequired ? "Required" : "Optional"})
+                        </span>
+                      </div>
+
+                      {/* Submission Date */}
+                      {req.status === "completed" && req.submitted_date && (
                         <div className="text-sm text-gray-500">
                           Submitted on {new Date(req.submitted_date).toLocaleDateString()}
                         </div>
                       )}
                     </div>
-                    {req.status !== 'completed' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                      // onClick={() => {
-                      //   navigate('/student/files', { state: { companyId: company.id } });
-                      // }}
-                      >
+
+                    {/* "View" Button for Incomplete Items */}
+                    {/* {req.status !== "completed" && (
+                      <Button size="sm" variant="outline">
                         View
                       </Button>
-                    )}
+                    )} */}
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         ))}
+
       </div>
 
       {/* Recent Announcements */}

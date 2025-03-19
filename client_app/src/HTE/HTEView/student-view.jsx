@@ -76,7 +76,8 @@ import { Dialog, DialogContent } from '@radix-ui/react-dialog';
 export default function StudentView({
   data,
   fetchFunction,
-  viewProgress
+  viewProgress,
+  isCoordinator = false
 }) {
 
 
@@ -92,7 +93,7 @@ export default function StudentView({
   const [collegeFilter, setCollegeFilter] = useState(null)
   const [programFilter, setProgramFilter] = useState(null)
   const [verifiedFilter, setVerifiedFilter] = useState(null)
-  const [activeTab, setActiveTab] = useState('applications');
+  const [activeTab, setActiveTab] = useState(isCoordinator ? 'progress' : 'applications');
   const [isEvaluationFormOpen, setIsEvaluationFormOpen] = useState(false);
   const [evaluationData, setEvaluationData] = useState(null);
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
@@ -343,18 +344,31 @@ export default function StudentView({
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
         <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="applications" className="flex items-center gap-2">
-            <ClipboardList className="h-4 w-4" />
-            <span>Applications {applications.filter(app => app.status === 'pending').length > 0 && `(${applications.filter(app => app.status === 'pending').length})`}</span>
-          </TabsTrigger>
-          <TabsTrigger value="trainees" className="flex items-center gap-2">
-            <UserCog className="h-4 w-4" />
-            <span>Active Trainees {activeTrainees.length > 0 && `(${activeTrainees.length})`}</span>
-          </TabsTrigger>
-          <TabsTrigger value="progress" className="flex items-center gap-2">
-            <ChartLine className="h-4 w-4" />
-            <span>Progress Reports {progressReports.length > 0 && `(${progressReports.length})`}</span>
-          </TabsTrigger>
+
+
+          {
+
+            isCoordinator ? <TabsTrigger value="progress" className="flex items-center gap-2">
+              <ChartLine className="h-4 w-4" />
+              <span>Progress Reports {progressReports.length > 0 && `(${progressReports.length})`}</span>
+            </TabsTrigger> : <>
+              <TabsTrigger value="applications" className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" />
+                <span>Applications {applications.filter(app => app.status === 'pending').length > 0 && `(${applications.filter(app => app.status === 'pending').length})`}</span>
+              </TabsTrigger>
+              <TabsTrigger value="trainees" className="flex items-center gap-2">
+                <UserCog className="h-4 w-4" />
+                <span>Active Trainees {activeTrainees.length > 0 && `(${activeTrainees.length})`}</span>
+              </TabsTrigger>
+              <TabsTrigger value="progress" className="flex items-center gap-2">
+                <ChartLine className="h-4 w-4" />
+                <span>Progress Reports {progressReports.length > 0 && `(${progressReports.length})`}</span>
+              </TabsTrigger>
+            </>
+          }
+
+
+
         </TabsList>
 
         {/* Applications Tab Content */}
@@ -764,11 +778,22 @@ export default function StudentView({
                                   size="sm"
                                   className="w-full justify-start"
                                   onClick={() => {
-                                    window.open(
-                                      `/HTE/student-progress/${student.trainee_user_id}`,
-                                      "_blank",
-                                      "noopener,noreferrer"
-                                    );
+
+
+                                    if (isCoordinator) {
+                                      window.open(
+                                        `/coordinator/student-progress/${student.trainee_user_id}`,
+                                        "_blank",
+                                        "noopener,noreferrer"
+                                      );
+                                    } else {
+                                      window.open(
+                                        `/HTE/student-progress/${student.trainee_user_id}`,
+                                        "_blank",
+                                        "noopener,noreferrer"
+                                      );
+                                      setOpenMenuId(null);
+                                    }
                                     setOpenMenuId(null);
                                   }}
                                 >

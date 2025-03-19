@@ -1569,20 +1569,58 @@ router.post(
       const loggedInUser = req.user;
       const { id } = loggedInUser;
 
-      // Get company ID if user is HTE supervisor
-      const [supervisor] = await db.query(
-        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
-        [id]
-      );
+      const userRole = req.user.role;
 
-      if (supervisor.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'User is not associated with any company'
-        });
+      let scopeData;
+
+      let companyID;
+      if (userRole === 'ojt-coordinator') {
+        const [coordinator] = await db.query(
+          `SELECT c.*, p.programID, p.programName, col.collegeID, col.collegeName
+           FROM coordinators c
+           JOIN programs p ON c.programID = p.programID
+           JOIN colleges col ON p.collegeID = col.collegeID
+           WHERE c.userID = ?`,
+          [id]
+        );
+
+        if (coordinator && coordinator.length > 0) {
+          scopeData = {
+            collegeID: coordinator[0].collegeID,
+            collegeName: coordinator[0].collegeName,
+            programID: coordinator[0].programID,
+            programName: coordinator[0].programName
+          };
+
+          // select from company table
+          const [company] = await db.query(
+            `SELECT * FROM companies WHERE collegeID = ?
+        
+        AND programID = ?
+        `,
+            [scopeData.collegeID, scopeData.programID]
+          );
+
+          companyID = company[0].companyID;
+        }
+      } else {
+        // Get company ID if user is HTE supervisor
+        const [supervisor] = await db.query(
+          `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+          [id]
+        );
+
+        if (supervisor.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'User is not associated with any company'
+          });
+        }
+
+        companyID = supervisor[0].companyID;
       }
 
-      const companyID = supervisor[0].companyID;
+      console.log({ companyID });
 
       // Get all applications for the company
       const [applications] = await db.query(
@@ -1636,21 +1674,55 @@ router.post(
     try {
       const loggedInUser = req.user;
       const { id } = loggedInUser;
+      const userRole = req.user.role;
+      let scopeData;
 
-      // Get company ID if user is HTE supervisor
-      const [supervisor] = await db.query(
-        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
-        [id]
-      );
+      let companyID;
+      if (userRole === 'ojt-coordinator') {
+        const [coordinator] = await db.query(
+          `SELECT c.*, p.programID, p.programName, col.collegeID, col.collegeName
+           FROM coordinators c
+           JOIN programs p ON c.programID = p.programID
+           JOIN colleges col ON p.collegeID = col.collegeID
+           WHERE c.userID = ?`,
+          [id]
+        );
 
-      if (supervisor.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'User is not associated with any company'
-        });
+        if (coordinator && coordinator.length > 0) {
+          scopeData = {
+            collegeID: coordinator[0].collegeID,
+            collegeName: coordinator[0].collegeName,
+            programID: coordinator[0].programID,
+            programName: coordinator[0].programName
+          };
+
+          // select from company table
+          const [company] = await db.query(
+            `SELECT * FROM companies WHERE collegeID = ?
+        
+        AND programID = ?
+        `,
+            [scopeData.collegeID, scopeData.programID]
+          );
+
+          companyID = company[0].companyID;
+        }
+      } else {
+        // Get company ID if user is HTE supervisor
+        const [supervisor] = await db.query(
+          `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+          [id]
+        );
+
+        if (supervisor.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'User is not associated with any company'
+          });
+        }
+
+        companyID = supervisor[0].companyID;
       }
-
-      const companyID = supervisor[0].companyID;
 
       console.log({ companyID });
 
@@ -1706,21 +1778,55 @@ router.post(
       const loggedInUser = req.user;
       const { id } = loggedInUser;
 
-      // Get company ID if user is HTE supervisor
-      const [supervisor] = await db.query(
-        `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
-        [id]
-      );
+      const userRole = req.user.role;
+      let scopeData;
 
-      if (supervisor.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'User is not associated with any company'
-        });
+      let companyID;
+      if (userRole === 'ojt-coordinator') {
+        const [coordinator] = await db.query(
+          `SELECT c.*, p.programID, p.programName, col.collegeID, col.collegeName
+           FROM coordinators c
+           JOIN programs p ON c.programID = p.programID
+           JOIN colleges col ON p.collegeID = col.collegeID
+           WHERE c.userID = ?`,
+          [id]
+        );
+
+        if (coordinator && coordinator.length > 0) {
+          scopeData = {
+            collegeID: coordinator[0].collegeID,
+            collegeName: coordinator[0].collegeName,
+            programID: coordinator[0].programID,
+            programName: coordinator[0].programName
+          };
+
+          // select from company table
+          const [company] = await db.query(
+            `SELECT * FROM companies WHERE collegeID = ?
+        
+        AND programID = ?
+        `,
+            [scopeData.collegeID, scopeData.programID]
+          );
+
+          companyID = company[0].companyID;
+        }
+      } else {
+        // Get company ID if user is HTE supervisor
+        const [supervisor] = await db.query(
+          `SELECT companyID FROM hte_supervisors WHERE userID = ?`,
+          [id]
+        );
+
+        if (supervisor.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'User is not associated with any company'
+          });
+        }
+
+        companyID = supervisor[0].companyID;
       }
-
-      const companyID = supervisor[0].companyID;
-
       // Get trainees with progress data
       const [traineeProgress] = await db.query(
         `SELECT 

@@ -137,7 +137,7 @@ function StudentHome() {
                 {company.name}
               </CardTitle>
               <div className="text-sm text-gray-500">
-                Requirements Progress
+                Requirements Progressss
               </div>
             </CardHeader>
             <CardContent>
@@ -151,33 +151,46 @@ function StudentHome() {
                 </div>
               </div>
               <div className="space-y-4">
-                {company.requirements.map((req, index) => (
+                {JSON.parse(company.list_of_requirements).map((req, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
                   >
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    {/* Icon */}
+                    <CheckCircle2
+                      className={`h-5 w-5 ${req.status === "completed" ? "text-green-500" : "text-gray-400"
+                        }`}
+                    />
+
+                    {/* Requirement Details */}
                     <div className="flex-1">
-                      <div className="font-medium">{req.label}</div>
-                      {req.status === 'completed' && (
+                      <div className="font-medium">
+                        {req.label}{" "}
+                        <span
+                          className={`text-xs font-semibold ${req.isRequired ? "text-red-500" : "text-gray-500"
+                            }`}
+                        >
+                          ({req.isRequired ? "Required" : "Optional"})
+                        </span>
+                      </div>
+
+                      {/* Submitted Date */}
+                      {req.status === "completed" && req.submitted_date && (
                         <div className="text-sm text-gray-500">
                           Submitted on {new Date(req.submitted_date).toLocaleDateString()}
                         </div>
                       )}
                     </div>
-                    {req.status !== 'completed' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                      // onClick={() => {
-                      //   navigate('/student/files', { state: { companyId: company.id } });
-                      // }}
-                      >
+
+                    {/* View Button (if not completed) */}
+                    {req.status !== "completed" && (
+                      <Button size="sm" variant="outline">
                         View
                       </Button>
                     )}
                   </div>
                 ))}
+
               </div>
             </CardContent>
           </Card>
