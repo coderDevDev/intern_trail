@@ -29,10 +29,12 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 
-export default function WeeklyReport({ weeklyReport }) {
+export default function WeeklyReport({ weeklyReport, supervisorName }) {
   const handlePrint = () => {
     window.print()
   }
+
+
 
   const calculateWorkingHours = (timeIn, timeOut) => {
     if (timeIn === "N/A" || timeOut === "N/A") return "N/A";
@@ -183,7 +185,9 @@ export default function WeeklyReport({ weeklyReport }) {
         {/* Certification */}
         <div className="pt-8 text-center">
           <p className="mb-4">Certified by:</p>
-          <p className="font-semibold">Mr. Ferdinand Pasion</p>
+
+
+          <p className="font-semibold">{supervisorName || 'Not Assigned'}</p>
           <p className="text-sm text-muted-foreground">Name of Trainor</p>
         </div>
       </div>

@@ -125,8 +125,8 @@ const sendRegistrationEmail = async ({
                 <div class="email-content">
                   <p>Dear ${fullName},</p>
                     <p>Congratulations! 🎉 Your OJT application at ${companyName} has been officially approved.</p>
-                    <p>We’re excited to have you on board and look forward to supporting you on this journey. Our team will be in touch soon with the next steps, including your schedule, orientation, and other important details.</p>
-                    <p>Welcome to the team—we can’t wait to see you thrive! 🚀</p>
+                    <p>We're excited to have you on board and look forward to supporting you on this journey. Our team will be in touch soon with the next steps, including your schedule, orientation, and other important details.</p>
+                    <p>Welcome to the team—we can't wait to see you thrive! 🚀</p>
                     </div>
                     <div class="footer">
                     <p>If you have any questions, don't hesitate to reach out to us.</p>
@@ -193,7 +193,7 @@ const sendRegistrationEmail = async ({
                   <p>The ${companyName} Team</p>
                 </div>
                 <div class="footer">
-                  <p>If you have any questions, please don’t hesitate to reach out.</p>
+                  <p>If you have any questions, please don't hesitate to reach out.</p>
                 </div>
               </div>
             </body>
@@ -1994,6 +1994,53 @@ router.post(
         success: false,
         message: 'Failed to fetch trainee certificates',
         error: error.message
+      });
+    }
+  }
+);
+
+// Get HTE supervisor details for a company
+router.get(
+  '/supervisor/:companyId',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { companyId } = req.params;
+
+      const [supervisor] = await db.query(
+        `
+      SELECT 
+        u.first_name, 
+        u.last_name,
+        u.userID,
+        hs.companyID
+      FROM users u
+      INNER JOIN hte_supervisors hs ON u.userID = hs.userID
+      WHERE hs.companyID = ? 
+      AND u.role = 'hte-supervisor'
+      LIMIT 1
+    `,
+        [companyId]
+      );
+
+      console.log('Found supervisor:', supervisor[0]);
+
+      if (supervisor.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Supervisor not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: supervisor[0]
+      });
+    } catch (error) {
+      console.error('Error fetching supervisor details:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch supervisor details'
       });
     }
   }

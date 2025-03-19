@@ -26,9 +26,9 @@ import EvaluationForm from '@/components/EvaluationForm/EvaluationForm';
 import CertificateUpload from '@/components/CertificateUpload/CertificateUpload';
 import { Skeleton } from "@/components/ui/skeleton";
 
-function StudentDTR() {
+function StudentDTR({ supervisorName }) {
   const { studentId } = useParams();
-
+  console.log({ supervisorName })
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const showButtons = !studentId || loggedInUser.userID === studentId;
@@ -1114,7 +1114,7 @@ function StudentDTR() {
             </DialogDescription>
           </DialogHeader>
           <div className="">
-            <WeeklyReport weeklyReport={weeklyReport} />
+            <WeeklyReport weeklyReport={weeklyReport} supervisorName={supervisorName} />
           </div>
         </DialogContent>
       </Dialog>
