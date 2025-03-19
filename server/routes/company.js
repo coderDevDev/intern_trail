@@ -67,6 +67,7 @@ const sendRegistrationEmail = async ({
     if (key === 'APPROVE_OJT_APPLICATION') {
       return {
         subject: '🎉 Congratulations! Your OJT Application Has Been Approved',
+        //Improve email content
         html: `
           <html>
             <head>
@@ -122,13 +123,13 @@ const sendRegistrationEmail = async ({
                   <h1>Welcome to ${companyName}!</h1>
                 </div>
                 <div class="email-content">
-                  <p>Dear ${fullName}</p>
-                  <p>We're thrilled to inform you that your OJT application at ${companyName} has been approved! 🎉</p>
-                  <p>We can't wait for you to start this journey with us. Our team will reach out with the next steps, including your schedule, orientation, and other essential details.</p>
-                  <p>See you soon, and welcome aboard! 🚀</p>
-                </div>
-                <div class="footer">
-                  <p>If you have any questions, feel free to contact us.</p>
+                  <p>Dear ${fullName},</p>
+                    <p>Congratulations! 🎉 Your OJT application at ${companyName} has been officially approved.</p>
+                    <p>We’re excited to have you on board and look forward to supporting you on this journey. Our team will be in touch soon with the next steps, including your schedule, orientation, and other important details.</p>
+                    <p>Welcome to the team—we can’t wait to see you thrive! 🚀</p>
+                    </div>
+                    <div class="footer">
+                    <p>If you have any questions, don't hesitate to reach out to us.</p>
                 </div>
               </div>
             </body>
@@ -138,6 +139,7 @@ const sendRegistrationEmail = async ({
     } else if (key === 'REJECT_OJT_APPLICATION') {
       return {
         subject: '⚠️ OJT Application Status: Rejected',
+        //Improve email content
         html: `
           <html>
             <head>
@@ -184,13 +186,14 @@ const sendRegistrationEmail = async ({
                 </div>
                 <div class="email-content">
                   <p>Dear ${fullName},</p>
-                  <p>Thank you for your interest in joining ${companyName}. Unfortunately, after reviewing your application, we regret to inform you that we cannot accommodate you at this time.</p>
-                  <p>We appreciate the time and effort you put into your application and encourage you to keep striving toward your career goals. We wish you success in your future endeavors.</p>
+                  <p>Thank you for your interest in joining ${companyName}. We sincerely appreciate the time and effort you put into your application.</p>
+                  <p>After careful consideration, we regret to inform you that we are unable to accommodate your application at this time. However, we truly admire your dedication and encourage you to continue pursuing your career goals.</p>
+                  <p>We wish you the very best in your future endeavors and hope our paths cross again.</p>
                   <p>Best regards,</p>
                   <p>The ${companyName} Team</p>
                 </div>
                 <div class="footer">
-                  <p>If you have any questions, feel free to reach out to us.</p>
+                  <p>If you have any questions, please don’t hesitate to reach out.</p>
                 </div>
               </div>
             </body>

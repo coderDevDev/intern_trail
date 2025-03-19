@@ -192,6 +192,7 @@ router.post('/send-verification-email', async (req, res) => {
       from: 'interntrailwup@gmail.com',
       to: email,
       subject: 'Email Verification',
+      //Improve email content
       html: `
         <h1>Email Verification</h1>
         <p>Click the link below to verify your email:</p>
@@ -299,8 +300,9 @@ router.post('/forgotPassword', async (req, res) => {
       from: 'interntrailwup@gmail.com',
       to: email,
       subject: 'Reset Password',
+      //Improve email content
       html: `
-        <h1>Reset Your Password</h1>
+        <h1>Reset your Password</h1>
         <p>Click the link below to reset your password:</p>
         <a href="${REACT_FRONT_END_URL}/reset-password/${token}">${REACT_FRONT_END_URL}/reset-password/${token}</a>
         <p>The link will expire in 10 minutes.</p>

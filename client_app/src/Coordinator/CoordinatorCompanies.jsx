@@ -547,7 +547,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     return (
       <ShadcnDialog open={isOpen} onOpenChange={onClose}>
         <ShadcnDialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          <ShadcnDialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b">
+          <ShadcnDialogHeader className="top-0 bg-white pb-4 border-b">
             <ShadcnDialogTitle className="text-xl font-bold flex items-center gap-2">
               <Building className="h-5 w-5 text-blue-500" />
               {editData ? 'Edit Company' : 'Add New Company'}
@@ -1439,7 +1439,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     <div className="p-6 space-y-6">
       {/* User Scope Badge - Modern Design */}
       {userScope && (
-        <div className="mb-6 p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="mb-4 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             {/* Left side - User scope information */}
             <div className="flex-1">
@@ -1447,7 +1447,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
               {role === 'ojt-coordinator' || role === 'trainee' ? (
                 <>
-                  <div className="flex items-center gap-2 mt-3 mb-2">
+                  <div className="flex items-center gap-2 mt-2 mb-2">
 
                     <Building className="h-5 w-5 text-blue-600" />
                     <span className="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
@@ -1467,25 +1467,19 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                 </>
               ) : role === 'dean' ? (
                 <>
-                  <div className="flex items-center gap-2 mt-3 mb-2">
+                  <div className="flex items-center gap-2 mt-2 mb-2">
                     <span className="px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                       {userScope.collegeName}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    You are viewing all companies in your college
-                  </p>
                 </>
               ) : role === 'hte-supervisor' ? (
                 <>
-                  <div className="flex items-center gap-2 mt-3 mb-2">
+                  <div className="flex items-center gap-2 mt-2 mb-2">
                     <span className="px-3 py-1.5 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
                       {userScope.companyName}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    You are viewing your company's information
-                  </p>
                 </>
               ) : null}
             </div>
@@ -1518,7 +1512,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Companies</h1>
-            <p className="text-gray-500 mt-1">Manage partner companies for student internships</p>
+            
           </div>
 
           <div className="flex items-center gap-3">

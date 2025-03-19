@@ -85,15 +85,15 @@ function StudentHome() {
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Clock className="h-6 w-6 text-blue-500" />
             <div>
-              <p className="text-sm text-gray-500">Total Hours</p>
+              <p className="text-lg font-semibold mb-auto ml-2">Total Hours</p>
               <h3 className="text-2xl font-bold">
-                {traineeDetails?.remaining_hours}
+                {traineeDetails?.remaining_hours || 0}
                 {/* {traineeDetails.total_hours_rendered} / {360 - traineeDetails.remaining_hours} */}
               </h3>
             </div>
-            <Clock className="h-8 w-8 text-blue-500" />
           </div>
           <Progress
             value={(traineeDetails.total_hours_rendered / (360 - traineeDetails.remaining_hours)) * 100}
@@ -192,7 +192,7 @@ function StudentHome() {
             <div key={index} className="border-b last:border-0 pb-3">
               <div className="flex items-start justify-between">
                 <h3 className="font-medium">{announcement.title}</h3>
-                <span className={`text-xs px-2 py-1 rounded ${announcement.status === 'Urgent'
+                <span className={`text-xs px-2 py-1 rounded-full ${announcement.status === 'Urgent'
                   ? 'bg-red-100 text-red-800'
                   : 'bg-blue-100 text-blue-800'
                   }`}>

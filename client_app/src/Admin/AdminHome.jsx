@@ -79,14 +79,15 @@ function AdminHome() {
 
   return (
     <div>
-      <Navbar bg="white" variant="light" className="m-3">
-        <Container fluid className="d-flex justify-content-between align-items-center">
-          <Navbar.Brand className="d-flex align-items-center justify-content-center w-100 p-2">
+       <Navbar bg="white" variant="light">
+            <Container fluid className="d-flex justify-content-between align-items-center">
+              <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" onClick={() => setExpanded(!expanded)} />
+              <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
             <img
               src="../logo.png"
-              width="auto"
-              height="20"
-              className="d-inline-block align-top me-2"
+              width="250px"
+              height="auto"
+              className="d-inline-block align-top me-1"
               alt="Logo"
             />
           </Navbar.Brand>

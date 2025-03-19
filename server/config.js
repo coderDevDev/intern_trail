@@ -72,15 +72,17 @@ try {
     // });
 
     const pool = await mysql.createPool({
-      host: 'bymw0ngk0zcrb7gwu3dv-mysql.services.clever-cloud.com',
-      user: 'unlmdaxhizkdqjp5',
-      password: '66t96mx1g412yr5bi52n',
-      database: 'bymw0ngk0zcrb7gwu3dv',
-      port: 3306,
+      host: 'aiks1r.stackhero-network.com',
+      user: 'root',
+      password: 'de5Jtt5OaQr5QY0mS5Cfb1jRQUDddlPD',
+      database: 'intern_trail',
+      port: 3934,
       waitForConnections: true,
       connectionLimit: 0, // Max number of connections in the pool
       queueLimit: 0,
-      ssl: false // Disable SSL connection
+      ssl: {
+        rejectUnauthorized: true // Ensure it's a secure connection
+      }
     });
 
     return pool;

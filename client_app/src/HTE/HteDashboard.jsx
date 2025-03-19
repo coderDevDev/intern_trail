@@ -94,14 +94,14 @@ function HTEDashboard() {
   return (
     <div>
       {/* Navbar */}
-      <Navbar bg="white" variant="light" className="m-3">
+      <Navbar bg="white" variant="light">
         <Container fluid className="d-flex justify-content-between align-items-center">
           <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" onClick={() => setExpanded(!expanded)} />
-          <Navbar.Brand className="d-flex align-items-left p-4 mx-auto">
+          <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
             <img
               src="../logo.png"
-              width="auto"
-              height="20"
+              width="250px"
+              height="auto"
               className="d-inline-block align-top me-1"
               alt="Logo"
             />

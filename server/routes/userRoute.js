@@ -59,7 +59,8 @@ const sendRegistrationEmail = async (email, templateKey) => {
   const getEmailTemplate = key => {
     if (key === 'APPROVE_REGISTRATION') {
       return {
-        subject: 'Your Registration Has Been Approved!',
+        subject: 'Your registration has been approved!',
+        //Improve email content
         html: `
           <html>
             <head>
@@ -115,7 +116,7 @@ const sendRegistrationEmail = async (email, templateKey) => {
                 </div>
                 <div class="email-content">
                   <p>Dear User,</p>
-                  <p>Your registration has been approved successfully. You can now start exploring the features of our platform.</p>
+                  <p>Your registration has been successfully approved. You can now start exploring the features of InternTrail.</p>
                
                 </div>
                 <div class="footer">
@@ -128,7 +129,8 @@ const sendRegistrationEmail = async (email, templateKey) => {
       };
     } else if (key === 'REJECT_REGISTRATION') {
       return {
-        subject: 'Your Registration Has Been Rejected',
+        subject: 'Your registration has been rejected',
+        //Improve email content
         html: `
           <html>
             <head>
@@ -475,7 +477,7 @@ router.post(
         subject: 'Verify your acccount',
         html: `
              <h1>Acccount Verification</h1>
-            <p>Click the link below to verify your account:</p>
+            <p>Please click the link below to verify your account:</p>
             <a href="${config.REACT_FRONT_END_URL}/verify-email/${token}">${config.REACT_FRONT_END_URL}/verify-email/${token}</a>
             <p>This link will expire in 24 hours.</p>
             

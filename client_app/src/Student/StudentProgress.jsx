@@ -41,8 +41,8 @@ function StudentProgress() {
   ];
 
   return (
-    <div>
-      <h1 className='font-bold mb-4'>Progress Reports</h1>
+    <div className='p-6 space-y-6'>
+      <h1 className='text-2xl font-bold'>Progress Reports</h1>
 
       <div className="progress-container">
         <StudentDTR />

@@ -861,12 +861,12 @@ function StudentDTR() {
 
   console.log({ weeklyReport, weeklyFeedback });
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
+    <div className="container mx-auto px-0">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-auto">
           {/* Progress Overview */}
-          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow mb-4">
             <CardContent className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Progress Overview</h2>
@@ -916,7 +916,7 @@ function StudentDTR() {
           </Card>
 
           {/* Calendar */}
-          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow mb-4">
             <CardContent className="p-4">
               <Calendar
                 onChange={setSelectedDate}
@@ -954,7 +954,7 @@ function StudentDTR() {
           </Card>
 
           {/* Time Entry */}
-          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow mb-4">
             <CardContent className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Time Entry</h2>
@@ -1004,7 +1004,7 @@ function StudentDTR() {
           <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">Reports & Feedback</h2>
+                <h2 className="text-lg font-semibold">Reports & Feedback</h2>
                 <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
                   <button
                     className={`px-4 py-2 text-sm font-medium transition-colors

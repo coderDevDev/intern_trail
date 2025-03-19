@@ -141,7 +141,6 @@ function CoordinatorTrainees() {
 
   return (
     <div>
-      <h1 className='font-bold mb-4'>Trainees</h1>
 
 
       <StudentView

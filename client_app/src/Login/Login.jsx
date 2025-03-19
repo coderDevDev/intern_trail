@@ -113,9 +113,27 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <h2 className='text-center text-2xl text-blue-900 font-bold'>Welcome to InternTrail</h2>
+
+    <div className="login-container relative overflow-hidden">
+      {/* Background gradient - modify positioning or colors as needed */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 transform-gpu overflow-hidden blur-3xl"
+      >
+        <div
+          style={{
+            clipPath:
+              'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+          }}
+          className="relative left-[calc(50%)] aspect-[1155/678] w-[48rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:w-[96rem]"
+        />
+      </div>
+
+      <div className="login-form ">
+        <img src="/logo.png" alt="logo" className="mx-auto block mb-2 w-28 h-auto" />
+        <h1 className='text-2xl font-semibold text-center mb-4'>
+          Log in
+        </h1>
         <Formik {...formikConfig}>
           {({
             handleSubmit,
@@ -133,7 +151,7 @@ function Login() {
                   labelColor="text-blue-950"
                   name="email"
                   type="text"
-                  placeholder=""
+                  placeholder="Enter your email"
                   value={values.email}
                   onBlur={handleBlur} // This apparently updates `touched`?
                 />
@@ -144,11 +162,13 @@ function Login() {
                     labelColor="text-blue-950"
                     label="Password"
                     name="password"
+                    placeholder="Enter your password"
                     type={showPassword ? "text" : "password"} // Change type based on visibility
                     value={values.password}
                     onBlur={handleBlur}
                   />
-                  <button
+                  {/* 
+                   <button
                     type="button"
                     onClick={togglePasswordVisibility}
                     className="absolute inset-y-0 right-0 flex items-center" // Added z-10
@@ -163,6 +183,8 @@ function Login() {
                       </svg>
                     )}
                   </button>
+                  */}
+
                 </div>
                 <div className="text-right text-blue-950">
                   <a href="/forgot-password"><span className="text-sm  text-blue-950 inline-block  hover:text-buttonPrimary  hover:underline hover:cursor-pointer transition duration-200">Forgot Password?</span></a></div>

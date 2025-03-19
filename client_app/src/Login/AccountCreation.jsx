@@ -242,41 +242,55 @@ function AccountCreation() {
 
         console.log({ errors })
         return (
-          <div className="account-creation-container">
+          <div className="account-creation-container relative overflow-hidden">
+              {/* Background gradient - modify positioning or colors as needed */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 -z-10 transform-gpu overflow-hidden blur-3xl"
+              >
+                <div
+                  style={{
+                    clipPath:
+                      'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+                  }}
+                  className="relative left-[calc(50%)] aspect-[1155/678] w-[48rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:w-[96rem]"
+                />
+              </div>
+              
             <div className="account-creation-form">
               <h2 className='text-center text-2xl'>Let's set up your account</h2>
               <div className="flex flex-col gap-4 md:flex-row">
-                <div className="">
+                <div className="mb-2">
                   <InputText
                     label="First Name"
                     labelColor="text-blue-950"
                     name="firstName"
                     type="text"
-                    placeholder=""
+                    placeholder="First name"
                     value={values.firstName}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={touched.firstName && errors.firstName}
                   />
                 </div>
-                <div className="">
+                <div className="mb-2">
                   <InputText
                     label="Middle Initial"
                     name="middleInitial"
                     type="text"
-                    placeholder="Enter your middle initial"
+                    placeholder="Middle initial"
                     value={values.middleInitial}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={touched.middleInitial && errors.middleInitial}
                   />
                 </div>
-                <div className="">
+                <div className="mb-2">
                   <InputText
                     label="Last Name"
                     name="lastName"
                     type="text"
-                    placeholder="Enter your last name"
+                    placeholder="Last name"
                     value={values.lastName}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -285,7 +299,7 @@ function AccountCreation() {
                 </div>
               </div>
 
-              <div className="">
+              <div className="mb-2">
                 <InputText
                   label={
                     userType === 'hte-supervisor'
@@ -304,7 +318,7 @@ function AccountCreation() {
               </div>
 
               {userType === 'student' && (
-                <div className="">
+                <div className="mb-2">
                   <InputText
                     label="Student ID"
                     name="studentId"
@@ -318,7 +332,7 @@ function AccountCreation() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-2">
                 <div>
                   <InputText
                     label="Password"
@@ -346,7 +360,7 @@ function AccountCreation() {
               </div>
 
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-2">
                 <div className="">
                   <InputText
                     label="Phone Number"
@@ -380,10 +394,10 @@ function AccountCreation() {
               {userType !== 'hte-supervisor' && (
                 <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="">
-                    <label htmlFor="college">College</label>
+                    <label htmlFor="college" className='mb-2'>College</label>
                     <select
                       id="college"
-                      className="form-control"
+                      className="form-control mb-2"
                       onChange={(e) => {
                         let value = e.target.value;
                         setFieldValue('college', value);
@@ -407,7 +421,7 @@ function AccountCreation() {
                   </div>
                   {userType !== 'university-dean' && (
                     <div className="">
-                      <label htmlFor="program">Program / Course</label>
+                      <label htmlFor="program" className='mb-2'>Program / Course</label>
                       <select
                         id="program"
                         className="form-control"
