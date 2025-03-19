@@ -211,8 +211,10 @@ export function StudentModal({
           <Button
             variant="default"
             onClick={async () => {
+
+              console.log({ hours })
               setLoading(true);
-              await onApprove(student.traineeID);
+              await onApprove(student.traineeID, hours);
               setLoading(false);
             }}
             disabled={loading}

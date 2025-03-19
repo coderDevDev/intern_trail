@@ -24,6 +24,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import EvaluationForm from '@/components/EvaluationForm/EvaluationForm';
 import CertificateUpload from '@/components/CertificateUpload/CertificateUpload';
+import { Skeleton } from "@/components/ui/skeleton";
 
 function StudentDTR() {
   const { studentId } = useParams();
@@ -54,6 +55,7 @@ function StudentDTR() {
   const [certificate, setCertificate] = useState(null);
   const [studentData, setStudentData] = useState(null);
   const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
+  const [isProgressLoading, setIsProgressLoading] = useState(true);
 
   useEffect(() => {
     const storedRecords = JSON.parse(localStorage.getItem('dtrRecords')) || {};
@@ -77,6 +79,7 @@ function StudentDTR() {
   useEffect(() => {
     const fetchWeeklyData = async () => {
       try {
+        setIsProgressLoading(true);
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
         // Get the week number relative to the month
@@ -90,6 +93,30 @@ function StudentDTR() {
 
         if (response.data.success) {
           const { weeklyReport, weeklyFeedback } = response.data.data;
+
+          // Get all weeks in the current month
+          const currentDate = new Date(selectedDate);
+          const firstDayOfMonth = startOfMonth(currentDate);
+          const lastDayOfMonth = endOfMonth(currentDate);
+          const totalWeeksInMonth = differenceInCalendarWeeks(lastDayOfMonth, firstDayOfMonth, { weekStartsOn: 1 }) + 1;
+
+          // Fetch all weekly reports for the month
+          const monthlyReportsPromises = Array.from({ length: totalWeeksInMonth }, (_, i) => {
+            return axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${i + 1}`);
+          });
+
+          const monthlyReports = await Promise.all(monthlyReportsPromises);
+
+          // Calculate total monthly hours from all weekly reports
+          const totalMonthlyHours = monthlyReports.reduce((total, weekResponse) => {
+            if (weekResponse.data.success) {
+              const weeklyData = weekResponse.data.data.weeklyReport;
+              return total + weeklyData.reduce((weekTotal, day) => {
+                return weekTotal + calculateHours(day.timeIn, day.timeOut);
+              }, 0);
+            }
+            return total;
+          }, 0);
 
           // Generate the complete week template
           const start = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Start from Monday
@@ -132,7 +159,6 @@ function StudentDTR() {
             }
           }
 
-          console.log({ completeWeekReport });
           setWeeklyReport(completeWeekReport);
           setWeeklyFeedback(weeklyFeedback);
 
@@ -153,16 +179,14 @@ function StudentDTR() {
             setDailyHours(calculateHours(todayReport.timeIn, todayReport.timeOut).toFixed(2));
           }
 
-          // Calculate total hours
-          const totalWeekHours = completeWeekReport.reduce((total, report) => {
-            return total + calculateHours(report.timeIn, report.timeOut);
-          }, 0);
-
-          setMonthlyHours(totalWeekHours.toFixed(2));
+          // Set monthly hours from accumulated data
+          setMonthlyHours(totalMonthlyHours.toFixed(2));
+          setIsProgressLoading(false);
         }
       } catch (error) {
         console.error('Error fetching weekly data:', error);
         toast.error('Failed to fetch weekly report data');
+        setIsProgressLoading(false);
       }
     };
 
@@ -881,34 +905,61 @@ function StudentDTR() {
               </div>
 
               <div className="space-y-4">
+                {/* Monthly Progress Bar */}
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-600">Monthly Progress</span>
-                    <span className="font-medium">{monthlyHours}/360 hours</span>
+                    {isProgressLoading ? (
+                      <Skeleton className="h-4 w-24" />
+                    ) : (
+                      <span className="font-medium">{monthlyHours}/360 hours</span>
+                    )}
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min((parseFloat(monthlyHours) / 360) * 100, 100)}%` }}
-                    />
-                  </div>
+                  {isProgressLoading ? (
+                    <Skeleton className="h-2 w-full" />
+                  ) : (
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min((parseFloat(monthlyHours) / 360) * 100, 100)}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
 
+                {/* Progress Stats Grid */}
                 <div className="grid grid-cols-3 gap-3">
+                  {/* Daily Progress */}
                   <div className="bg-blue-50 p-3 rounded-lg text-center">
                     <p className="text-sm text-blue-600">Daily</p>
-                    <p className="text-lg font-bold text-blue-700">{dailyHours}h</p>
+                    {isProgressLoading ? (
+                      <Skeleton className="h-7 w-16 mx-auto mt-1" />
+                    ) : (
+                      <p className="text-lg font-bold text-blue-700">{dailyHours}h</p>
+                    )}
                   </div>
+
+                  {/* Weekly Progress */}
                   <div className="bg-green-50 p-3 rounded-lg text-center">
                     <p className="text-sm text-green-600">Weekly</p>
-                    <p className="text-lg font-bold text-green-700">
-                      {weeklyReport.reduce((total, entry) =>
-                        total + calculateHours(entry.timeIn, entry.timeOut), 0).toFixed(2)}h
-                    </p>
+                    {isProgressLoading ? (
+                      <Skeleton className="h-7 w-16 mx-auto mt-1" />
+                    ) : (
+                      <p className="text-lg font-bold text-green-700">
+                        {weeklyReport.reduce((total, entry) =>
+                          total + calculateHours(entry.timeIn, entry.timeOut), 0).toFixed(2)}h
+                      </p>
+                    )}
                   </div>
+
+                  {/* Monthly Progress */}
                   <div className="bg-purple-50 p-3 rounded-lg text-center">
                     <p className="text-sm text-purple-600">Monthly</p>
-                    <p className="text-lg font-bold text-purple-700">{monthlyHours}h</p>
+                    {isProgressLoading ? (
+                      <Skeleton className="h-7 w-16 mx-auto mt-1" />
+                    ) : (
+                      <p className="text-lg font-bold text-purple-700">{monthlyHours}h</p>
+                    )}
                   </div>
                 </div>
               </div>

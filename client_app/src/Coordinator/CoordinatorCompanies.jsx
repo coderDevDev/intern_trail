@@ -39,7 +39,7 @@ import InputText from './../components/Input/InputText';
 
 import { Button } from "@/components/ui/button";
 
-import { Formik, useField, useFormik, Form } from 'formik';
+import { Formik, useField, useFormik, Form, getIn } from 'formik';
 import * as Yup from 'yup';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -507,7 +507,14 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
         formData.append('contact_phone', values.contact_phone);
         formData.append('address', values.address);
         formData.append('expertise', values.expertise);
-        formData.append('list_of_requirements', JSON.stringify(values.list_of_requirements));
+
+        // Transform requirements to include required/optional status
+        formData.append('list_of_requirements', JSON.stringify(values.list_of_requirements.map(req => ({
+          value: req.value,
+          label: req.value,
+          isRequired: req.isRequired,
+          status: req.isRequired ? 'required' : 'optional'
+        }))));
         formData.append('collegeID', userScope?.collegeID);
         formData.append('programID', userScope?.programID);
 
@@ -577,11 +584,9 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
               contact_phone: editData?.contact_phone || '',
               address: editData?.address || '',
               expertise: editData?.expertise || '',
-              list_of_requirements: editData?.list_of_requirements ?
-                (typeof editData.list_of_requirements === 'string' ?
-                  JSON.parse(editData.list_of_requirements) :
-                  editData.list_of_requirements) || defaultRequirements :
-                defaultRequirements,
+              list_of_requirements: editData?.list_of_requirements || [
+                { value: '', isRequired: true }
+              ],
               avatar_photo: editData?.avatar_photo || null,
               MOA: editData?.moa_url || null
             }}
@@ -591,7 +596,13 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
               contact_email: Yup.string().email('Invalid email').required('Email is required'),
               contact_phone: Yup.string().required('Contact phone is required'),
               address: Yup.string().required('Address is required'),
-              expertise: Yup.string().required('Expertise is required')
+              expertise: Yup.string().required('Expertise is required'),
+              list_of_requirements: Yup.array().of(
+                Yup.object().shape({
+                  value: Yup.string().required('Requirement is required'),
+                  isRequired: Yup.boolean().required('Please specify if requirement is required')
+                })
+              )
             })}
             onSubmit={handleSubmit}
           >
@@ -718,25 +729,43 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                   <div className="space-y-4">
                     <div className="border rounded-md p-3 bg-gray-50">
                       {values.list_of_requirements.map((req, index) => (
-                        <div key={index} className="flex items-center mb-2">
-                          <Input
-                            value={req.value}
-                            onChange={(e) => {
-                              const newReqs = [...values.list_of_requirements];
-                              newReqs[index].value = e.target.value;
-                              setFieldValue('list_of_requirements', newReqs);
-                            }}
-                            className="flex-1"
-                          />
+                        <div key={index} className="flex items-center gap-2 mb-2">
+                          <div className="flex-1">
+                            <Input
+                              name={`list_of_requirements.${index}.value`}
+                              placeholder="Enter requirement"
+                              value={req.value}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              error={
+                                getIn(touched, `list_of_requirements.${index}.value`) &&
+                                getIn(errors, `list_of_requirements.${index}.value`)
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-600">
+                              <input
+                                type="checkbox"
+                                name={`list_of_requirements.${index}.isRequired`}
+                                checked={req.isRequired}
+                                onChange={(e) => {
+                                  setFieldValue(`list_of_requirements.${index}.isRequired`, e.target.checked);
+                                }}
+                                className="mr-2"
+                              />
+                              Required
+                            </label>
+                          </div>
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => {
-                              const newReqs = values.list_of_requirements.filter((_, i) => i !== index);
-                              setFieldValue('list_of_requirements', newReqs);
+                              const newRequirements = [...values.list_of_requirements];
+                              newRequirements.splice(index, 1);
+                              setFieldValue('list_of_requirements', newRequirements);
                             }}
-                            className="ml-2 text-red-500 hover:text-red-700"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -747,7 +776,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          setFieldValue('list_of_requirements', [...values.list_of_requirements, { label: '', value: '' }]);
+                          setFieldValue('list_of_requirements', [...values.list_of_requirements, { label: '', isRequired: true }]);
                         }}
                         className="mt-2"
                       >
@@ -931,6 +960,38 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     const userHasJoinedOtherCompany = hasUserJoinedAnyCompany() && !application?.is_confirmed;
     const joinedCompanyName = getJoinedCompanyName();
 
+    const renderRequirements = () => {
+      let requirements = [];
+      try {
+        requirements = typeof company.list_of_requirements === 'string'
+          ? JSON.parse(company.list_of_requirements)
+          : company.list_of_requirements;
+      } catch (e) {
+        console.error('Error parsing requirements:', e);
+      }
+
+      return (
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Requirements:</h4>
+          <ul className="space-y-2">
+            {requirements.map((req, index) => (
+              <li key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">• {req.value}</span>
+                {req.isRequired ? (
+                  <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                    Required
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                    Optional
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    };
 
     return (
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100">
@@ -1187,23 +1248,33 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     }));
   };
 
-  const canSubmitApplication = () => {
-    if (!selectedCompany?.list_of_requirements) return false;
+  const validateRequirements = () => {
+    const requirements = typeof company.list_of_requirements === 'string'
+      ? JSON.parse(company.list_of_requirements)
+      : company.list_of_requirements;
 
-    return selectedCompany.list_of_requirements.every(req => {
-      if (!selectedRequirements.includes(req.id)) return false;
-      if (req.file_required && !applicationFiles[req.id]) return false;
-      return true;
+    const newErrors = {};
+    requirements.forEach((req) => {
+      if (req.isRequired && !applicationFiles[req.id]?.file) {
+        newErrors[req.id] = 'This requirement is mandatory';
+      }
     });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmitApplication = async () => {
+    if (!validateRequirements()) {
+      toast.error('Please complete all required requirements');
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append('companyID', selectedCompany.companyID);
 
-      // Append files for each requirement
-      selectedCompany.list_of_requirements.forEach(req => {
+      company.list_of_requirements.forEach(req => {
         if (applicationFiles[req.id]?.file) {
           formData.append(`file_${req.id}`, applicationFiles[req.id].file);
         }
@@ -1217,16 +1288,15 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
       if (response.data.success) {
         toast.success('Application submitted successfully');
-        setIsModalOpen(false);
-        setSelectedCompany(null);
-        setSelectedRequirements([]);
+        onClose();
         setApplicationFiles({});
-        setIsApplying(false);
         fetchUserApplications();
       }
     } catch (error) {
       console.error('Error submitting application:', error);
       toast.error(error.response?.data?.message || 'Failed to submit application');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1293,7 +1363,6 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-
     console.log({ company })
     company.list_of_requirements = (company.list_of_requirements || []).map(req => ({
       ...req,
@@ -1320,21 +1389,28 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       }));
     };
 
-    const handleSubmitApplication = async () => {
+    const validateRequirements = () => {
+      const requirements = typeof company.list_of_requirements === 'string'
+        ? JSON.parse(company.list_of_requirements)
+        : company.list_of_requirements;
+
       const newErrors = {};
-      company.list_of_requirements.forEach(req => {
-        if (req.required && !applicationFiles[req.id]?.file) {
-          newErrors[req.id] = 'This field is required';
+      requirements.forEach((req) => {
+        if (req.isRequired && !applicationFiles[req.id]?.file) {
+          newErrors[req.id] = 'This requirement is mandatory';
         }
       });
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
 
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
+    const handleSubmitApplication = async () => {
+      if (!validateRequirements()) {
+        toast.error('Please complete all required requirements');
         return;
       }
 
       setIsLoading(true);
-
       try {
         const formData = new FormData();
         formData.append('companyID', company.companyID);
@@ -1380,11 +1456,27 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
           <div className="py-4">
             <div className="space-y-4">
               {company.list_of_requirements?.map((req, index) => (
-                <div key={index} className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow ${errors[req.id] ? 'border-red-500' : ''}`}>
-                  <label className="text-sm font-medium text-gray-700">
-                    {req.label}
-                    {req.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
+                <div
+                  key={index}
+                  className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow 
+                    ${errors[req.id] ? 'border-red-500' : ''}
+                    ${req.isRequired ? 'bg-red-50' : 'bg-gray-50'}`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {req.value}
+                      {req.isRequired && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {req.isRequired ? (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                        Required
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-600 rounded-full">
+                        Optional
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-2">
                     <DropzoneArea
                       fieldName={`file_${req.id}`}
@@ -1392,20 +1484,19 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                       onFileSelect={(file) => handleFileSelect(req.id, file)}
                       currentFile={applicationFiles[req.id]?.file}
                     />
-                    {errors[req.id] && <p className="text-red-500 text-sm mt-1">{errors[req.id]}</p>}
+                    {errors[req.id] && (
+                      <p className="text-red-500 text-sm mt-1">{errors[req.id]}</p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
           <ShadcnDialogFooter>
-            <ButtonUI variant="outline" onClick={onClose}>
-              Cancel
-            </ButtonUI>
             <ButtonUI
               onClick={handleSubmitApplication}
-              disabled={!allRequirementsMet() || isLoading}
-              className={`bg-blue-600 hover:bg-blue-700 text-white ${!allRequirementsMet() || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
+              className={isLoading ? 'opacity-50 cursor-not-allowed' : ''}
             >
               {isLoading ? 'Submitting...' : 'Submit Application'}
             </ButtonUI>
@@ -1512,7 +1603,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Companies</h1>
-            
+
           </div>
 
           <div className="flex items-center gap-3">

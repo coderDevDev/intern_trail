@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 // import Image from "next/image"
-import { Grid, List, Eye, Filter, TrophyIcon, MoreHorizontal, Users, Search, CheckCircle2, XCircle, FileText, Award, Download, UserCheck, Clock } from "lucide-react"
+import { Grid, List, Eye, Filter, TrophyIcon, MoreHorizontal, Users, Search, CheckCircle2, XCircle, FileText, Award, Download, UserCheck, Clock, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -101,6 +101,7 @@ export default function StudentView({
   const [activeTrainees, setActiveTrainees] = useState([]);
   const [progressReports, setProgressReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -191,9 +192,7 @@ export default function StudentView({
     setIsModalOpen(false);
 
     // Then use a timeout to clear the selected student after the modal animation completes
-    setTimeout(() => {
-      setSelectedStudent(null);
-    }, 300);
+    setSelectedStudent(null);
   };
 
   const handleViewDocuments = (student) => {
@@ -346,7 +345,7 @@ export default function StudentView({
         <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="applications" className="flex items-center gap-2">
             <ClipboardList className="h-4 w-4" />
-            <span>Applications {applications.length > 0 && `(${applications.length})`}</span>
+            <span>Applications {applications.filter(app => app.status === 'pending').length > 0 && `(${applications.filter(app => app.status === 'pending').length})`}</span>
           </TabsTrigger>
           <TabsTrigger value="trainees" className="flex items-center gap-2">
             <UserCog className="h-4 w-4" />
@@ -472,42 +471,82 @@ export default function StudentView({
                           <StatusBadge isActive={student.status === 'approved'} />
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewInfo(student)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-
-                              <DropdownMenuItem
-                                onClick={() => {
-
-
-                                  console.log({ student })
-
-                                  window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer");
-                                }}
+                          <Popover open={openMenuId === student.traineeID} onOpenChange={(open) => setOpenMenuId(open ? student.traineeID : null)}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex items-center gap-1"
+                                aria-label="Actions menu"
                               >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Progress Report
-                              </DropdownMenuItem>
+                                Actions
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-48 p-2"
+                              align="end"
+                              onInteractOutside={() => setOpenMenuId(null)}
+                            >
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    handleViewInfo(student);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </Button>
 
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    window.open(
+                                      `/HTE/student-progress/${student.trainee_user_id}`,
+                                      "_blank",
+                                      "noopener,noreferrer"
+                                    );
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Progress Report
+                                </Button>
 
-                              <DropdownMenuItem onClick={() => handleEvaluationForm(student)}>
-                                <FileText className="h-4 w-4 mr-2" />
-                                View Evaluation
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUploadCertificate(student)}>
-                                <Download className="h-4 w-4 mr-2" />
-                                View Certificate
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    handleEvaluationForm(student);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  View Evaluation
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    handleUploadCertificate(student);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Download className="h-4 w-4 mr-2" />
+                                  View Certificate
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -563,42 +602,82 @@ export default function StudentView({
                         <TableCell>{student.deployment_date ? new Date(student.deployment_date).toLocaleDateString() : 'Not started'}</TableCell>
                         <TableCell>{student.hours_completed || '0'} / {student.remaining_hours || '360'}</TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewInfo(student)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-
-                              <DropdownMenuItem
-                                onClick={() => {
-
-
-                                  console.log({ student })
-
-                                  window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer");
-                                }}
+                          <Popover open={openMenuId === student.traineeID} onOpenChange={(open) => setOpenMenuId(open ? student.traineeID : null)}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex items-center gap-1"
+                                aria-label="Actions menu"
                               >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Progress Report
-                              </DropdownMenuItem>
+                                Actions
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-48 p-2"
+                              align="end"
+                              onInteractOutside={() => setOpenMenuId(null)}
+                            >
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    handleViewInfo(student);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </Button>
 
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    window.open(
+                                      `/HTE/student-progress/${student.trainee_user_id}`,
+                                      "_blank",
+                                      "noopener,noreferrer"
+                                    );
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Progress Report
+                                </Button>
 
-                              <DropdownMenuItem onClick={() => handleEvaluationForm(student)}>
-                                <FileText className="h-4 w-4 mr-2" />
-                                View Evaluation
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUploadCertificate(student)}>
-                                <Download className="h-4 w-4 mr-2" />
-                                View Certificate
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    handleEvaluationForm(student);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  View Evaluation
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    handleUploadCertificate(student);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Download className="h-4 w-4 mr-2" />
+                                  View Certificate
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -662,16 +741,43 @@ export default function StudentView({
                         <TableCell>{student.last_update ? new Date(student.last_update).toLocaleDateString() : 'No updates'}</TableCell>
                         <TableCell>{student.remaining_hours || '360'} hours</TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer");
-                            }}
-                          >
-                            <ChartLine className="h-4 w-4 mr-1" />
-                            View Progress
-                          </Button>
+                          <Popover open={openMenuId === student.traineeID} onOpenChange={(open) => setOpenMenuId(open ? student.traineeID : null)}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex items-center gap-1"
+                                aria-label="Actions menu"
+                              >
+                                Actions
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-48 p-2"
+                              align="end"
+                              onInteractOutside={() => setOpenMenuId(null)}
+                            >
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  onClick={() => {
+                                    window.open(
+                                      `/HTE/student-progress/${student.trainee_user_id}`,
+                                      "_blank",
+                                      "noopener,noreferrer"
+                                    );
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <ChartLine className="h-4 w-4 mr-2" />
+                                  View Progress
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </TableCell>
                       </TableRow>
                     ))}

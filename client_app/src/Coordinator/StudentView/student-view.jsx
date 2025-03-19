@@ -55,8 +55,8 @@ export default function StudentView({
 
 
   console.log({ sortedStudents })
-  const handleApprove = async (studentId) => {
-    console.log(`Approving student ${studentId}`)
+  const handleApprove = async (studentId, hours) => {
+    console.log(`Approving student ${studentId} with hours ${hours}`)
     // setIsModalOpen(false)
 
     try {
@@ -65,7 +65,8 @@ export default function StudentView({
         url: `user/trainee/${studentId}`,
         data: {
           studentId: studentId,
-          is_verified_by_coordinator: true
+          is_verified_by_coordinator: true,
+          remaining_hours: hours
         }
       });
 

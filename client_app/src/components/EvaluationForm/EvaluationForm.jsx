@@ -43,7 +43,7 @@ const questions = [
   }
 ];
 
-function EvaluationForm({ isOpen, onClose, student, existingData = null, }) {
+function EvaluationForm({ isOpen, onClose, student, existingData = null, initialFocus }) {
   const [answers, setAnswers] = useState(
     existingData?.answers ||
     questions.reduce((acc, _, index) => {

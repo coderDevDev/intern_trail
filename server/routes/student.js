@@ -120,4 +120,35 @@ router.get('/dashboard-stats', authenticateUserMiddleware, async (req, res) => {
   }
 });
 
+// Add this new endpoint to handle monthly progress
+router.get(
+  '/dtrs/:studentId/monthly-progress',
+  authenticateUserMiddleware,
+  async (req, res) => {
+    try {
+      const { studentId } = req.params;
+      const { startDate, endDate } = req.query;
+
+      const [dtrs] = await db.query(
+        `SELECT * FROM dtrs 
+       WHERE traineeID = ? 
+       AND date BETWEEN ? AND ?
+       ORDER BY date ASC`,
+        [studentId, startDate, endDate]
+      );
+
+      res.json({
+        success: true,
+        data: dtrs
+      });
+    } catch (error) {
+      console.error('Error fetching monthly progress:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch monthly progress'
+      });
+    }
+  }
+);
+
 export default router;

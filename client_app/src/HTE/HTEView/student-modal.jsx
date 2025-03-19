@@ -14,37 +14,26 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
 
   if (!student) return null;
 
-  // Format student name
-  const studentName = `${student.first_name || ''} ${student.last_name || ''}`;
+  const studentName = `${student.first_name || ""} ${student.last_name || ""}`;
 
-  // Handle approve action
-  const handleApprove = async () => {
+  const handleAction = async (action) => {
     setLoading(true);
     try {
-      await onApprove(student);
-      onClose();
+      if (action === "approve") {
+        await onApprove(student);
+      } else {
+        await onReject(student, "Rejected");
+      }
+      onClose(); // Ensure modal closes after action completes
     } catch (error) {
-      console.error('Error approving student:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle reject action
-  const handleReject = async () => {
-    setLoading(true);
-    try {
-      await onReject(student, 'Rejected');
-      onClose();
-    } catch (error) {
-      console.error('Error rejecting student:', error);
+      console.error(`Error ${action}ing student:`, error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Student Details</DialogTitle>
@@ -55,7 +44,11 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
             <div className="flex-shrink-0">
               <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
                 {student.proof_identity ? (
-                  <img src={student.proof_identity} alt={studentName} className="h-24 w-24 rounded-full object-cover" />
+                  <img
+                    src={student.proof_identity}
+                    alt={studentName}
+                    className="h-24 w-24 rounded-full object-cover"
+                  />
                 ) : (
                   <UserCheck className="h-12 w-12 text-gray-400" />
                 )}
@@ -73,7 +66,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
 
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-gray-500" />
-                  <span>{student.phone || 'N/A'}</span>
+                  <span>{student.phone || "N/A"}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -83,7 +76,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
 
                 <div className="flex items-center gap-2">
                   <Building className="h-4 w-4 text-gray-500" />
-                  <span>{student.collegeName || 'N/A'}</span>
+                  <span>{student.collegeName || "N/A"}</span>
                 </div>
               </div>
 
@@ -91,7 +84,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
                 <h4 className="font-medium mb-2">Program Details</h4>
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-gray-500" />
-                  <span>{student.progName || 'N/A'}</span>
+                  <span>{student.progName || "N/A"}</span>
                 </div>
               </div>
             </div>
@@ -99,20 +92,13 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
         </div>
 
         <DialogFooter>
-          {student.status === 'pending' && (
+          {student.status === "pending" && (
             <>
-              <Button
-                variant="destructive"
-                onClick={handleReject}
-                disabled={loading}
-              >
-                {loading ? 'Processing...' : 'Reject'}
+              <Button variant="destructive" onClick={() => handleAction("reject")} disabled={loading}>
+                {loading ? "Processing..." : "Reject"}
               </Button>
-              <Button
-                onClick={handleApprove}
-                disabled={loading}
-              >
-                {loading ? 'Processing...' : 'Approve'}
+              <Button onClick={() => handleAction("approve")} disabled={loading}>
+                {loading ? "Processing..." : "Approve"}
               </Button>
             </>
           )}

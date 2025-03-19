@@ -12,7 +12,7 @@ import { useDropzone } from 'react-dropzone';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-function CertificateUpload({ isOpen, onClose, student }) {
+function CertificateUpload({ isOpen, onClose, student, initialFocus }) {
   const [activeTab, setActiveTab] = useState("upload");
   const [loading, setLoading] = useState(false);
   const [certificateFile, setCertificateFile] = useState(null);
@@ -221,10 +221,8 @@ function CertificateUpload({ isOpen, onClose, student }) {
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={handleOpenChange}
-      modal={true}
+    <Dialog open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
         className="sm:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col"
