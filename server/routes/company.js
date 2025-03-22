@@ -1809,7 +1809,11 @@ router.post(
             [scopeData.collegeID, scopeData.programID]
           );
 
-          companyID = company[0].companyID;
+          if (company && company.length > 0) {
+            companyID = company[0].companyID;
+          } else {
+            companyID = null; // or any fallback value
+          }
         }
       } else {
         // Get company ID if user is HTE supervisor
