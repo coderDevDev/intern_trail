@@ -381,6 +381,7 @@ function StudentReports() {
               <p className="text-gray-500 mt-1">Manage and track emergency incidents</p>
             </div>
             <Button
+              disabled={!joinedCompany}
               onClick={handleNewReport}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -407,7 +408,7 @@ function StudentReports() {
                   {
                     console.log({ joinedCompany })
                   }
-                  {joinedCompany.companyName && (
+                  {joinedCompany && joinedCompany.companyName && (
                     <div className="mt-3 p-3 bg-green-50 border border-green-100 rounded-lg">
                       <p className="text-sm text-gray-700">
                         Currently assigned to <span className="font-semibold text-green-700">{joinedCompany.companyName}</span>
