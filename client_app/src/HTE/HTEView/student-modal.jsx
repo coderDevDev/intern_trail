@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { UserCheck, Mail, Phone, Calendar, Building, Award } from "lucide-react";
 
+
+import { SubmittedFiles } from './../../Coordinator/StudentView/submitted-files';
 export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) {
   const [loading, setLoading] = useState(false);
 
@@ -79,15 +81,20 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
                   <span>{student.collegeName || "N/A"}</span>
                 </div>
               </div>
-
-              <div className="pt-4 border-t">
+              {/* <div className="pt-4 border-t">
                 <h4 className="font-medium mb-2">Program Details</h4>
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-gray-500" />
                   <span>{student.progName || "N/A"}</span>
                 </div>
-              </div>
+              </div> */}
+
+
             </div>
+          </div>
+
+          <div className="pt-4 border-t">
+            <SubmittedFiles studentId={student.traineeID} />
           </div>
         </div>
 
