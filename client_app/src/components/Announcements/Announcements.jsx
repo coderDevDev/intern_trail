@@ -207,6 +207,7 @@ function Announcements() {
             onView={() => handleView(announcement)}
             onEdit={!isStudent ? () => handleEdit(announcement) : undefined}
             onDelete={!isStudent ? () => handleDelete(announcement) : undefined}
+            readonly={announcement.readonly}
           />
         ))}
       </div>

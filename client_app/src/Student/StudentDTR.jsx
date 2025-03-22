@@ -76,6 +76,35 @@ function StudentDTR({ supervisorName }) {
     setWeeklyReport(generateWeeklyReport());
   }, [selectedDate, records]);
 
+
+
+
+  const [totalOJTHours, setTotalOJTHours] = useState(0);
+
+
+
+
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await axios.get('/student/dashboard-stats');
+
+
+
+
+      setTotalOJTHours(response.data.data.traineeDetails.remaining_hours)
+    } catch (error) {
+      setTotalOJTHours(360)
+
+    }
+  };
+
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+
+
   useEffect(() => {
     const fetchWeeklyData = async () => {
       try {
@@ -912,7 +941,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-4 w-24" />
                     ) : (
-                      <span className="font-medium">{monthlyHours}/360 hours</span>
+                      <span className="font-medium">{monthlyHours}/{totalOJTHours} hours</span>
                     )}
                   </div>
                   {isProgressLoading ? (

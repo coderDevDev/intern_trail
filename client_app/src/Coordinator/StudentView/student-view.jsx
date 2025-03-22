@@ -55,7 +55,7 @@ export default function StudentView({
 
 
   console.log({ sortedStudents })
-  const handleApprove = async (studentId, hours) => {
+  const handleApprove = async (studentId, hours = 360) => {
     console.log(`Approving student ${studentId} with hours ${hours}`)
     // setIsModalOpen(false)
 

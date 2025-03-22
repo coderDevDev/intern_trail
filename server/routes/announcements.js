@@ -65,20 +65,55 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
         ORDER BY a.created_at DESC
       `;
       queryParams = [userId, userId, userId, userId];
-    } else {
-      // Coordinators, HTEs, and Deans see their own announcements
+    } else if (userRole === 'ojt-coordinator') {
+      // Coordinators see announcements from their college, program, and dean
       query = `
         SELECT a.*, u.first_name, u.last_name, u.email
         FROM announcements a
         LEFT JOIN users u ON a.created_by = u.userID
-        WHERE a.created_by = ?
+        WHERE (
+          -- From same college and program
+          (a.college_id = (SELECT collegeID FROM coordinators WHERE userID = ?)
+           AND a.program_id = (SELECT programID FROM coordinators WHERE userID = ?))
+          OR
+          -- From dean of same college
+          (a.created_by_role = 'dean' 
+           AND a.college_id = (SELECT collegeID FROM coordinators WHERE userID = ?))
+        )
+        ORDER BY a.created_at DESC
+      `;
+      queryParams = [userId, userId, userId];
+    } else if (userRole === 'hte-supervisor') {
+      // HTE supervisors see announcements for their company
+      query = `
+        SELECT a.*, u.first_name, u.last_name, u.email
+        FROM announcements a
+        LEFT JOIN users u ON a.created_by = u.userID
+        WHERE a.company_id = (SELECT companyID FROM hte_supervisors WHERE userID = ?)
+        ORDER BY a.created_at DESC
+      `;
+      queryParams = [userId];
+    } else if (userRole === 'dean') {
+      // Deans see announcements for their college
+      query = `
+        SELECT a.*, u.first_name, u.last_name, u.email
+        FROM announcements a
+        LEFT JOIN users u ON a.created_by = u.userID
+        WHERE a.college_id = (SELECT collegeID FROM deans WHERE userID = ?)
         ORDER BY a.created_at DESC
       `;
       queryParams = [userId];
     }
 
     const [announcements] = await db.query(query, queryParams);
-    res.status(200).json({ success: true, data: announcements });
+
+    res.json({
+      success: true,
+      data: announcements.map(announcement => ({
+        ...announcement,
+        readonly: announcement.created_by !== userId
+      }))
+    });
   } catch (err) {
     console.error(err);
     res

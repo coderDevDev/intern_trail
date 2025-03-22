@@ -11,6 +11,7 @@ import DeanCompanies from './DeanCompanies';
 import DeanTrainees from './DeanTrainees';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/ExitToApp';
+import DeanProfile from './DeanProfile';
 
 import AccountInfoPopup from '../components/AccountInfoPopup';
 import DeanHome from './DeanDashboard/DeanHome';
@@ -65,7 +66,7 @@ function DeanDashboard() {
   const location = useLocation(); // Hook to get the current route
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [expanded, setExpanded] = useState(false); // Add state for sidebar expansion
-
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // Add state for profile modal
   const handleProfileClick = () => {
     setIsPopupOpen(true);
   };
@@ -73,6 +74,16 @@ function DeanDashboard() {
   const handleClosePopup = () => {
     setIsPopupOpen(false);
   };
+
+  const handleProfileOpen = () => {
+    setIsPopupOpen(false);
+    setIsProfileModalOpen(true);
+  };
+
+  const handleProfileModalClose = () => {
+    setIsProfileModalOpen(false);
+  };
+
 
   return (
     <div>
@@ -96,10 +107,19 @@ function DeanDashboard() {
               className="profile-picture"
               onClick={handleProfileClick}
             />
-            {isPopupOpen && <AccountInfoPopup onClose={handleClosePopup} />}
+            {isPopupOpen && (
+              <AccountInfoPopup
+                onClose={handleClosePopup}
+                onProfileOpen={handleProfileOpen}
+              />
+            )}
           </div>
         </Container>
       </Navbar>
+
+      <DeanProfile open={isProfileModalOpen} onClose={handleProfileModalClose} />
+
+
 
       {/* Dashboard Layout */}
       <div className="dashboard-container">

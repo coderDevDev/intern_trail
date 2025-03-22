@@ -15,7 +15,8 @@ function AnnouncementCard({
   creatorRole,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  readonly
 }) {
   const roleLabels = {
     'ojt-coordinator': 'Coordinator',
@@ -72,23 +73,31 @@ function AnnouncementCard({
             <Eye className="h-4 w-4 mr-1" />
             View
           </Button>
-          {onEdit && (
-            <Button variant="outline" size="sm" onClick={onEdit}>
-              <Edit2 className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-red-600 hover:text-red-700"
-              onClick={onDelete}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete
-            </Button>
-          )}
+          {
+            !readonly && (
+              <>
+                {onEdit && (
+                  <Button variant="outline" size="sm" onClick={onEdit}>
+                    <Edit2 className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700"
+                    onClick={onDelete}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                )}
+              </>
+            )
+          }
+
+
         </CardFooter>
       </div>
     </Card>

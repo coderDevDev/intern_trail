@@ -46,7 +46,7 @@ function CoordinatorTrainees() {
       setTrainees(response.data.data.map((data) => {
         return {
           ...data,
-          name: `${data.first_name} ${data.last_name}`
+          name: `${data.first_name} ${data.last_name}`,
         }
       }));
     } catch (error) {

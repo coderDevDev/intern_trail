@@ -8,13 +8,17 @@ import {
   TextField,
   IconButton,
   Avatar,
+  MenuItem,
   FormControl,
   FormLabel,
+  Grid,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import '../index.css'; // Adjust the import path if necessary
 
-function HTEProfileModal({ open, onClose }) {
+
+import ProfileManager from '../components/Profile/ProfileManager';
+function CoordinatorProfile({ open, onClose }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isEditable, setIsEditable] = useState(false); // State to control editability
   const modalRef = useRef(null);
@@ -29,8 +33,7 @@ function HTEProfileModal({ open, onClose }) {
     userRole: '',
     college: '',
     program: '',
-    company: '',
-    HTEId: '',
+    CoordinatorId: '',
   });
 
   // Close the Profile Modal if clicked outside
@@ -62,6 +65,10 @@ function HTEProfileModal({ open, onClose }) {
     // Upload logic here...
   };
 
+  const stopPropagation = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <Dialog
       open={open}
@@ -85,7 +92,7 @@ function HTEProfileModal({ open, onClose }) {
             color: '#000',
           }}
         >
-          HTE Profile
+          Coordinator Profile
         </DialogTitle>
 
         <DialogContent
@@ -148,7 +155,7 @@ function HTEProfileModal({ open, onClose }) {
             Edit Profile
           </Button>
 
-          <h5 style={{marginBottom:'0', marginTop:'20px'}}>User Information</h5>
+          <h5 style={{ marginBottom: '0', marginTop: '20px' }}>User Information</h5>
 
           {/* Text Field Styles */}
           <FormControl margin="normal" fullWidth>
@@ -392,6 +399,121 @@ function HTEProfileModal({ open, onClose }) {
             />
           </FormControl>
 
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl margin="normal" fullWidth>
+                <FormLabel
+                  sx={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '16px', // Adjust as needed
+                    color: '#000',
+                    marginBottom: '4px',
+                  }}
+                >
+                  College
+                </FormLabel>
+                <TextField
+                  select
+                  variant="outlined"
+                  name="college"
+                  value={profileData.college}
+                  onChange={handleChange}
+                  disabled={!isEditable} // Controlled by state
+                  onMouseDown={stopPropagation} // Prevents closing the modal
+                  InputProps={{
+                    sx: {
+                      fontSize: '14px', // Adjust input text size
+                      fontFamily: 'Poppins, sans-serif',
+                      height: '40px',
+                    },
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '14px', // Adjust label size
+                      fontFamily: 'Poppins, sans-serif',
+                    },
+                  }}
+                  sx={{
+                    borderRadius: '8px',
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#808080',
+                        borderWidth: '2px',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#1F41BB',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#1F41BB',
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="CECT" onMouseDown={stopPropagation}>CECT</MenuItem>
+                  <MenuItem value="CAS" onMouseDown={stopPropagation}>CAS</MenuItem>
+                  <MenuItem value="CBA" onMouseDown={stopPropagation}>CBA</MenuItem>
+                  {/* Add more options as needed */}
+                </TextField>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl margin="normal" fullWidth>
+                <FormLabel
+                  sx={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '16px', // Adjust as needed
+                    color: '#000',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Program
+                </FormLabel>
+                <TextField
+                  select
+                  variant="outlined"
+                  name="program"
+                  value={profileData.program}
+                  onChange={handleChange}
+                  disabled={!isEditable} // Controlled by state
+                  onMouseDown={stopPropagation} // Prevents closing the modal
+                  InputProps={{
+                    sx: {
+                      fontSize: '14px', // Adjust input text size
+                      fontFamily: 'Poppins, sans-serif',
+                      height: '40px',
+                    },
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '14px', // Adjust label size
+                      fontFamily: 'Poppins, sans-serif',
+                    },
+                  }}
+                  sx={{
+                    borderRadius: '8px',
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#808080',
+                        borderWidth: '2px',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#1F41BB',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#1F41BB',
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="BSCpE" onMouseDown={stopPropagation}>BSCpE</MenuItem>
+                  <MenuItem value="BSECE" onMouseDown={stopPropagation}>BSECE</MenuItem>
+                  <MenuItem value="BSBAAdministration" onMouseDown={stopPropagation}>BSBA</MenuItem>
+                  {/* Add more options as needed */}
+                </TextField>
+              </FormControl>
+            </Grid>
+          </Grid>
+
           <FormControl margin="normal" fullWidth>
             <FormLabel
               sx={{
@@ -440,56 +562,7 @@ function HTEProfileModal({ open, onClose }) {
             />
           </FormControl>
 
-          <FormControl margin="normal" fullWidth>
-            <FormLabel
-              sx={{
-                fontFamily: 'Poppins, sans-serif',
-                fontSize: '16px', // Adjust as needed
-                color: '#000',
-                marginBottom: '4px',
-              }}
-            >
-              Company
-            </FormLabel>
-            <TextField
-              variant="outlined"
-              name="HTEId"
-              value={profileData.company}
-              onChange={handleChange}
-              disabled={!isEditable} // Controlled by state
-              InputProps={{
-                sx: {
-                  fontSize: '14px', // Adjust input text size
-                  fontFamily: 'Poppins, sans-serif',
-                  height: '40px',
-                },
-              }}
-              InputLabelProps={{
-                sx: {
-                  fontSize: '14px', // Adjust label size
-                  fontFamily: 'Poppins, sans-serif',
-                },
-              }}
-              sx={{
-                borderRadius: '8px',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#808080',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#1F41BB',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1F41BB',
-                  },
-                },
-              }}
-            />
-          </FormControl>
-          
-
-          <h5 style={{marginBottom:'0', marginTop:'20px'}}>Change Password</h5>
+          <h5 style={{ marginBottom: '0', marginTop: '20px' }}>Change Password</h5>
 
           <FormControl margin="normal" fullWidth>
             <FormLabel
@@ -504,8 +577,8 @@ function HTEProfileModal({ open, onClose }) {
             </FormLabel>
             <TextField
               variant="outlined"
-              name="HTEd"
-              value={profileData.HTEId}
+              name="Coordinatord"
+              value={profileData.CoordinatorId}
               onChange={handleChange}
               disabled={!isEditable} // Controlled by state
               InputProps={{
@@ -552,8 +625,8 @@ function HTEProfileModal({ open, onClose }) {
             </FormLabel>
             <TextField
               variant="outlined"
-              name="HTEId"
-              value={profileData.HTEId}
+              name="CoordinatorId"
+              value={profileData.CoordinatorId}
               onChange={handleChange}
               disabled={!isEditable} // Controlled by state
               InputProps={{
@@ -600,8 +673,8 @@ function HTEProfileModal({ open, onClose }) {
             </FormLabel>
             <TextField
               variant="outlined"
-              name="HTEId"
-              value={profileData.HTEId}
+              name="CoordinatorId"
+              value={profileData.CoordinatorId}
               onChange={handleChange}
               disabled={!isEditable} // Controlled by state
               InputProps={{
@@ -668,4 +741,12 @@ function HTEProfileModal({ open, onClose }) {
   );
 }
 
-export default HTEProfileModal;
+
+function CoordinatorProfileManager() {
+  return (
+    <div>
+      <ProfileManager />
+    </div>
+  );
+}
+export default ProfileManager;
