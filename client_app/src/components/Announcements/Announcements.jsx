@@ -117,83 +117,90 @@ function Announcements() {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Announcements</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">Announcements</h1>
+        </div>
+
         {!isStudent && (
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 w-full sm:w-auto"
           >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Announcement
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Announcement
           </Button>
         )}
       </div>
 
-      {/* Controls Section */}
-      <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-        <div className="flex-1 max-w-md">
+      {/* Search and Filter Section */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
           <Input
             placeholder="Search announcements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
+            className="w-full sm:w-[300px]"
           />
-        </div>
 
-        <div className="flex gap-2">
-          {/* Add creator role filter */}
-          <Select value={creatorRoleFilter} onValueChange={setCreatorRoleFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by creator" />
+          <Select
+            value={creatorRoleFilter}
+            onValueChange={setCreatorRoleFilter}
+            className="w-full sm:w-auto"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Announcements</SelectItem>
+              <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="ojt-coordinator">Coordinator</SelectItem>
               <SelectItem value="hte-supervisor">HTE Supervisor</SelectItem>
               <SelectItem value="dean">Dean</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
+          <Select
+            value={sortBy}
+            onValueChange={setSortBy}
+            className="w-full sm:w-auto"
+          >
+            <SelectTrigger>
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="newest">Newest First</SelectItem>
               <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="title">Title A-Z</SelectItem>
             </SelectContent>
           </Select>
+        </div>
 
-          <div className="flex border rounded-md">
-            <Button
-              variant={view === "grid" ? "default" : "ghost"}
-              onClick={() => setView("grid")}
-              className="px-3"
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={view === "list" ? "default" : "ghost"}
-              onClick={() => setView("list")}
-              className="px-3"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex border rounded-md w-full sm:w-auto justify-center sm:justify-start">
+          <Button
+            variant={view === "grid" ? "default" : "ghost"}
+            onClick={() => setView("grid")}
+            className="px-3"
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={view === "list" ? "default" : "ghost"}
+            onClick={() => setView("list")}
+            className="px-3"
+          >
+            <List className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
       {/* Announcements Grid/List */}
       <div className={`
-        grid gap-6
-        ${view === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}
+        grid gap-4 sm:gap-6
+        ${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}
       `}>
         {loading ? (
-          <div>Loading...</div>
+          <div className="text-center py-8">Loading...</div>
         ) : sortedAnnouncements.map(announcement => (
           <AnnouncementCard
             key={announcement.id}

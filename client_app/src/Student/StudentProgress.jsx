@@ -112,8 +112,8 @@ function StudentProgress() {
 
 
   return isLoaded && (
-    <div className='p-6 space-y-6'>
-      <h1 className='text-2xl font-bold'>Progress Reports</h1>
+    <div className='p-3 sm:p-6 space-y-4 sm:space-y-6'>
+      <h1 className='text-xl sm:text-2xl font-bold'>Progress Reports</h1>
 
       <div className="progress-container">
         <StudentDTR

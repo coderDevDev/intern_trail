@@ -21,6 +21,7 @@ import {
   Info,
   Eye,
   Loader2,
+  CheckCircle,
 } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -372,18 +373,18 @@ function StudentReports() {
   );
 
   return (
-    <div className="">
+    <div className="p-3 sm:p-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold">Emergency Reports</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">Emergency Reports</h1>
               <p className="text-gray-500 mt-1">Manage and track emergency incidents</p>
             </div>
             <Button
               disabled={!joinedCompany}
               onClick={handleNewReport}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Report Emergency
@@ -427,11 +428,11 @@ function StudentReports() {
                 placeholder="Search reports..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
             <Select value={activeTab} onValueChange={setActiveTab}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -446,17 +447,18 @@ function StudentReports() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Responsive Table Container */}
+        <div className="block w-full overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Type</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Reporter</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Location</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Date & Time</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Severity</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-600">Actions</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Type</th>
+                <th className="hidden sm:table-cell text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Reporter</th>
+                <th className="hidden md:table-cell text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Location</th>
+                <th className="hidden lg:table-cell text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Date & Time</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Status</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Severity</th>
+                <th className="text-right py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -480,44 +482,41 @@ function StudentReports() {
               ) : (
                 filteredReports.map((report) => (
                   <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">{report.emergency_type}</td>
-                    <td className="py-3 px-4">{report.name}</td>
-                    <td className="py-3 px-4">{report.location}</td>
-                    <td className="py-3 px-4">{formatDate(report.created_at)}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{report.emergency_type}</span>
+                        <span className="sm:hidden text-xs text-gray-500">{report.name}</span>
+                      </div>
+                    </td>
+                    <td className="hidden sm:table-cell py-3 px-2 sm:px-4 text-xs sm:text-sm">{report.name}</td>
+                    <td className="hidden md:table-cell py-3 px-2 sm:px-4 text-xs sm:text-sm">{report.location}</td>
+                    <td className="hidden lg:table-cell py-3 px-2 sm:px-4 text-xs sm:text-sm">{formatDate(report.created_at)}</td>
+                    <td className="py-3 px-2 sm:px-4">
                       <Badge className={`${getStatusColor(report.status)}`}>
                         {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 sm:px-4">
                       <Badge className={`${getSeverityColor(report.severity)} flex items-center gap-1 w-fit`}>
                         {getSeverityIcon(report.severity)}
                         {report.severity}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="py-3 px-2 sm:px-4 text-right">
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleView(report)}
-                          className="hover:bg-gray-100"
+                          className="hover:bg-gray-100 w-full sm:w-auto text-xs sm:text-sm"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {/* <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(report)}
-                          className="hover:bg-blue-50 text-blue-600"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button> */}
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => confirmDelete(report)}
-                          className="hover:bg-red-50 text-red-600"
+                          className="hover:bg-red-50 text-red-600 w-full sm:w-auto text-xs sm:text-sm"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
