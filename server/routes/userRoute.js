@@ -112,7 +112,7 @@ const sendRegistrationEmail = async (email, templateKey) => {
             <body>
               <div class="email-wrapper">
                 <div class="email-header">
-                  <h1>Welcome to InterTrail!</h1>
+                  <h1>Welcome to InternTrail!</h1>
                 </div>
                 <div class="email-content">
                   <p>Dear User,</p>
