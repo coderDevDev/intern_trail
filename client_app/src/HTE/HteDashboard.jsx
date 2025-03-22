@@ -102,7 +102,7 @@ function HTEDashboard() {
           <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" onClick={() => setExpanded(!expanded)} />
           <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
             <img
-              src="../logo.png"
+              src="/logo.png"
               width="250px"
               height="auto"
               className="d-inline-block align-top me-1"
@@ -111,7 +111,7 @@ function HTEDashboard() {
           </Navbar.Brand>
           <div className="account-info">
             <img
-              src="../anyrgb.com.png"
+              src="/anyrgb.com.png"
               alt="Profile"
               className="profile-picture"
               onClick={handleProfileClick}

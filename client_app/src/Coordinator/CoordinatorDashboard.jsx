@@ -161,7 +161,7 @@ function CoordinatorDashboard() {
           <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" onClick={() => setExpanded(!expanded)} />
           <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
             <img
-              src="../logo.png"
+              src='/logo.png'
               width="250px"
               height="auto"
               className="d-inline-block align-top me-1"
