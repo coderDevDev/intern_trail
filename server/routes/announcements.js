@@ -201,10 +201,12 @@ router.post(
         queryParams = [collegeId, programId];
       } else if (userRole === 'hte-supervisor') {
         recipientQuery = `
-        SELECT u.email FROM users u
-        INNER JOIN inter_application ia ON u.userID = ia.trainee_user_id
-        WHERE ia.company_id = ? AND ia.is_confirmed = 1
-      `;
+          SELECT u.email FROM users u
+          INNER JOIN inter_application ia ON u.userID = ia.trainee_user_id
+          INNER JOIN trainee t ON u.userID = t.userID
+          WHERE ia.company_id = ? 
+  
+        `;
         queryParams = [companyId];
       } else if (userRole === 'dean') {
         recipientQuery = `
@@ -217,7 +219,13 @@ router.post(
 
       const [recipients] = await db.query(recipientQuery, queryParams);
 
-      console.log({ recipients, userRole });
+      let [createdBy] = await db.query(
+        'SELECT first_name, last_name FROM users WHERE userID = ?',
+        [req.user.id]
+      );
+
+      console.log({ createdBy });
+      createdBy = createdBy[0];
       // Send emails in parallel
       await Promise.all(
         recipients.map(recipient =>
@@ -225,7 +233,7 @@ router.post(
             title,
             description,
             senderRole: userRole,
-            senderName: req.user.first_name + ' ' + req.user.last_name
+            senderName: createdBy.first_name + ' ' + createdBy.last_name
           })
         )
       );
@@ -253,6 +261,8 @@ const sendAnnouncementEmail = async (recipientEmail, announcementData) => {
       pass: 'oclc xbbw agiq cdvl'
     }
   });
+
+  console.log({ announcementData });
 
   const mailOptions = {
     from: process.env.EMAIL_USER,

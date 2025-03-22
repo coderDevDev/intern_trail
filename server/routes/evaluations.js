@@ -123,9 +123,10 @@ router.put('/:id', authenticateUserMiddleware, async (req, res) => {
     // Update the evaluation
     await db.query(
       `UPDATE evaluations 
-       SET answers = ?, comments = ?, signature = ?, evaluation_date = ? 
+       SET answers = ?, comments = ?, signature = ?
+
        WHERE id = ?`,
-      [JSON.stringify(answers), comments, signature, evaluationDate, id]
+      [JSON.stringify(answers), comments, signature, id]
     );
 
     res.status(200).json({
