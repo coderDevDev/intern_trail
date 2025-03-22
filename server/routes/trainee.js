@@ -55,4 +55,54 @@ router.get(
     }
   }
 );
+
+// Get submitted files for a trainee
+router.get('/submitted-files/of/:traineeId', async (req, res) => {
+  try {
+    const { traineeId } = req.params;
+
+    // get userId from traineeId
+    const [trainee] = await db.query(
+      `
+      SELECT userID FROM trainee WHERE traineeID = ?
+      `,
+      [traineeId]
+    );
+
+    console.log({ trainee });
+    if (trainee.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Trainee not found'
+      });
+    }
+
+    const userId = trainee[0].userID;
+
+    const [files] = await db.query(
+      `
+      SELECT af.*, ia.status as application_status
+      FROM application_files af
+      INNER JOIN inter_application ia ON af.application_id = ia.id
+      WHERE ia.trainee_user_id = ?
+      ORDER BY af.uploaded_at DESC
+      `,
+      [userId]
+    );
+
+    console.log({ traineeId });
+
+    res.json({
+      success: true,
+      data: files
+    });
+  } catch (error) {
+    console.error('Error fetching submitted files:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch submitted files'
+    });
+  }
+});
+
 export default router;

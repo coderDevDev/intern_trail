@@ -787,7 +787,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div>
                     <Label className="text-sm font-medium">Company Logo</Label>
                     <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${filePreview.avatar_photo ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-blue-400'}`}>
@@ -833,7 +833,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <Label className="text-sm font-medium">Memorandum of Agreement</Label>
                     <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${filePreview.MOA ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-blue-400'}`}>
                       <input
@@ -881,7 +881,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                         )}
                       </label>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 <ShadcnDialogFooter className="sticky bottom-0 pt-4 pb-2 bg-white border-t mt-6">

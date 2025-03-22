@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Mail, Phone, GraduationCap, BookOpen, Clock, CheckCircle, XCircle, Image as ImageIcon } from "lucide-react";
 import { toast } from "react-toastify";
+import { SubmittedFiles } from './submitted-files';
 
 export function StudentModal({
   student,
@@ -76,6 +77,8 @@ export function StudentModal({
           <TabsList className="px-6">
             <TabsTrigger value="info">Information</TabsTrigger>
             <TabsTrigger value="requirements">Proof of Identity</TabsTrigger>
+            <TabsTrigger value="submitted-files">Submitted Files</TabsTrigger>
+
           </TabsList>
 
           <div className="flex-1 overflow-auto p-6">
@@ -182,6 +185,10 @@ export function StudentModal({
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="submitted-files" className="h-full">
+              <SubmittedFiles studentId={student.traineeID} />
             </TabsContent>
           </div>
         </Tabs>

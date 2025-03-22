@@ -8,7 +8,9 @@ import {
   FileText,
   CheckCircle2,
   AlertCircle,
-  Bell
+  Bell,
+  Eye,
+  Download
 } from 'lucide-react';
 
 import { Progress } from "@/components/ui/progress";
@@ -19,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 function StudentHome() {
   const [stats, setStats] = useState(null);
+  const [submittedFiles, setSubmittedFiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [requirements, setRequirements] = useState([]);
@@ -63,6 +66,21 @@ function StudentHome() {
     }
   };
 
+  useEffect(() => {
+    if (stats?.traineeDetails?.traineeID) {
+      fetchSubmittedFiles();
+    }
+  }, [stats?.traineeDetails?.traineeID]);
+
+  const fetchSubmittedFiles = async () => {
+    try {
+      const response = await axios.get(`/trainee/submitted-files/of/${stats.traineeDetails.traineeID}`);
+      setSubmittedFiles(response.data.data);
+    } catch (error) {
+      console.error('Error fetching submitted files:', error);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-96">Loading...</div>;
   }
@@ -73,12 +91,13 @@ function StudentHome() {
 
 
   const calculateProgress = (requirements) => {
-    if (!requirements || requirements.length === 0) return 1; // Default to 1% if there are no requirements
+    if (!requirements || requirements.length === 0) return 0;
 
-    const completed = requirements.filter((req) => req.status === "completed").length;
-    const progress = (completed / requirements.length) * 100;
+    const completed = requirements.filter((req) =>
+      submittedFiles.some(file => file.requirement_id === req.label)
+    ).length;
 
-    return progress > 0 ? progress : 100; // Ensure minimum progress is 1%
+    return Math.round((completed / requirements.length) * 100);
   };
   return (
     <div className="p-6">
@@ -147,45 +166,93 @@ function StudentHome() {
 
               {/* Requirements List */}
               <div className="space-y-4">
-                {company.requirements.map((req, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
-                  >
-                    {/* Status Icon */}
-                    <CheckCircle2
-                      className={`h-5 w-5 ${req.status === "completed" ? "text-green-500" : "text-gray-400"
-                        }`}
-                    />
+                {company.requirements.map((req, index) => {
+                  const submittedFile = submittedFiles.find(f => f.requirement_id === req.label);
+                  const isSubmitted = !!submittedFile;
+                  const status = isSubmitted ? "completed" : "pending";
 
-                    {/* Requirement Details */}
-                    <div className="flex-1">
-                      <div className="font-medium">
-                        {req.label}{" "}
-                        <span
-                          className={`text-xs font-semibold ${req.isRequired ? "text-red-500" : "text-gray-500"
-                            }`}
-                        >
-                          ({req.isRequired ? "Required" : "Optional"})
-                        </span>
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                    >
+                      {/* Status Icon */}
+                      <CheckCircle2
+                        className={`h-5 w-5 ${status === "completed" ? "text-green-500" : "text-gray-400"
+                          }`}
+                      />
+
+                      {/* Requirement Details */}
+                      <div className="flex-1">
+                        <div className="font-medium">
+                          {req.label}{" "}
+                          <span
+                            className={`text-xs font-semibold ${req.isRequired ? "text-red-500" : "text-gray-500"
+                              }`}
+                          >
+                            ({req.isRequired ? "Required" : "Optional"})
+                          </span>
+                        </div>
+
+                        {/* Submission Date */}
+                        {status === "completed" && (
+                          <div className="text-sm text-gray-500">
+                            Submitted on {new Date(submittedFile.uploaded_at).toLocaleDateString()}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Submission Date */}
-                      {req.status === "completed" && req.submitted_date && (
-                        <div className="text-sm text-gray-500">
-                          Submitted on {new Date(req.submitted_date).toLocaleDateString()}
+                      {/* View/Download Buttons for Submitted Files */}
+                      {isSubmitted && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            asChild
+                          >
+                            <a
+                              href={submittedFile.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            asChild
+                          >
+                            <a
+                              href={submittedFile.file_url}
+                              download
+                              className="flex items-center gap-1"
+                            >
+                              <Download className="h-4 w-4" />
+                              Download
+                            </a>
+                          </Button>
                         </div>
                       )}
-                    </div>
 
-                    {/* "View" Button for Incomplete Items */}
-                    {/* {req.status !== "completed" && (
-                      <Button size="sm" variant="outline">
-                        View
-                      </Button>
-                    )} */}
-                  </div>
-                ))}
+                      {/* Upload Button for Pending Requirements */}
+                      {!isSubmitted && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            // TODO: Implement file upload functionality
+                            toast.info('File upload coming soon!');
+                          }}
+                        >
+                          Upload
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
