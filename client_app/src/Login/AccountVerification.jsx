@@ -61,7 +61,7 @@ function AccountVerification() {
                             {/* Spinner */}
                             <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid border-opacity-75"></div>
                         </div>
-                        <h2 className="text-xl font-semibold text-gray-700">Verification In Progress</h2>
+                        <h2 className="text-xl font-semibold text-gray-700">Verification in Progress</h2>
                     </>
                 )}
                 {verificationStatus === 'success' && (

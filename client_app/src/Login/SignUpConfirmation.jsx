@@ -6,7 +6,7 @@ function SignUpConfirmation() {
     const navigate = useNavigate();
 
     const handleLoginClick = () => {
-        navigate('/');
+        navigate('/login');
     };
 
     return (

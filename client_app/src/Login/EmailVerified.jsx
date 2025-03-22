@@ -7,7 +7,7 @@ function EmailVerified() {
     const navigate = useNavigate();
 
     const handleLoginClick = () => {
-        navigate('/');
+        navigate('/login');
     };
 
     return (
