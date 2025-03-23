@@ -8,7 +8,7 @@ function PasswordChangedSuccess() {
   const navigate = useNavigate();
 
   const handleBackToLoginClick = () => {
-    navigate('/'); // Redirect to login page
+    navigate('/login'); // Redirect to login page
   };
 
   return (
