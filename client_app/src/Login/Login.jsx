@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import '../index.css'; // Adjust the import path if necessary
+import { ArrowLeft } from 'lucide-react'; 
 
 
 import InputText from './../components/Input/InputText';
@@ -24,7 +25,6 @@ function Login() {
   const handleForgotPasswordClick = () => {
     navigate('/forgot-password');
   };
-
 
   const INITIAL_LOGIN_OBJ = {
     password: '',
@@ -128,9 +128,10 @@ function Login() {
           className="relative left-[calc(50%)] aspect-[1155/678] w-[48rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:w-[96rem]"
         />
       </div>
+      
 
       <div className="login-form ">
-        <img src="/logo.png" alt="logo" className="mx-auto block mb-2 w-28 h-auto" />
+        <img src="/logo.png" alt="logo" className="mx-auto block my-8 w-50 h-auto" />
         <h1 className='text-2xl font-semibold text-center mb-4'>
           Log in
         </h1>
@@ -167,7 +168,7 @@ function Login() {
                     value={values.password}
                     onBlur={handleBlur}
                   />
-                  {/* 
+                
                    <button
                     type="button"
                     onClick={togglePasswordVisibility}
@@ -183,11 +184,26 @@ function Login() {
                       </svg>
                     )}
                   </button>
-                  */}
-
                 </div>
-                <div className="text-right text-blue-950">
-                  <a href="/forgot-password"><span className="text-sm  text-blue-950 inline-block  hover:text-buttonPrimary  hover:underline hover:cursor-pointer transition duration-200">Forgot Password?</span></a></div>
+                
+                <div className="flex justify-between items-center text-blue-950">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = '/#';
+                    }}
+                    className="flex items-center text-black-950 text-sm hover:text-buttonPrimary hover:underline transition duration-200 focus:outline-none"
+                  >
+                    <ArrowLeft size={14} className="mr-1" />
+                    <span>Back</span>
+                  </button>
+                  
+                  <a href="/forgot-password">
+                    <span className="text-sm text-blue-950 inline-block hover:text-buttonPrimary hover:underline hover:cursor-pointer transition duration-200">
+                      Forgot Password?
+                    </span>
+                  </a>
+                </div>
 
                 <button
                   type="submit"
@@ -196,14 +212,6 @@ function Login() {
                 </button>
 
                 <button className="register-button" onClick={handleRegisterClick}>Create an Account</button>
-                {/* <div className="text-sm font-light text-gray-500 dark:text-gray-400 mt-4">
-                      Don't have an account yet?
-                      <Link to="/register">
-                        <span className="  inline-block  hover:text-primary hover:underline hover:cursor-pointer transition duration-200">
-                          Register
-                        </span>
-                      </Link>
-                    </div> */}
               </Form>
             );
           }}
@@ -213,7 +221,7 @@ function Login() {
         {/* <div className="form-group">
           <label htmlFor="email">Email</label>
           <input type="email" id="email" className="form-control" placeholder="Enter your email" />
-        </div>
+        </div>h
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <input type="password" id="password" className="form-control" placeholder="Enter your password" />

@@ -44,15 +44,15 @@ function LandingPage() {
     <div className="bg-white">
       <header className="sticky top-0 z-50 bg-transparent backdrop-blur-md shadow-md">
         <nav className="flex items-center justify-between p-4 lg:px-6">
+
           {/* Logo */}
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5 flex items-center">
               <img
                 alt="InternTrail Logo"
-                src="/img/official_logo.png"
+                src="/logo.png"
                 className="h-8 w-auto"
               />
-              <span className="ml-2 text-gray-900 font-semibold">InternTrail</span>
             </a>
           </div>
 
@@ -78,20 +78,30 @@ function LandingPage() {
               <a
                 key={item.name}
                 href={item.href}
-                className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition duration-300"
+                className="text-md font-semibold text-gray-900 hover:text-indigo-600 transition duration-300"
                 onClick={item.href.startsWith('#') ? handleNavClick : undefined}
               >
                 {item.name}
               </a>
             ))}
           </div>
+          
 
-          {/* Get Started Button (Desktop) */}
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          {/* Get Started Button and Login Button (Desktop) */}
+          <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-x-4">
             <a
               href="#"
               onClick={() => {
                 window.location.href = '/login';
+              }}
+              className="rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition duration-300"
+            >
+              Login
+            </a>
+            <a
+              href="#"
+              onClick={() => {
+                window.location.href = '/user-selection';
               }}
               className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition duration-300"
             >
@@ -119,16 +129,28 @@ function LandingPage() {
               </a>
             ))}
 
-            {/* Get Started Button (Mobile) */}
-            <div className="mt-6 pt-2 border-t border-gray-200">
+            {/* Get Started Button and Login Button (Mobile) */}
+            <div className="mt-6 pt-2 border-t border-gray-200 flex flex-col gap-y-3">
+              <a
+                href="#"
+                onClick={() => {
+                  window.location.href = '/login';
+                }}
+                className="block w-full rounded-md border border-indigo-600 px-4 py-3 text-center text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition-colors"
+              >
+                Login
+              </a>
               <a
                 href="#"
                 className="block w-full rounded-md bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
-                onClick={handleNavClick}
+                onClick={() => {
+                  window.location.href = '/user-selection';
+                }}
               >
                 Get Started
               </a>
             </div>
+
           </div>
         </div>
       </header>
@@ -150,7 +172,7 @@ function LandingPage() {
         {/* Section Container */}
         <div className="mx-auto max-w-4xl pt-20 pb-10 sm:py-24 lg:pt-24 lg:pb-10">
           <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
+            <div className="relative rounded-full px-3 py-1 text-md leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
               Announcing our first ever release of{' '}
               <span className="font-semibold text-indigo-600">InternTrail</span>
             </div>
@@ -165,6 +187,9 @@ function LandingPage() {
             <div className="mt-8 flex flex-col items-center justify-center gap-y-4 sm:flex-row sm:gap-x-6">
               <a
                 href="#"
+                onClick={() => {
+                  window.location.href = '/user-selection';
+                }}
                 className="rounded-md bg-indigo-600 mb-14 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
               >
                 Get Started
@@ -206,7 +231,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <LayoutDashboard size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Dashboard Overview</h3>
+                <h3 className="mb-2 text-xl font-semibold">Dashboard Overview</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Stay on track with a real-time dashboard that displays internship progress, rendered hours, and important updates all in one place.
                 </p>
@@ -216,7 +241,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <Megaphone size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Announcements Hub</h3>
+                <h3 className="mb-2 text-xl font-semibold">Announcements Hub</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Stay informed with important news, deadlines, and internship-related updates.
                 </p>
@@ -226,7 +251,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <Building2 size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Company Directory</h3>
+                <h3 className="mb-2 text-xl font-semibold">Company Directory</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Explore and connect with partner companies for internship opportunities.
                 </p>
@@ -236,7 +261,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <FileCheck size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">File Storage</h3>
+                <h3 className="mb-2 text-xl font-semibold">File Storage</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Upload, organize, and access essential documents like resumes, reports, and requirement templates.
                 </p>
@@ -246,7 +271,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <UsersRound size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Trainee Management</h3>
+                <h3 className="mb-2 text-xl font-semibold">Trainee Management</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Track student progress, performance, and evaluations throughout the internship.
                 </p>
@@ -256,7 +281,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <MessageSquareText size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Performance Feedback</h3>
+                <h3 className="mb-2 text-xl font-semibold">Performance Feedback</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Receive AI-generated performance assessment and structured feedback from your supervisors
                 </p>
@@ -270,7 +295,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <ShieldAlert size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Emergency Alerts</h3>
+                <h3 className="mb-2 text-xl font-semibold">Emergency Alerts</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Quickly report urgent concerns or incidents related to your internship for immediate assistance.
                 </p>
@@ -281,7 +306,7 @@ function LandingPage() {
                 <div className="flex justify-center items-center mb-4 mx-auto">
                   <Activity size={40} className="text-indigo-600 dark:text-indigo-300" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold">Trainee Monitoring</h3>
+                <h3 className="mb-2 text-xl font-semibold">Trainee Monitoring</h3>
                 <p className="mt-2 mx-auto max-w-2xl text-gray-600">
                   Monitor and manage your student trainee's records and accomplishments.
                 </p>
@@ -333,18 +358,18 @@ function LandingPage() {
 
         {/* New developer highlights section */}
         <section id="developers" className="py-16">
-          <div className="container mx-auto">
+          <div className="container mx-auto flex flex-col items-center">
             <h2 className="text-5xl font-semibold text-gray-900 text-center mb-12">
               Meet the Developers
             </h2>
-            <div className="flex flex-wrap justify-center gap-8 text-center">
+            <div className="w-full flex flex-wrap justify-center gap-8 text-center">
               <div className="w-64">
                 <img
                   src="/img/unen.png"
                   alt="Developer 1"
                   className="w-32 h-32 rounded-full mx-auto mb-4"
                 />
-                <h3 className="text-xl font-bold">Onin Binuya</h3>
+                <h3 className="text-xl font-semibold">Onin Binuya</h3>
                 <p className="mt-2 text-gray-600">
                   Project Manager, Full-stack Developer
                 </p>
@@ -355,7 +380,7 @@ function LandingPage() {
                   alt="Developer 2"
                   className="w-32 h-32 rounded-full mx-auto mb-4"
                 />
-                <h3 className="text-xl font-bold">Aldrine Castro</h3>
+                <h3 className="text-xl font-semibold">Aldrine Castro</h3>
                 <p className="mt-2 text-gray-600">
                   Full-stack Developer, UI/UX Designer
                 </p>
@@ -366,7 +391,7 @@ function LandingPage() {
                   alt="Developer 3"
                   className="w-32 h-32 rounded-full mx-auto mb-4"
                 />
-                <h3 className="text-xl font-bold">Vincent Manio</h3>
+                <h3 className="text-xl font-semibold">Vincent Manio</h3>
                 <p className="mt-2 text-gray-600">
                   Frontend Developer
                 </p>
@@ -377,7 +402,7 @@ function LandingPage() {
                   alt="Developer 4"
                   className="w-32 h-32 rounded-full mx-auto mb-4"
                 />
-                <h3 className="text-xl font-bold">Lance Ugatillo</h3>
+                <h3 className="text-xl font-semibold">Lance Ugatillo</h3>
                 <p className="mt-2 text-gray-600">
                   Information System Analyst
                 </p>
@@ -388,7 +413,7 @@ function LandingPage() {
                   alt="Developer 5"
                   className="w-32 h-32 rounded-full mx-auto mb-4"
                 />
-                <h3 className="text-xl font-bold">Dexter Miranda</h3>
+                <h3 className="text-xl font-semibold">Dexter Miranda</h3>
                 <p className="mt-2 text-gray-600">
                   Technical Adviser
                 </p>
@@ -410,19 +435,22 @@ function LandingPage() {
             className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
           />
         </div>
-
+        
         {/* Final section with email field and button */}
-        <section className="py-50">
-          <div className="container mx-auto text-center">
+        <section className="pt-16 pb-24">
+          <div className="container mx-auto flex flex-col items-center">
             <h2 className="text-5xl font-semibold text-gray-900">
               Start using our application today!
             </h2>
-            <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-              InternTrail—where internships meet innovation.  Sign up now and experience a smarter way of managing internships.
+            <p className="mt-4 text-gray-600 max-w-2xl mx-auto text-center">
+              InternTrail—where internships meet innovation. Sign up now and experience a smarter way of managing internships.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-y-3 sm:flex-row sm:gap-x-6">
               <a
                 href="#"
+                onClick={() => {
+                  window.location.href = '/user-selection';
+                }}
                 className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Get Started
@@ -431,9 +459,9 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-gray-200 py-8">
-          <div className="container mx-auto text-center">
+        {/* Footer with increased top margin */}
+        <footer className="border-t border-gray-200 py-8 mt-24 w-full">
+          <div className="w-full text-center">
             <p className="text-sm text-gray-600">
               &copy; 2025 InternTrail. All rights reserved.
             </p>

@@ -11,7 +11,7 @@ function UserSelection() {
   };
 
   const handleSignInClick = () => {
-    navigate('/');
+    navigate('/login');
   };
 
   return (

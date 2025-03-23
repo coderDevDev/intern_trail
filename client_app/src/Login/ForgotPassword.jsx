@@ -138,7 +138,7 @@ function ForgotPassword() {
               </button>
               <p className="sign-in-text">
                 Proceed to{' '}
-                <span onClick={() => navigate('/')} className="link-style">login</span>
+                <span onClick={() => navigate('/login')} className="link-style">login</span>
               </p>
             </Form>
           )}

@@ -15,7 +15,7 @@ function AccountCreation() {
   const { userType } = location.state || { userType: 'student' };
 
   const handleSignInClick = () => {
-    navigate('/');
+    navigate('/login');
   };
 
   const handleSignUpClick = () => {
