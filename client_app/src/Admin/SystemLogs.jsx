@@ -146,25 +146,31 @@ function SystemLogs() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">System Logs</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">System Logs</h1>
           <p className="text-gray-500">Monitor and analyze system activities</p>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           <Button
             variant="outline"
-            className={`${autoRefresh ? 'bg-blue-50 text-blue-600 border-blue-200' : ''}`}
+            className={`${autoRefresh ? 'bg-blue-50 text-blue-600 border-blue-200' : ''} w-full sm:w-auto`}
             onClick={() => setAutoRefresh(!autoRefresh)}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
             {autoRefresh ? 'Auto-refresh On' : 'Auto-refresh Off'}
           </Button>
-          <Button variant="outline" onClick={exportLogs}>
+          <Button 
+            variant="outline" 
+            className="w-full sm:w-auto" 
+            onClick={exportLogs}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Logs
           </Button>
         </div>
+                
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -178,7 +184,7 @@ function SystemLogs() {
                 Last 24h
               </Badge>
             </div>
-            <h3 className="text-2xl font-bold mt-2">{typeCounts[key] || 0}</h3>
+            <h3 className="text-2xl font-semibold mt-2">{typeCounts[key] || 0}</h3>
             <p className="text-gray-500 text-sm">{title}</p>
             <div className="mt-2 pt-2 border-t border-gray-100">
               <span className="text-xs text-gray-500 flex items-center">

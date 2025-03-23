@@ -141,9 +141,6 @@ function CoordinatorTrainees() {
 
   return (
     <div>
-      <h1 className='font-bold mb-4'>HTE Supervisors</h1>
-
-
       <StudentView
         data={trainees || []}
         fetchFunction={fetchTrainees}
