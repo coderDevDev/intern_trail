@@ -475,7 +475,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       MOA: editData?.moa_url || null
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    //
     const defaultRequirements = [
       { label: 'OJT endorsement', value: 'OJT endorsement' },
       { label: 'Training plan', value: 'Training plan' },
