@@ -346,6 +346,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
         value => value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
       );
 
+      //
       // MOA status filter
       const matchesMoaStatus = moaStatusFilter === 'all' ||
         company.moa_status === moaStatusFilter;
