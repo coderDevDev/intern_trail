@@ -352,25 +352,25 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
       // Role-based filtering
       let matchesScope = true;
-      // if (userScope) {
-      //   if (role === 'ojt-coordinator') {
-      //     // Coordinator sees companies in their college and program
-      //     matchesScope = company.collegeID === userScope.collegeID &&
-      //       company.programID === userScope.programID;
-      //   } else if (role === 'trainee') {
+      if (userScope) {
+        if (role === 'ojt-coordinator') {
+          // Coordinator sees companies in their college and program
+          matchesScope = company.collegeID === userScope.collegeID &&
+            company.programID === userScope.programID;
+        } else if (role === 'trainee') {
 
-      //     console.log({ company, userScope })
-      //     // Trainee sees companies matching their college and program
-      //     matchesScope = company.collegeID === userScope.collegeID &&
-      //       company.programID === userScope.programID;
-      //   } else if (role === 'hte-supervisor') {
-      //     // Supervisor only sees their own company
-      //     matchesScope = company.companyID === userScope.companyID;
-      //   } else if (role === 'dean') {
-      //     // Dean sees all companies in their college
-      //     matchesScope = company.collegeID === userScope.collegeID;
-      //   }
-      // }
+          console.log({ company, userScope })
+          // Trainee sees companies matching their college and program
+          matchesScope = company.collegeID === userScope.collegeID &&
+            company.programID === userScope.programID;
+        } else if (role === 'hte-supervisor') {
+          // Supervisor only sees their own company
+          matchesScope = company.companyID === userScope.companyID;
+        } else if (role === 'dean') {
+          // Dean sees all companies in their college
+          matchesScope = company.collegeID === userScope.collegeID;
+        }
+      }
 
       return matchesSearch && matchesMoaStatus && matchesScope;
     });
