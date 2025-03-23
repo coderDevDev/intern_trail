@@ -159,8 +159,8 @@ export default function StudentView({
         toast.error(res.data.message);
       }
     } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while processing your request');
+      // console.error(error);
+      // toast.error('An error occurred while processing your request');
     }
   }
 
