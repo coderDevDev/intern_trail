@@ -36,10 +36,10 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Student Details</DialogTitle>
-        </DialogHeader>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold mt-4">Student Details</DialogTitle>
+          </DialogHeader>
 
         <div className="py-4">
           <div className="flex flex-col md:flex-row gap-6">
@@ -58,7 +58,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
             </div>
 
             <div className="flex-1 space-y-4">
-              <h3 className="text-xl font-bold">{studentName}</h3>
+              <h3 className="text-xl font-semibold">{studentName}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
             </div>
           </div>
 
-          <div className="pt-4 border-t">
+          <div className="pt-4">
             <SubmittedFiles studentId={student.traineeID} />
           </div>
         </div>

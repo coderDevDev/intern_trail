@@ -117,22 +117,13 @@ function Announcements() {
   });
 
   return (
-    <div className="p-3 sm:p-6">
+    <div className="">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold mb-2">Announcements</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold mb-2">Announcements</h1>
         </div>
 
-        {!isStudent && (
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 w-full sm:w-auto"
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Create Announcement
-          </Button>
-        )}
       </div>
 
       {/* Search and Filter Section */}
@@ -176,7 +167,7 @@ function Announcements() {
           </Select>
         </div>
 
-        <div className="flex border rounded-md w-full sm:w-auto justify-center sm:justify-start">
+        <div className="flex border rounded-md ml-auto w-auto">
           <Button
             variant={view === "grid" ? "default" : "ghost"}
             onClick={() => setView("grid")}
@@ -192,12 +183,22 @@ function Announcements() {
             <List className="h-4 w-4" />
           </Button>
         </div>
+
       </div>
+      {!isStudent && (
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-blue-600 w-full sm:w-auto mb-4"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Announcement
+          </Button>
+        )}
 
       {/* Announcements Grid/List */}
       <div className={`
         grid gap-4 sm:gap-6
-        ${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}
+        ${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2" : "grid-cols-1"}
       `}>
         {loading ? (
           <div className="text-center py-8">Loading...</div>
@@ -240,21 +241,25 @@ function Announcements() {
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-center">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
               This action cannot be undone. This will permanently delete the announcement.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+          <AlertDialogFooter className="">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto mt-2"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
     </div>
   );
 }

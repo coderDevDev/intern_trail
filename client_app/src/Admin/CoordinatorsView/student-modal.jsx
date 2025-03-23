@@ -38,9 +38,9 @@ export function StudentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-4 rounded-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="flex items-center justify-between mt-4">
             <span className="text-xl font-semibold">
               {student.first_name} {student.middle_initial} {student.last_name}
             </span>
@@ -56,7 +56,7 @@ export function StudentModal({
             </div>
           </DialogTitle>
         </DialogHeader>
-
+    
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="info">Information</TabsTrigger>
@@ -147,6 +147,7 @@ export function StudentModal({
               setLoading(false);
             }}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             {loading ? (
               <div className="flex items-center">
@@ -168,6 +169,7 @@ export function StudentModal({
               setLoading(false);
             }}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             {loading ? (
               <div className="flex items-center">

@@ -173,29 +173,11 @@ export default function StudentView({
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Trainee Applications</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Trainee Applications</h1>
           <p className="text-gray-500">Manage and review trainee applications</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={view === "table" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("table")}
-          >
-            <List className="h-4 w-4 mr-1" />
-            Table
-          </Button>
-          <Button
-            variant={view === "grid" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("grid")}
-          >
-            <Grid className="h-4 w-4 mr-1" />
-            Grid
-          </Button>
         </div>
       </div>
 
@@ -210,9 +192,9 @@ export default function StudentView({
               icon={<Search className="h-4 w-4" />}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="w-full sm:w-auto sm:flex-shrink-0">
             <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Verification Status" />
               </SelectTrigger>
               <SelectContent>
@@ -225,9 +207,34 @@ export default function StudentView({
         </div>
       </div>
 
+      <div className="flex flex-row sm:flex-row items-center gap-3 w-full sm:w-auto">
+        
+        <Button
+          variant={view === "table" ? "default" : "outline"}
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={() => setView("table")}
+        >
+
+        <List className="h-4 w-4 mr-1" />
+          Table
+        </Button>
+        
+        <Button
+          variant={view === "grid" ? "default" : "outline"}
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={() => setView("grid")}
+        >
+        
+        <Grid className="h-4 w-4 mr-1" />
+          Grid
+        </Button>
+      </div>
+
       {viewProgress ? (
         // Show progress view (existing table/grid view)
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {sortedStudents.map((student) => (
             <Card key={student.traineeID}>
               <CardHeader className="pb-4">

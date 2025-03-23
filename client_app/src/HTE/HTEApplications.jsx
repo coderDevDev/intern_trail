@@ -31,7 +31,7 @@ function HTETrainees() {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-0">
       {/* {userScope && (
         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center">
           <AlertCircle className="h-6 w-6 text-blue-600 mr-3" />

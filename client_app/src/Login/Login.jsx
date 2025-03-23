@@ -175,11 +175,11 @@ function Login() {
                     className="absolute inset-y-0 right-0 flex items-center" // Added z-10
                   >
                     {showPassword ? (
-                      <svg className="w-10 h-5 mt-4" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-10 h-5 mt-4 pt-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d={mdiEyeOff} />
                       </svg>
                     ) : (
-                      <svg className="w-10 h-5 mt-4" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-10 h-5 mt-4 pt-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d={mdiEye} />
                       </svg>
                     )}

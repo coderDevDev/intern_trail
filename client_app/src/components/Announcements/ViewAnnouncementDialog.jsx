@@ -9,10 +9,11 @@ function ViewAnnouncementDialog({ open, onOpenChange, announcement }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
+        <DialogHeader className="text-left mt-4">
           <div className="flex items-center justify-between">
-            <DialogTitle>{announcement.title}</DialogTitle>
+            <DialogTitle className="text-left">{announcement.title}</DialogTitle>
+
             <Badge variant={
               announcement.status === "New" ? "default" :
                 announcement.status === "Urgent" ? "destructive" :
@@ -21,6 +22,7 @@ function ViewAnnouncementDialog({ open, onOpenChange, announcement }) {
               {announcement.status}
             </Badge>
           </div>
+          
           <p className="text-sm text-gray-500">
             Posted on {format(new Date(announcement.created_at), 'PPP')}
           </p>
@@ -45,6 +47,7 @@ function ViewAnnouncementDialog({ open, onOpenChange, announcement }) {
         <DialogFooter>
           <Button onClick={() => onOpenChange(false)}>Close</Button>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );

@@ -40,13 +40,13 @@ function EditAnnouncementDialog({ open, onOpenChange, announcement, onSubmit }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
         <DialogHeader>
           <DialogTitle>Edit Announcement</DialogTitle>
         </DialogHeader>
-
+    
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -101,7 +101,7 @@ function EditAnnouncementDialog({ open, onOpenChange, announcement, onSubmit }) 
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" className="mb-2" >Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

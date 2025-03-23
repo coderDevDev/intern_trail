@@ -915,7 +915,7 @@ function StudentDTR({ supervisorName }) {
   console.log({ weeklyReport, weeklyFeedback });
   return (
     <div className="container mx-auto px-0">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 min-[1300px]:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-1 space-y-auto">
           {/* Progress Overview */}
@@ -964,7 +964,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-bold text-blue-700">{dailyHours}h</p>
+                      <p className="text-lg font-semibold text-blue-700">{dailyHours}h</p>
                     )}
                   </div>
 
@@ -974,7 +974,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-bold text-green-700">
+                      <p className="text-lg font-semibold text-green-700">
                         {weeklyReport.reduce((total, entry) =>
                           total + calculateHours(entry.timeIn, entry.timeOut), 0).toFixed(2)}h
                       </p>
@@ -987,7 +987,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-bold text-purple-700">{monthlyHours}h</p>
+                      <p className="text-lg font-semibold text-purple-700">{monthlyHours}h</p>
                     )}
                   </div>
                 </div>
@@ -1083,51 +1083,51 @@ function StudentDTR({ supervisorName }) {
         <div className="lg:col-span-2">
           <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold">Reports & Feedback</h2>
-                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-                  <button
-                    className={`px-4 py-2 text-sm font-medium transition-colors
-                      ${activeTab === 'reports'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    onClick={() => setActiveTab('reports')}
-                  >
-                    Reports
-                  </button>
-                  <button
-                    className={`px-4 py-2 text-sm font-medium transition-colors
-                      ${activeTab === 'feedbacks'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    onClick={() => setActiveTab('feedbacks')}
-                  >
-                    Feedbacks
-                  </button>
-                  <button
-                    className={`px-4 py-2 text-sm font-medium transition-colors
-                      ${activeTab === 'evaluation'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    onClick={() => setActiveTab('evaluation')}
-                  >
-                    Evaluation
-                  </button>
-                  <button
-                    className={`px-4 py-2 text-sm font-medium transition-colors
-                      ${activeTab === 'certificate'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    onClick={() => setActiveTab('certificate')}
-                  >
-                    Certificate
-                  </button>
-                </div>
+            <div className="flex flex-col mb-6">
+              <h2 className="text-lg font-semibold mb-3">Reports & Feedback</h2>
+              <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden w-full sm:w-auto">
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                    ${activeTab === 'reports'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  onClick={() => setActiveTab('reports')}
+                >
+                  Reports
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                    ${activeTab === 'feedbacks'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  onClick={() => setActiveTab('feedbacks')}
+                >
+                  Feedbacks
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                    ${activeTab === 'evaluation'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  onClick={() => setActiveTab('evaluation')}
+                >
+                  Evaluation
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                    ${activeTab === 'certificate'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  onClick={() => setActiveTab('certificate')}
+                >
+                  Certificate
+                </button>
               </div>
+            </div>
 
               {activeTab === 'reports' ? renderReportsTab() : activeTab === 'feedbacks' ? renderFeedbacksTab() : activeTab === 'evaluation' ? renderEvaluationTab() : renderCertificateTab()}
             </CardContent>

@@ -50,7 +50,7 @@ function CoordinatorHome() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* College Info Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.collegeDetails && (
@@ -60,18 +60,18 @@ function CoordinatorHome() {
                 <School className="h-12 w-12 text-blue-500" />
               </div>
               <div className="flex-grow">
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-2xl font-semibold text-gray-800">
                   {stats.collegeDetails.collegeName}
                 </h2>
                 <p className="text-sm text-gray-500">College Code: {stats.collegeDetails.collegeCode}</p>
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Programs</p>
-                    <p className="text-2xl font-bold">{stats.collegeDetails.totalPrograms}</p>
+                    <p className="text-2xl font-semibold">{stats.collegeDetails.totalPrograms}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Companies</p>
-                    <p className="text-2xl font-bold">{stats.collegeDetails.totalCompanies}</p>
+                    <p className="text-2xl font-semibold">{stats.collegeDetails.totalCompanies}</p>
                   </div>
                 </div>
               </div>
@@ -160,7 +160,7 @@ function StatCard({ title, value, icon, change, alert }) {
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <h3 className="text-2xl font-bold mt-2">{value}</h3>
+          <h3 className="text-2xl font-semibold mt-2">{value}</h3>
           {change && (
             <p className={`text-sm mt-2 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               <TrendingUp className="h-4 w-4 inline mr-1" />

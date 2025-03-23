@@ -103,7 +103,7 @@ function HTEDashboard() {
           <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
             <img
               src="/logo.png"
-              width="250px"
+              width="180px"
               height="auto"
               className="d-inline-block align-top me-1"
               alt="Logo"

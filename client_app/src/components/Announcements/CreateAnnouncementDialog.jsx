@@ -33,10 +33,10 @@ function CreateAnnouncementDialog({ open, onOpenChange, onSubmit }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
-        <DialogHeader>
-          <DialogTitle>Create New Announcement</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[525px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
+          <DialogHeader className="mt-4">
+            <DialogTitle>Create New Announcement</DialogTitle>
+          </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -100,10 +100,10 @@ function CreateAnnouncementDialog({ open, onOpenChange, onSubmit }) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" className="mt-2" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Create Announcement</Button>
+            <Button type="submit" className="mt-2">Create Announcement</Button>
           </DialogFooter>
         </form>
       </DialogContent>

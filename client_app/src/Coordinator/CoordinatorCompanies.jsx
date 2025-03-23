@@ -559,21 +559,21 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
     return (
       <ShadcnDialog open={isOpen} onOpenChange={onClose}>
-        <ShadcnDialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          <ShadcnDialogHeader className="top-0 bg-white pb-4 border-b">
-            <ShadcnDialogTitle className="text-xl font-bold flex items-center gap-2">
+        <ShadcnDialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto rounded-lg">
+          <ShadcnDialogHeader className="top-0 bg-white pb-4 border-b mt-4">
+            <ShadcnDialogTitle className="text-xl font-semibold flex items-center gap-2">
               <Building className="h-5 w-5 text-blue-500" />
               {editData ? 'Edit Company' : 'Add New Company'}
             </ShadcnDialogTitle>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 text-left">
               Please provide detailed information about the company to help us manage it effectively.
             </p>
           </ShadcnDialogHeader>
 
           {/* Modern Alert for Scope */}
           {userScope && (
-            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Scope Confirmation</p>
+            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert">
+              <p className="font-semibold">Scope Confirmation</p>
               <p>This company will be created within your assigned scope:</p>
               <ul className="list-disc pl-5">
                 <li>College: {userScope.collegeName}</li>
@@ -614,7 +614,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
           >
             {({ values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue }) => (
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <Label htmlFor="companyName" className="text-sm font-medium flex items-center gap-2">
                       <Building className="h-4 w-4 text-gray-500" />
@@ -626,7 +626,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                       value={values.companyName}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`mt-1 ${errors.companyName && touched.companyName ? 'border-red-500' : ''}`}
+                      className={`mt-1 ${errors.companyName && touched.companyName ? 'border-red-500' : ''} mb-4`}
                     />
                     {touched.companyName && errors.companyName && (
                       <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>
@@ -644,7 +644,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                       value={values.contact_email}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`mt-1 ${errors.contact_email && touched.contact_email ? 'border-red-500' : ''}`}
+                      className={`mt-1 ${errors.contact_email && touched.contact_email ? 'border-red-500' : ''} mb-4`}
                     />
                     {touched.contact_email && errors.contact_email && (
                       <p className="text-red-500 text-xs mt-1">{errors.contact_email}</p>
@@ -662,7 +662,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                       value={values.contact_phone}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`mt-1 ${errors.contact_phone && touched.contact_phone ? 'border-red-500' : ''}`}
+                      className={`mt-1 ${errors.contact_phone && touched.contact_phone ? 'border-red-500' : ''} mb-4`}
                     />
                     {touched.contact_phone && errors.contact_phone && (
                       <p className="text-red-500 text-xs mt-1">{errors.contact_phone}</p>
@@ -793,7 +793,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Company Logo</Label>
                     <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${filePreview.avatar_photo ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-blue-400'}`}>
@@ -1451,7 +1451,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       <ShadcnDialog open={isOpen} onOpenChange={onClose}>
         <ShadcnDialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <ShadcnDialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b">
-            <ShadcnDialogTitle className="text-xl font-bold flex items-center gap-2">
+            <ShadcnDialogTitle className="text-xl font-semibold flex items-center gap-2">
               <InfoIcon className="h-5 w-5 text-green-500" />
               Apply to {company.companyName}
             </ShadcnDialogTitle>
@@ -1533,11 +1533,38 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
   console.log({ role })
   return (
-    <div className="p-6 space-y-6">
-      {/* User Scope Badge - Modern Design */}
+    <div className="space-y-6">
+      
+
+      {/* Multiple applications alert - Modern Design */}
+      {isTrainee && approvedApplications.length > 1 && !hasUserJoinedAnyCompany() && (
+        <div className="mb-6 p-5 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="bg-amber-100 p-2.5 rounded-full shrink-0">
+              <AlertCircle className="h-6 w-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-amber-800 text-lg mb-1">Multiple Approved Applications</h3>
+              <p className="text-sm text-amber-700 leading-relaxed">
+                Congratulations! You have been approved by multiple companies. Please choose one company to join by clicking the <span className="font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Join</span> button on your preferred company.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header Section */}
+      <div className="companies-header space-y-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-800">Companies</h1>
+        </div>
+      </div>
+
+        {/* User Scope Badge - Modern Design */}
       {userScope && (
-        <div className="mb-4 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
+        <div className="mb-4 hover:shadow-md transition-all duration-300">
+          <div className="flex flex-col md:flex-row md:items-start gap-2">
             {/* Left side - User scope information */}
             <div className="flex-1">
 
@@ -1586,77 +1613,50 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
           </div>
         </div>
       )}
-
-      {/* Multiple applications alert - Modern Design */}
-      {isTrainee && approvedApplications.length > 1 && !hasUserJoinedAnyCompany() && (
-        <div className="mb-6 p-5 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="bg-amber-100 p-2.5 rounded-full shrink-0">
-              <AlertCircle className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-medium text-amber-800 text-lg mb-1">Multiple Approved Applications</h3>
-              <p className="text-sm text-amber-700 leading-relaxed">
-                Congratulations! You have been approved by multiple companies. Please choose one company to join by clicking the <span className="font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Join</span> button on your preferred company.
-              </p>
-            </div>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <div className="relative flex-1 min-w-0">
+            <Input
+              type="text"
+              placeholder="Search companies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-full bg-white"
+            />
+          </div>
+          
+          <div className="w-full sm:flex-shrink-0 sm:w-auto">
+            <select
+              value={moaStatusFilter}
+              onChange={(e) => setMoaStatusFilter(e.target.value)}
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All MOA Status</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+              <option value="none">No MOA</option>
+            </select>
           </div>
         </div>
-      )}
 
-      {/* Header Section */}
-      <div className="companies-header">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Companies</h1>
+        {canEditCompany && (
+          <ButtonUI
+            onClick={() => {
+              setEditingCompany(null);
+              setIsAddCompanyModalOpen(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 shadow-sm transition-all hover:shadow-md w-full sm:w-auto"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add New Company</span>
+          </ButtonUI>
+        )}
 
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              {/* <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /> */}
-              <Input
-                type="text"
-                placeholder="Search companies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-[250px] bg-white"
-              />
-            </div>
-
-            {canEditCompany && (
-              <ButtonUI
-                onClick={() => {
-                  setEditingCompany(null);
-                  setIsAddCompanyModalOpen(true);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 shadow-sm transition-all hover:shadow-md"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Add New Company</span>
-              </ButtonUI>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Add this to the JSX near the search and sort controls */}
-      <div className="filter-controls">
-        <select
-          value={moaStatusFilter}
-          onChange={(e) => setMoaStatusFilter(e.target.value)}
-          className="moa-status-filter"
-        >
-          <option value="all">All MOA Status</option>
-          <option value="approved">Approved</option>
-          <option value="pending">Pending</option>
-          <option value="rejected">Rejected</option>
-          <option value="none">No MOA</option>
-        </select>
       </div>
 
       {/* Companies Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
         {filterCompanies(companies).map((company) => (
           <CompanyCard
             key={company.companyID}
