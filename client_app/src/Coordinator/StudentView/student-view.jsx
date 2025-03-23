@@ -66,7 +66,8 @@ export default function StudentView({
         data: {
           studentId: studentId,
           is_verified_by_coordinator: true,
-          remaining_hours: hours
+          remaining_hours: hours,
+          fromApproveButton: true
         }
       });
 
