@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,20 +7,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react"; // Import Loader2 for spinner
 
 function CreateAnnouncementDialog({ open, onOpenChange, onSubmit }) {
-  const [date, setDate] = React.useState(new Date());
-  const [formData, setFormData] = React.useState({
+  const [date, setDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false); // State for loading
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
     status: 'New',
     image: null
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    setIsLoading(true); // Show loading state
+    
+    await onSubmit(formData); // Wait for submission to complete
+
+    setIsLoading(false); // Hide loading state
   };
 
   const handleChange = (e) => {
@@ -34,9 +39,9 @@ function CreateAnnouncementDialog({ open, onOpenChange, onSubmit }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
-          <DialogHeader className="mt-4">
-            <DialogTitle>Create New Announcement</DialogTitle>
-          </DialogHeader>
+        <DialogHeader className="mt-4">
+          <DialogTitle>Create New Announcement</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -100,10 +105,29 @@ function CreateAnnouncementDialog({ open, onOpenChange, onSubmit }) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" className="mt-2" onClick={() => onOpenChange(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="mt-2" 
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading} // Disable if loading
+            >
               Cancel
             </Button>
-            <Button type="submit" className="mt-2">Create Announcement</Button>
+            
+            <Button 
+              type="submit" 
+              className="mt-2 flex items-center gap-2"
+              disabled={isLoading} // Disable button while loading
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" /> Posting...
+                </>
+              ) : (
+                "Create Announcement"
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -111,4 +135,4 @@ function CreateAnnouncementDialog({ open, onOpenChange, onSubmit }) {
   );
 }
 
-export default CreateAnnouncementDialog; 
+export default CreateAnnouncementDialog;

@@ -59,6 +59,8 @@ function Login() {
       values,
       { setSubmitting, setFieldValue, setErrorMessage, setErrors }
     ) => {
+      setLoading(true); // Set loading to true when form is submitted
+      
       try {
         let res = await axios({
           method: 'POST',
@@ -103,6 +105,8 @@ function Login() {
           progress: undefined,
           theme: 'light'
         });
+      } finally {
+        setLoading(false); // Set loading back to false regardless of success or error
       }
 
       // setErrorMessage('');
@@ -209,8 +213,10 @@ function Login() {
 
                 <button
                   type="submit"
-                  className="submit-button">
-                  Sign in
+                  className="submit-button"
+                  disabled={loading}
+                >
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
 
                 <button className="register-button" onClick={handleRegisterClick}>Create an Account</button>
