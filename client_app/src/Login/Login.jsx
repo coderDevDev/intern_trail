@@ -189,14 +189,16 @@ function Login() {
                 <div className="flex justify-between items-center text-blue-950">
                   <button
                     onClick={(e) => {
+                      if (e.detail === 0) return; // Ignore keyboard events
                       e.preventDefault();
-                      window.location.href = '/#';
+                      window.location.href = '/';
                     }}
                     className="flex items-center text-black-950 text-sm hover:text-buttonPrimary hover:underline transition duration-200 focus:outline-none"
                   >
                     <ArrowLeft size={14} className="mr-1" />
                     <span>Back</span>
                   </button>
+
                   
                   <a href="/forgot-password">
                     <span className="text-sm text-blue-950 inline-block hover:text-buttonPrimary hover:underline hover:cursor-pointer transition duration-200">
