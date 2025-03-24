@@ -744,15 +744,15 @@ function StudentReports() {
       </Dialog>
 
       {/* View Report Modal */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Emergency Report Details</DialogTitle>
-          </DialogHeader>
-
-          {selectedReport && (
-            <div className="space-y-6 py-4">
-              <div className="flex flex-wrap gap-2 justify-between items-center">
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
+            <DialogHeader>
+              <DialogTitle className="mt-4 text-xl font-semibold">Emergency Report Details</DialogTitle>
+            </DialogHeader>
+            
+            {selectedReport && (
+              <div className="space-y-6 py-4">
+                <div className="flex flex-row gap-2 mb-6">
                 <Badge className={`${getStatusColor(selectedReport.status)} px-3 py-1 text-sm font-medium`}>
                   {selectedReport.status.charAt(0).toUpperCase() + selectedReport.status.slice(1)}
                   {selectedReport.status === 'in-progress' && (

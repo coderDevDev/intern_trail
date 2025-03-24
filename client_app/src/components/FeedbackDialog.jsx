@@ -45,7 +45,7 @@ function FeedbackDialog({ isOpen, onClose, company, onFeedbackSubmitted, feedbac
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
         <DialogHeader>
           <DialogTitle>Rate Your Experience</DialogTitle>
         </DialogHeader>

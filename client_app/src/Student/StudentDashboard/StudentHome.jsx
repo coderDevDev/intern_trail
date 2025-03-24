@@ -415,7 +415,7 @@ function StudentHome() {
 
       {/* Upload Modal */}
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
           <DialogHeader>
             <DialogTitle>Upload Requirement</DialogTitle>
           </DialogHeader>

@@ -1449,14 +1449,13 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
 
     return (
       <ShadcnDialog open={isOpen} onOpenChange={onClose}>
-        <ShadcnDialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-          <ShadcnDialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b">
+        <ShadcnDialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
+          <ShadcnDialogHeader className="top-0 pb-2 mt-4">
             <ShadcnDialogTitle className="text-xl font-semibold flex items-center gap-2">
-              <InfoIcon className="h-5 w-5 text-green-500" />
+              <InfoIcon className="h-5 w-5 text-green-500 font-semibold" />
               Apply to {company.companyName}
             </ShadcnDialogTitle>
-            <p className="text-sm text-gray-500 mt-1">
-              Please upload the required documents to complete your application.
+            <p className="text-sm text-left text-gray-500 mt-1">Please upload the required documents to complete your application.
             </p>
           </ShadcnDialogHeader>
           <div className="py-4">
@@ -1790,7 +1789,7 @@ function CoordinatorCompanies({ role = 'ojt-coordinator' }) {
       <ToastContainer />
       {/* Update MOA Modal */}
       <ShadcnDialog open={moaModalOpen} onOpenChange={setMoaModalOpen}>
-        <ShadcnDialogContent className="sm:max-w-[800px] h-[80vh] flex flex-col">
+        <ShadcnDialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
           <ShadcnDialogHeader>
             <ShadcnDialogTitle>Memorandum of Agreement</ShadcnDialogTitle>
           </ShadcnDialogHeader>
