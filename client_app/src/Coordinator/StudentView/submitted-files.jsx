@@ -7,7 +7,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export function SubmittedFiles({ studentId }) {
+export function SubmittedFiles({ studentId, userID }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -18,7 +18,9 @@ export function SubmittedFiles({ studentId }) {
 
   const fetchFiles = async () => {
     try {
-      const response = await axios.get(`/trainee/submitted-files/of/${studentId}`);
+
+      console.log({ fetchFiles: studentId })
+      const response = await axios.get(`/trainee/submitted-files/of/${userID}`);
       setFiles(response.data.data);
     } catch (error) {
       console.error('Error fetching files:', error);
@@ -93,13 +95,17 @@ export function SubmittedFiles({ studentId }) {
         </div>
       </div>
 
+
+      {
+        console.log({ files })
+      }
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {files.map((file) => (
             <Card key={file.id} className="p-4 hover:shadow-lg transition-shadow">
               <div className="flex flex-col items-center text-center">
                 <FileIcon className="h-12 w-12 text-blue-500 mb-2" />
-                <p className="text-sm font-medium truncate w-full">{file.file_name}</p>
+                <p className="text-sm font-medium truncate w-full">{file.requirement_id}</p>
                 <p className="text-xs text-gray-500">
                   {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
                 </p>

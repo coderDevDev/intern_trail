@@ -137,7 +137,7 @@ function StudentHome() {
                 {company.name}
               </CardTitle>
               <div className="text-sm text-gray-500">
-                Requirements Progressss
+                Requirements Progress
               </div>
             </CardHeader>
             <CardContent>

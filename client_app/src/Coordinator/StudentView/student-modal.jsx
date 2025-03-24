@@ -191,7 +191,9 @@ export function StudentModal({
             </TabsContent>
 
             <TabsContent value="submitted-files" className="h-full">
-              <SubmittedFiles studentId={student.traineeID} />
+              <SubmittedFiles studentId={student.userID}
+                userID={student.userID}
+              />
             </TabsContent>
           </div>
         </Tabs>
