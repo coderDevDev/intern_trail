@@ -471,7 +471,7 @@ export default function FileManager({
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel className="w-full sm:w-auto mt-2">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 w-full sm:w-auto">
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 w-full sm:w-auto mt-2">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

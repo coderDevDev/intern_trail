@@ -102,6 +102,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
               userID={student.userID}
             />
           </div>
+
         </div>
 
         <DialogFooter>
