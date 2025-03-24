@@ -93,9 +93,13 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
             </div>
           </div>
 
-          <div className="pt-4">
-            <SubmittedFiles studentId={student.traineeID} />
+          <div className="pt-4 border-t">
+
+            <SubmittedFiles studentId={student.traineeID}
+              userID={student.userID}
+            />
           </div>
+
         </div>
 
         <DialogFooter>
