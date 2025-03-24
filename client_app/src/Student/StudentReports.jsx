@@ -649,31 +649,31 @@ function StudentReports() {
             <div>
               <Label className="text-sm font-medium">Severity Level</Label>
               <RadioGroup
-                value={formData.severity}
-                onValueChange={(value) => handleRadioChange('severity', value)}
-                className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2"
-              >
-                <div className="flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-gray-50">
-                  <RadioGroupItem value="Low" id="severity-1" className="sr-only" />
-                  <div className={`w-4 h-4 rounded-full ${formData.severity === 'Low' ? 'bg-green-500' : 'bg-green-200'}`}></div>
-                  <Label htmlFor="severity-1" className={`text-sm cursor-pointer ${formData.severity === 'Low' ? 'font-medium' : ''}`}>Low</Label>
-                </div>
-                <div className="flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-gray-50">
-                  <RadioGroupItem value="Moderate" id="severity-2" className="sr-only" />
-                  <div className={`w-4 h-4 rounded-full ${formData.severity === 'Moderate' ? 'bg-yellow-500' : 'bg-yellow-200'}`}></div>
-                  <Label htmlFor="severity-2" className={`text-sm cursor-pointer ${formData.severity === 'Moderate' ? 'font-medium' : ''}`}>Moderate</Label>
-                </div>
-                <div className="flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-gray-50">
-                  <RadioGroupItem value="High" id="severity-3" className="sr-only" />
-                  <div className={`w-4 h-4 rounded-full ${formData.severity === 'High' ? 'bg-orange-500' : 'bg-orange-200'}`}></div>
-                  <Label htmlFor="severity-3" className={`text-sm cursor-pointer ${formData.severity === 'High' ? 'font-medium' : ''}`}>High</Label>
-                </div>
-                <div className="flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-gray-50">
-                  <RadioGroupItem value="Critical" id="severity-4" className="sr-only" />
-                  <div className={`w-4 h-4 rounded-full ${formData.severity === 'Critical' ? 'bg-red-500' : 'bg-red-200'}`}></div>
-                  <Label htmlFor="severity-4" className={`text-sm cursor-pointer ${formData.severity === 'Critical' ? 'font-medium' : ''}`}>Critical</Label>
-                </div>
-              </RadioGroup>
+              value={formData.severity}
+              onValueChange={(value) => handleRadioChange('severity', value)}
+              className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2"
+            >
+              <div className={`flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-green-50 transition-colors ${formData.severity === 'Low' ? 'bg-green-100 border-green-400' : ''}`}>
+                <RadioGroupItem value="Low" id="severity-1" className="sr-only" />
+                <div className={`w-4 h-4 rounded-full ${formData.severity === 'Low' ? 'bg-green-500' : 'bg-green-200'}`}></div>
+                <Label htmlFor="severity-1" className={`text-sm cursor-pointer ${formData.severity === 'Low' ? 'font-medium text-green-700' : ''}`}>Low</Label>
+              </div>
+              <div className={`flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-yellow-50 transition-colors ${formData.severity === 'Moderate' ? 'bg-yellow-100 border-yellow-400' : ''}`}>
+                <RadioGroupItem value="Moderate" id="severity-2" className="sr-only" />
+                <div className={`w-4 h-4 rounded-full ${formData.severity === 'Moderate' ? 'bg-yellow-500' : 'bg-yellow-200'}`}></div>
+                <Label htmlFor="severity-2" className={`text-sm cursor-pointer ${formData.severity === 'Moderate' ? 'font-medium text-yellow-700' : ''}`}>Moderate</Label>
+              </div>
+              <div className={`flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-orange-50 transition-colors ${formData.severity === 'High' ? 'bg-orange-100 border-orange-400' : ''}`}>
+                <RadioGroupItem value="High" id="severity-3" className="sr-only" />
+                <div className={`w-4 h-4 rounded-full ${formData.severity === 'High' ? 'bg-orange-500' : 'bg-orange-200'}`}></div>
+                <Label htmlFor="severity-3" className={`text-sm cursor-pointer ${formData.severity === 'High' ? 'font-medium text-orange-700' : ''}`}>High</Label>
+              </div>
+              <div className={`flex flex-col items-center space-y-1 rounded-md border p-3 hover:bg-red-50 transition-colors ${formData.severity === 'Critical' ? 'bg-red-100 border-red-400' : ''}`}>
+                <RadioGroupItem value="Critical" id="severity-4" className="sr-only" />
+                <div className={`w-4 h-4 rounded-full ${formData.severity === 'Critical' ? 'bg-red-500' : 'bg-red-200'}`}></div>
+                <Label htmlFor="severity-4" className={`text-sm cursor-pointer ${formData.severity === 'Critical' ? 'font-medium text-red-700' : ''}`}>Critical</Label>
+              </div>
+            </RadioGroup>
             </div>
 
             <div>
