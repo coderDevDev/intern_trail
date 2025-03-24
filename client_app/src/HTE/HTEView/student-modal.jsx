@@ -14,6 +14,9 @@ import { SubmittedFiles } from './../../Coordinator/StudentView/submitted-files'
 export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) {
   const [loading, setLoading] = useState(false);
 
+
+  console.log({ student })
+
   if (!student) return null;
 
   const studentName = `${student.first_name || ""} ${student.last_name || ""}`;
@@ -94,7 +97,10 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
           </div>
 
           <div className="pt-4 border-t">
-            <SubmittedFiles studentId={student.traineeID} />
+
+            <SubmittedFiles studentId={student.traineeID}
+              userID={student.userID}
+            />
           </div>
         </div>
 

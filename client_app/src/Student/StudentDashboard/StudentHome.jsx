@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   Clock,
@@ -10,7 +10,9 @@ import {
   AlertCircle,
   Bell,
   Eye,
-  Download
+  Download,
+  Upload,
+  Circle
 } from 'lucide-react';
 
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from 'react-toastify';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useDropzone } from 'react-dropzone';
 
 function StudentHome() {
   const [stats, setStats] = useState(null);
@@ -26,6 +30,11 @@ function StudentHome() {
 
   const [requirements, setRequirements] = useState([]);
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedRequirement, setSelectedRequirement] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Fetch requirements from company
   const fetchRequirements = async () => {
@@ -74,10 +83,56 @@ function StudentHome() {
 
   const fetchSubmittedFiles = async () => {
     try {
-      const response = await axios.get(`/trainee/submitted-files/of/${stats.traineeDetails.traineeID}`);
+      const response = await axios.get(`/trainee/submitted-files/of/${stats.traineeDetails.userID}`);
       setSubmittedFiles(response.data.data);
     } catch (error) {
       console.error('Error fetching submitted files:', error);
+    }
+  };
+
+  // Add file upload handler
+  const onDrop = useCallback((acceptedFiles) => {
+    if (acceptedFiles?.length) {
+      setUploadingFile(acceptedFiles[0]);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'image/*': ['.png', '.jpg', '.jpeg']
+    }
+  });
+
+  const handleUploadRequirement = async () => {
+    if (!uploadingFile || !selectedRequirement) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', uploadingFile);
+
+    console.log({ selectedRequirement })
+    formData.append('requirementId', selectedRequirement.label);
+
+    console.log({ stats })
+
+    formData.append('companyID', stats.traineeDetails.companyID);
+    try {
+      const response = await axios.post('/trainee/upload-requirement/upload-file', formData);
+      if (response.data.success) {
+        toast.success('Requirement uploaded successfully');
+        fetchSubmittedFiles();
+        fetchRequirements(); // Refresh requirements list
+        setIsUploadModalOpen(false);
+      }
+    } catch (error) {
+      console.error('Error uploading requirement:', error);
+      toast.error('Failed to upload requirement');
+    } finally {
+      setIsUploading(false);
+      setUploadingFile(null);
     }
   };
 
@@ -153,7 +208,7 @@ function StudentHome() {
           <Card key={company.id} className="shadow-lg">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl">{company.name}</CardTitle>
-              <div className="text-sm text-gray-500">Requirements Progress</div>
+              <div className="text-sm text-gray-500">Requirements Progresss</div>
             </CardHeader>
             <CardContent>
               {/* Progress Bar */}
@@ -164,6 +219,10 @@ function StudentHome() {
                 </div>
               </div>
 
+
+              {
+                console.log({ submittedFiles })
+              }
               {/* Requirements List */}
               <div className="space-y-4">
                 {company.requirements.map((req, index) => {
@@ -243,10 +302,11 @@ function StudentHome() {
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            // TODO: Implement file upload functionality
-                            toast.info('File upload coming soon!');
+                            setSelectedRequirement(req);
+                            setIsUploadModalOpen(true);
                           }}
                         >
+                          <Upload className="h-4 w-4 mr-1" />
                           Upload
                         </Button>
                       )}
@@ -285,6 +345,44 @@ function StudentHome() {
           ))}
         </div>
       </Card>
+
+      {/* Upload Modal */}
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Requirement</DialogTitle>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div {...getRootProps()} className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-blue-500">
+              <input {...getInputProps()} />
+              {uploadingFile ? (
+                <div className="text-sm">
+                  Selected file: {uploadingFile.name}
+                </div>
+              ) : (
+                <div className="text-gray-500">
+                  <Upload className="h-8 w-8 mx-auto mb-2" />
+                  <p>Drag & drop a file here, or click to select</p>
+                  <p className="text-xs mt-1">Supported formats: PDF, PNG, JPG</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUploadRequirement}
+              disabled={!uploadingFile || isUploading}
+            >
+              {isUploading ? 'Uploading...' : 'Upload'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
