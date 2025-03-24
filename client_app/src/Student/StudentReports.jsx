@@ -373,18 +373,18 @@ function StudentReports() {
   );
 
   return (
-    <div className="p-3 sm:p-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
+    <div className="">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">Emergency Reports</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold">Emergency Reports</h1>
               <p className="text-gray-500 mt-1">Manage and track emergency incidents</p>
             </div>
             <Button
               disabled={!joinedCompany}
               onClick={handleNewReport}
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto mb-4"
             >
               <Plus className="h-4 w-4 mr-2" />
               Report Emergency
@@ -393,7 +393,7 @@ function StudentReports() {
 
           {/* Add userScope display */}
           {userScope && (
-            <div className="mb-6 p-4 bg-white border border-gray-100 rounded-xl">
+            <div className="rounded-xl">
               <div className="flex flex-col md:flex-row md:items-start gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mt-2">
@@ -422,8 +422,7 @@ function StudentReports() {
           )}
 
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative flex-1"> 
               <Input
                 placeholder="Search reports..."
                 value={searchTerm}
@@ -534,7 +533,7 @@ function StudentReports() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
               {selectedReport ? 'Edit Emergency Report' : 'Report an Emergency'}
             </DialogTitle>

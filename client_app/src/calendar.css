@@ -1,10 +1,8 @@
 /* Calendar.css */
 .react-calendar {
-    border: 2px solid #808080;
-    border-radius: 8px;
     font-family: 'Poppins', sans-serif;
-    padding: 20px;
     width: 100%;
+    border: transparent;
   }
   
   .react-calendar__tile {
@@ -28,12 +26,13 @@
   /* Navigation and Labels */
   .react-calendar__navigation__label {
     color: #1F41BB;
-    font-weight: 600;
+    font-weight: 700;
   }
   
   .react-calendar__navigation__arrow {
     background-color: #1F41BB;
     color: #1F41BB;
+    font-weight: 700;
   }
   
   /* Color of weekends */

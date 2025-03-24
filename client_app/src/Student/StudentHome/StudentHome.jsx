@@ -81,7 +81,7 @@ function StudentHome() {
     return progress > 0 ? progress : 100; // Ensure minimum progress is 1%
   };
   return (
-    <div className="p-6">
+    <div className="">
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="p-4">
@@ -89,7 +89,7 @@ function StudentHome() {
             <Clock className="h-6 w-6 text-blue-500" />
             <div>
               <p className="text-lg font-semibold mb-auto ml-2">Total Hours</p>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-semibold">
                 {traineeDetails?.remaining_hours || 0}
                 {/* {traineeDetails.total_hours_rendered} / {360 - traineeDetails.remaining_hours} */}
               </h3>

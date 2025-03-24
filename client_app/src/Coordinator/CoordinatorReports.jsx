@@ -182,18 +182,17 @@ function CoordinatorReports() {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-6 border-b border-gray-100">
+    <div className="bg-white rounded-lg  overflow-hidden">
+      <div className="">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Emergency Reports Management</h1>
+            <h1 className="text-2xl font-semibold">Emergency Reports Management</h1>
             <p className="text-gray-500 mt-1">Review and manage student emergency reports</p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search reports..."
               value={searchTerm}
@@ -352,7 +351,7 @@ function CoordinatorReports() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Details</p>
-                  <div className="bg-white p-3 rounded border border-gray-100">
+                  <div className="bg-white rounded border border-gray-100">
                     <p className="whitespace-pre-line">{selectedReport.details}</p>
                   </div>
                 </div>

@@ -10,10 +10,10 @@ import HistoryIcon from '@mui/icons-material/History';
 function AdminSidebar({ expanded, setExpanded }) {
   return (
     <div>
-      <div className="sidebar-toggle" onClick={() => setExpanded(!expanded)}>
+      <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
         <MenuIcon />
       </div>
-      <div className={`custom-sidebar ${expanded ? 'expanded' : ''}`}>
+      <div className={`custom-sidebar ${expanded ? 'expanded' : ''} z-2`}>
         <Nav defaultActiveKey="/admin/coordinators" className="flex-column">
           {/* Users Section */}
           {/* <Nav.Item>

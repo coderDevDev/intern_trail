@@ -151,14 +151,14 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+  <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-blue-700">
+          <DialogTitle className="text-2xl font-semibold text-center black mt-4">
             Student Performance Evaluation
           </DialogTitle>
         </DialogHeader>
 
-        <div className="bg-white rounded-lg p-6">
+        <div className="bg-white rounded-lg p-0">
           {/* Student Information */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">Student Information</h3>

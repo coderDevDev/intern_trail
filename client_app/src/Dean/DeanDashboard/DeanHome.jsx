@@ -34,9 +34,9 @@ function DeanHome() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-0">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">
+        <h1 className="text-2xl font-semibold mb-2">
           {stats.collegeDetails.collegeName} ({stats.collegeDetails.collegeCode})
         </h1>
         <p className="text-gray-600">
@@ -51,7 +51,7 @@ function DeanHome() {
             <Users className="w-8 h-8 text-blue-500" />
             <div>
               <p className="text-sm text-gray-600">Total Trainees</p>
-              <h3 className="text-2xl font-bold">{stats.traineeStats.totalTrainees}</h3>
+              <h3 className="text-2xl font-semibold">{stats.traineeStats.totalTrainees}</h3>
               <p className="text-sm text-gray-500">
                 {stats.traineeStats.deployedTrainees} Deployed
               </p>
@@ -64,7 +64,7 @@ function DeanHome() {
             <Building2 className="w-8 h-8 text-green-500" />
             <div>
               <p className="text-sm text-gray-600">Partner Companies</p>
-              <h3 className="text-2xl font-bold">{stats.companyStats.totalCompanies}</h3>
+              <h3 className="text-2xl font-semibold">{stats.companyStats.totalCompanies}</h3>
               <p className="text-sm text-gray-500">
                 {stats.companyStats.approvedCompanies} MOA Approved
               </p>
@@ -77,7 +77,7 @@ function DeanHome() {
             <GraduationCap className="w-8 h-8 text-purple-500" />
             <div>
               <p className="text-sm text-gray-600">Completed Training</p>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-semibold">
                 {stats.traineeStats.completedTrainees}
               </h3>
               <p className="text-sm text-gray-500">With Certificates</p>
@@ -90,7 +90,7 @@ function DeanHome() {
             <AlertTriangle className="w-8 h-8 text-red-500" />
             <div>
               <p className="text-sm text-gray-600">Emergency Reports</p>
-              <h3 className="text-2xl font-bold">{stats.emergencyStats.total}</h3>
+              <h3 className="text-2xl font-semibold">{stats.emergencyStats.total}</h3>
               <p className="text-sm text-gray-500">
                 {stats.emergencyStats.pending} Pending
               </p>

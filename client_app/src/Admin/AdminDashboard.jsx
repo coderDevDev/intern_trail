@@ -48,8 +48,8 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -150,7 +150,7 @@ function StatCard({ title, value, icon, change, alert }) {
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <h3 className="text-2xl font-bold mt-2">{value}</h3>
+          <h3 className="text-2xl font-semibold mt-2">{value}</h3>
           {change && (
             <p className={`text-sm mt-2 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               <TrendingUp className="h-4 w-4 inline mr-1" />

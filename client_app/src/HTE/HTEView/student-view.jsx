@@ -313,32 +313,29 @@ export default function StudentView({
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header with icon */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-full">
-            <Users className="h-6 w-6 text-blue-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Trainee Management</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Trainee Management</h1>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search students..."
-              className="pl-9 w-64"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+      </div>
+
+      {/* Search and filter section */}
+      <div className="flex items-center w-full gap-3 mb-4">
+        <div className="relative flex-1 min-w-0">
+          <Input
+            placeholder="Search students..."
+            className="pl-9 w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <Button variant="outline" className="flex-shrink-0 flex items-center gap-2 whitespace-nowrap">
+          <Filter className="h-4 w-4" />
+          Filter
+        </Button>
       </div>
 
       {/* Tabs for different sections */}
@@ -348,9 +345,9 @@ export default function StudentView({
 
           {
 
-            isCoordinator ? <TabsTrigger value="progress" className="flex items-center gap-2">
+            isCoordinator ? <TabsTrigger value="progress" className="flex items-center gap-1">
               <ChartLine className="h-4 w-4" />
-              <span>Progress Reports {progressReports.length > 0 && `(${progressReports.length})`}</span>
+              <span>Progress {progressReports.length > 0 && `(${progressReports.length})`}</span>
             </TabsTrigger> : <>
               <TabsTrigger value="applications" className="flex items-center gap-2">
                 <ClipboardList className="h-4 w-4" />
@@ -358,11 +355,11 @@ export default function StudentView({
               </TabsTrigger>
               <TabsTrigger value="trainees" className="flex items-center gap-2">
                 <UserCog className="h-4 w-4" />
-                <span>Active Trainees {activeTrainees.length > 0 && `(${activeTrainees.length})`}</span>
+                <span>Active {activeTrainees.length > 0 && `(${activeTrainees.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="progress" className="flex items-center gap-2">
                 <ChartLine className="h-4 w-4" />
-                <span>Progress Reports {progressReports.length > 0 && `(${progressReports.length})`}</span>
+                <span>Progress {progressReports.length > 0 && `(${progressReports.length})`}</span>
               </TabsTrigger>
             </>
           }
@@ -374,7 +371,7 @@ export default function StudentView({
         {/* Applications Tab Content */}
         <TabsContent value="applications" className="space-y-6">
           {/* Status summary cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
             <Card className="hover:shadow-md transition-shadow">
               <CardContent className="p-4 flex items-center gap-4">
                 <div className="p-3 bg-blue-50 rounded-full">
@@ -382,7 +379,7 @@ export default function StudentView({
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Total Applications</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-semibold">
                     {applications.filter(app => app.status === 'pending').length}
                   </p>
                 </div>
@@ -396,7 +393,7 @@ export default function StudentView({
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Approved</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-semibold">
 
                     {
                       console.log({ applications })
@@ -414,7 +411,7 @@ export default function StudentView({
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Pending</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-semibold">
                     {applications.filter(app => app.status === 'pending').length}
                   </p>
                 </div>
@@ -428,7 +425,7 @@ export default function StudentView({
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Rejected</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-semibold">
                     {applications.filter(app => app.status === 'rejected').length}
                   </p>
                 </div>
@@ -484,6 +481,7 @@ export default function StudentView({
                         <TableCell>
                           <StatusBadge isActive={student.status === 'approved'} />
                         </TableCell>
+                        
                         <TableCell className="text-right">
                           <Popover open={openMenuId === student.traineeID} onOpenChange={(open) => setOpenMenuId(open ? student.traineeID : null)}>
                             <PopoverTrigger asChild>

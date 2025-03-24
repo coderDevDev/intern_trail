@@ -12,10 +12,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 function Sidebar({ expanded, setExpanded }) {
   return (
     <div>
-      <div className="sidebar-toggle" onClick={() => setExpanded(!expanded)}>
+      <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
         <MenuIcon />
       </div>
-      <div className={`custom-sidebar ${expanded ? 'expanded' : ''}`}>
+      <div className={`custom-sidebar ${expanded ? 'expanded' : ''} z-2`}>
         <Nav defaultActiveKey="/student/home" className="flex-column">
           <Nav.Item>
             <Link to="/student/home" className="nav-link custom-nav-link" onClick={() => setExpanded(false)}>

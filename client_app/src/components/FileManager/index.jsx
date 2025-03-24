@@ -240,7 +240,7 @@ export default function FileManager({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <h1 className="text-2xl font-bold mb-4">Files</h1>
+      <h1 className="text-2xl font-semibold mb-4">Files</h1>
       <div className="flex items-center space-x-2 mb-4 flex-shrink-0">
         <Button
           variant="ghost"
@@ -263,29 +263,27 @@ export default function FileManager({
           </React.Fragment>
         ))}
       </div>
+
       {!readOnly && (
-        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 mb-4 flex-shrink-0">
-          <div className="flex space-x-2">
-            <Button onClick={() => document.getElementById('fileInput').click()}>
-              <Upload className="mr-2 h-4 w-4" /> Upload File
-            </Button>
-            <Input id="fileInput" type="file" className="hidden" onChange={handleFileSelect} />
-            <Button onClick={() => setCreateFolderDialogOpen(true)}>
-              <FolderPlus className="mr-2 h-4 w-4" /> New Folder
-            </Button>
-          </div>
-          <div className="flex-1 flex space-x-2">
-            <div className="relative flex-1">
-              <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="flex flex-col space-y-4 mb-4 flex-shrink-0 w-full">
+          {/* Search and View Toggle Row */}
+          <div className="flex flex-wrap items-center w-full gap-3">
+            <div className="relative flex-1 min-w-0 max-w-full sm:max-w-[600px]">
               <Input
                 type="search"
                 placeholder="Search files..."
-                className="pl-8"
+                className="pl-9 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => setViewMode(value)}>
+            
+            <ToggleGroup 
+              type="single" 
+              value={viewMode} 
+              onValueChange={(value) => setViewMode(value)} 
+              className="flex-shrink-0"
+            >
               <ToggleGroupItem value="table" aria-label="Table view">
                 <List className="h-4 w-4" />
               </ToggleGroupItem>
@@ -294,8 +292,27 @@ export default function FileManager({
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
+
+          {/* Upload & New Folder Buttons */}
+          <div className="flex flex-wrap gap-3 w-full">
+            <Button 
+              className="w-full sm:w-auto sm:max-w-[200px] flex-1 whitespace-nowrap" 
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <Upload className="mr-2 h-4 w-4" /> Upload File
+            </Button>
+            <Input id="fileInput" type="file" className="hidden" onChange={handleFileSelect} />
+            <Button 
+              className="w-full sm:w-auto sm:max-w-[200px] flex-1 whitespace-nowrap"
+              onClick={() => setCreateFolderDialogOpen(true)}
+            >
+              <FolderPlus className="mr-2 h-4 w-4" /> New Folder
+            </Button>
+          </div>
         </div>
       )}
+
+
       <div className="flex-1 overflow-auto min-h-0">
         {viewMode === "table" ? (
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -385,21 +402,22 @@ export default function FileManager({
         )}
       </div>
       <Dialog open={approveModalOpen} onOpenChange={setApproveModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
           <DialogHeader>
             <DialogTitle>Approve File</DialogTitle>
             <DialogDescription>Are you sure you want to approve "{fileToApprove?.name}"?</DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setApproveModalOpen(false)}>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setApproveModalOpen(false)} className="w-full sm:w-auto mt-2">
               Cancel
             </Button>
-            <Button onClick={approveFile}>Approve</Button>
+            <Button onClick={approveFile} className="w-full sm:w-auto mt-2">Approve</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <Dialog open={uploadModalOpen} onOpenChange={setUploadModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
           <DialogHeader>
             <DialogTitle>Upload File</DialogTitle>
             <DialogDescription>Select a tag for the file before uploading.</DialogDescription>
@@ -431,18 +449,19 @@ export default function FileManager({
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setUploadModalOpen(false)}>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setUploadModalOpen(false)} className="w-full sm:w-auto mt-2">
               Cancel
             </Button>
-            <Button onClick={handleFileUpload}>
+            <Button onClick={handleFileUpload} className="w-full sm:w-auto mt-2">
               <Upload className="mr-2 h-4 w-4" /> Upload
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -450,16 +469,17 @@ export default function FileManager({
               {itemToDelete?.type === 'folder' && " All files inside this folder will also be deleted."}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel className="w-full sm:w-auto mt-2">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 w-full sm:w-auto">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
       <Dialog open={createFolderDialogOpen} onOpenChange={setCreateFolderDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
           <DialogHeader>
             <DialogTitle>Create New Folder</DialogTitle>
           </DialogHeader>
@@ -476,11 +496,11 @@ export default function FileManager({
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateFolderDialogOpen(false)}>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setCreateFolderDialogOpen(false)} className="w-full sm:w-auto mt-2">
               Cancel
             </Button>
-            <Button onClick={createNewFolder}>Create</Button>
+            <Button onClick={createNewFolder} className="w-full sm:w-auto mt-2">Create</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -52,44 +52,53 @@ function HTEHome() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Company Details Section */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
 
 
         {stats?.companyDetails && (
-          <Card className="p-6">
-            <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0">
-                <img
-                  src={stats.companyDetails.avatar_photo || '/default-company.png'}
-                  alt={stats.companyDetails.companyName}
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
-              </div>
-              <div className="flex-grow">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {stats.companyDetails.companyName}
-                </h2>
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center text-gray-600">
-                    <Building2 className="h-4 w-4 mr-2" />
-                    <span>{stats.companyDetails.address}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Mail className="h-4 w-4 mr-2" />
-                    <span>{stats.companyDetails.contact_email}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Phone className="h-4 w-4 mr-2" />
-                    <span>{stats.companyDetails.contact_phone}</span>
-                  </div>
-                </div>
-                <p className="mt-4 text-gray-600">{stats.companyDetails.description}</p>
-              </div>
-            </div>
-          </Card>
+                    <Card className="p-6">
+                      <div className="flex flex-col gap-4">
+                        {/* Header with image and company name in one row */}
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
+                          <div className="flex-shrink-0">
+                            <img
+                              src={stats.companyDetails.avatar_photo || '/default-company.png'}
+                              alt={stats.companyDetails.companyName}
+                              className="w-20 h-20 rounded-lg object-cover"
+                            />
+                          </div>
+                          <div className="flex-grow text-left sm:text-left">
+                            <h2 className="text-2xl font-semibold text-gray-800">
+                              {stats.companyDetails.companyName}
+                            </h2>
+                          </div>
+                        </div>
+                        
+                        {/* Contact information in a separate section */}
+                        <div className="w-full grid grid-cols-1 gap-3">
+                          <div className="flex items-center text-gray-600">
+                            <Building2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{stats.companyDetails.address}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{stats.companyDetails.contact_email}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{stats.companyDetails.contact_phone}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Description at the bottom */}
+                        <div className="mt-2">
+                          <p className="text-gray-600 break-words">{stats.companyDetails.description}</p>
+                        </div>
+                      </div>
+                    </Card>
         )}
 
         {/* Requirements Checklist Section */}
@@ -119,7 +128,7 @@ function HTEHome() {
         )}
       </div>
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Active Interns"
           value={stats?.internStats.active}
@@ -215,7 +224,7 @@ function StatCard({ title, value, icon, change, alert }) {
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <h3 className="text-2xl font-bold mt-2">{value}</h3>
+          <h3 className="text-2xl font-semibold mt-2">{value}</h3>
           {change && (
             <p className={`text-sm mt-2 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               <TrendingUp className="h-4 w-4 inline mr-1" />

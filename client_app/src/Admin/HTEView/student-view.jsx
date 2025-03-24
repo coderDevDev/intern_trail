@@ -229,30 +229,13 @@ export default function StudentView({
   )
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+<div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">HTE Supervisor Applications</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">HTE Supervisor Applications</h1>
           <p className="text-gray-500">Manage and review HTE supervisor applications</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={view === "table" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("table")}
-          >
-            <List className="h-4 w-4 mr-1" />
-            Table
-          </Button>
-          <Button
-            variant={view === "grid" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("grid")}
-          >
-            <Grid className="h-4 w-4 mr-1" />
-            Grid
-          </Button>
-        </div>
+
       </div>
 
       <div className="flex flex-col space-y-4">
@@ -291,6 +274,27 @@ export default function StudentView({
           </div>
         </div>
       </div>
+
+      <div className="flex flex-row sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <Button
+            variant={view === "table" ? "default" : "outline"}
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => setView("table")}
+          >
+            <List className="h-4 w-4 mr-1" />
+            Table
+          </Button>
+          <Button
+            variant={view === "grid" ? "default" : "outline"}
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => setView("grid")}
+          >
+            <Grid className="h-4 w-4 mr-1" />
+            Grid
+          </Button>
+        </div>
 
       {view === "table" ? (
         <div className="rounded-md border">

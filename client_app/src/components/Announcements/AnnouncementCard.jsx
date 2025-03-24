@@ -27,11 +27,11 @@ function AnnouncementCard({
   return (
     <Card className={`
       overflow-hidden transition-shadow hover:shadow-lg 
-      ${view === "list" ? "flex flex-col sm:flex-row items-stretch sm:items-center" : ""}
+      ${view === "list" ? "flex flex-col sm:flex-row" : ""}
     `}>
       {image && (
         <div className={`
-          ${view === "list" ? "w-full sm:w-48 h-48" : "w-full h-48"}
+          ${view === "list" ? "w-full sm:w-48 h-48 flex-shrink-0" : "w-full h-48"}
           relative overflow-hidden
         `}>
           <img
@@ -41,36 +41,39 @@ function AnnouncementCard({
           />
         </div>
       )}
-
-      <div className="flex-1">
-        <CardHeader className="space-y-1">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <h3 className="font-semibold text-lg">{title}</h3>
-            <Badge variant={
-              status === "New" ? "default" :
+  
+      <div className="flex-1 flex flex-col w-full ">
+        <CardHeader className="space-y-2">
+          <div className="flex flex-row items-center gap-2">
+            <Badge 
+              variant={
+                status === "New" ? "default" :
                 status === "Urgent" ? "destructive" :
-                  "secondary"
-            }>
+                "secondary"
+              }
+              className="w-fit mb-2"
+            >
               {status}
             </Badge>
+            <h3 className="font-semibold text-lg mb-2">{title}</h3>
           </div>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <p className="text-sm text-gray-500">
+          <div className="flex flex-col sm:flex-col justify-between items-start sm:items-left gap-1">
+            <p className="text-sm text-gray-500 leading-tight gap-1">
               {format(new Date(date), 'PPP')}
             </p>
-            <span className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500">
               Posted by: {roleLabels[creatorRole] || creatorRole}
-            </span>
+            </p>
           </div>
         </CardHeader>
-
+  
         <CardContent>
-          <p className="text-sm text-gray-600 line-clamp-2">
+          <p className="text-sm text-gray-600 line-clamp-2 leading-tight">
             {description}
           </p>
         </CardContent>
 
-        <CardFooter className="flex flex-wrap justify-end gap-2">
+        <CardFooter className="flex flex-wrap justify-end gap-2 mt-auto">
           <Button variant="outline" size="sm" onClick={onView} className="w-full sm:w-auto">
             <Eye className="h-4 w-4 mr-1" />
             View

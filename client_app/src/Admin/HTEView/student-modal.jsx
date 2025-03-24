@@ -38,7 +38,7 @@ export function StudentModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="flex items-center justify-between mt-4">
             <span className="text-xl font-semibold">
               {student.first_name} {student.middle_initial} {student.last_name}
             </span>
@@ -57,7 +57,7 @@ export function StudentModal({
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="info">Information</TabsTrigger>
+            <TabsTrigger value="info">Infor</TabsTrigger>
             <TabsTrigger value="requirements">Proof of Identity</TabsTrigger>
           </TabsList>
 

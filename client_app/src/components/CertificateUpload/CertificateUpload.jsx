@@ -225,7 +225,7 @@ function CertificateUpload({ isOpen, onClose, student, initialFocus }) {
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
-        className="sm:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col"
+        className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg"
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -248,10 +248,10 @@ function CertificateUpload({ isOpen, onClose, student, initialFocus }) {
           className="flex-1 overflow-hidden flex flex-col"
         >
           <TabsList className="grid grid-cols-3">
-            <TabsTrigger value="upload" ref={initialFocusRef}>Upload Certificate</TabsTrigger>
-            <TabsTrigger value="create">Create Certificate</TabsTrigger>
+            <TabsTrigger value="upload" ref={initialFocusRef}>Upload</TabsTrigger>
+            <TabsTrigger value="create">Create</TabsTrigger>
             <TabsTrigger value="view">
-              View Certificates
+              View
               {existingCertificates.length > 0 && (
                 <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
                   {existingCertificates.length}
