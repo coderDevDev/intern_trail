@@ -117,63 +117,55 @@ function ProfileManager({ open, onClose }) {
 
   const validateField = (name, value) => {
     try {
-      // Create a temporary object with all current form data plus the new value
-      const tempFormData = {
-        ...formData,
-        [name]: value
-      };
+        const tempFormData = { ...formData, [name]: value };
 
-      if (activeTab === "general") {
-        // Only validate the specific field for general tab
-        if (name in generalFormSchema.shape) {
-          const fieldSchema = generalFormSchema.shape[name];
-          fieldSchema.parse(value);
-          setErrors(prev => ({ ...prev, [name]: undefined }));
-        }
-      } else if (activeTab === "security") {
-        // For security tab, validate password matching if relevant
-        if (name === 'new_password' || name === 'confirm_password') {
-          if (tempFormData.new_password || tempFormData.confirm_password) {
-            // Only validate if either password field has content
-            if (tempFormData.new_password !== tempFormData.confirm_password) {
-              setErrors(prev => ({
-                ...prev,
-                confirm_password: "Passwords don't match"
-              }));
-              return;
-            } else {
-              setErrors(prev => ({
-                ...prev,
-                confirm_password: undefined
-              }));
-            }
-          }
+        if (activeTab === "general" && name in generalFormSchema.shape) {
+            generalFormSchema.shape[name].parse(value);
+            setErrors(prev => ({ ...prev, [name]: undefined }));
+        } else if (activeTab === "security") {
+            if (name === "current_password") return;
 
-          // Validate individual password field if it's not empty
-          if (value) {
-            const fieldSchema = securityFormSchema.shape[name];
-            if (fieldSchema) {
-              fieldSchema.parse(value);
-              setErrors(prev => ({ ...prev, [name]: undefined }));
+            if (name === "new_password") {
+                if (!value) {
+                    setErrors(prev => ({ ...prev, new_password: undefined }));
+                    return;
+                }
+
+                let errorMessage = null;
+
+                if (value.length < 8) errorMessage = "Password must be at least 8 characters";
+                else if (!/[A-Z]/.test(value)) errorMessage = "Password must contain at least one uppercase letter";
+                else if (!/[a-z]/.test(value)) errorMessage = "Password must contain at least one lowercase letter";
+                else if (!/[0-9]/.test(value)) errorMessage = "Password must contain at least one number";
+
+                setErrors(prev => ({ ...prev, new_password: errorMessage }));
+
+                if (tempFormData.confirm_password.length > 0) {
+                    setErrors(prev => ({
+                        ...prev,
+                        confirm_password:
+                            tempFormData.new_password === tempFormData.confirm_password
+                                ? undefined
+                                : "Passwords don't match"
+                    }));
+                }
             }
-          }
+
+            if (name === "confirm_password") {
+                setErrors(prev => ({
+                    ...prev,
+                    confirm_password:
+                        tempFormData.new_password === value ? undefined : "Passwords don't match"
+                }));
+            }
         }
-      }
     } catch (error) {
-      console.log({ error });
-      if (error.errors && error.errors.length > 0) {
         setErrors(prev => ({
-          ...prev,
-          [name]: error.errors[0].message
+            ...prev,
+            [name]: error.errors?.[0]?.message || "Invalid input"
         }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          [name]: 'Invalid input'
-        }));
-      }
     }
-  };
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
