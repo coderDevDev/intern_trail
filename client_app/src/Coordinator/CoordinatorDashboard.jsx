@@ -156,14 +156,14 @@ function CoordinatorDashboard() {
   return (
     <div>
       {/* Navbar */}
-      <Navbar bg="white" variant="light">
+      <Navbar bg="white" variant="light" className='mx-2'>
         <Container fluid className="d-flex justify-content-between align-items-center">
-          <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" onClick={() => setExpanded(!expanded)} />
-          <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
+          <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" />
+          <Navbar.Brand className="d-flex align-items-left mx-auto my-8">
             <img
               src='/logo.png'
-              width="180px"
-              height="auto"
+              width="150px"
+              height="150px"
               className="d-inline-block align-top me-1"
               alt="Logo"
             />
@@ -172,7 +172,7 @@ function CoordinatorDashboard() {
             <img
               src="/anyrgb.com.png"
               alt="Profile"
-              className="profile-picture"
+              className="w-[50px] h-[50px] rounded-full mr-[15px]"
               onClick={handleProfileClick}
             />
             {isPopupOpen && (

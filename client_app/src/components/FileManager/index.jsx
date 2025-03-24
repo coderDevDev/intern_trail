@@ -241,7 +241,7 @@ export default function FileManager({
   return (
     <div className="w-full h-full flex flex-col">
       <h1 className="text-2xl font-semibold mb-4">Files</h1>
-      <div className="flex items-center space-x-2 mb-4 flex-shrink-0">
+      <div className="flex items-center space-x-2 mb-4 flex-shrink-0 border rounded-lg">
         <Button
           variant="ghost"
           onClick={() => {
@@ -249,7 +249,7 @@ export default function FileManager({
             setFolderPath([]);
           }}
         >
-          Root
+          <Folder className="mr-2 h-5 w-5 text-blue-500" /> Root
         </Button>
         {folderPath.map((folder, index) => (
           <React.Fragment key={folder.id}>
@@ -470,7 +470,7 @@ export default function FileManager({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel className="w-full sm:w-auto mt-2">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 w-full sm:w-auto mt-2">
               Delete
             </AlertDialogAction>

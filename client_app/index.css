@@ -150,7 +150,6 @@ li {
 
 .profile-picture {
   border-radius: 50%;
-  width: 50px;
   margin-right: 15px;
 }
 
@@ -1100,6 +1099,7 @@ li {
 .trainees-profile-picture {
   border-radius: 50%;
   width: 50px;
+  height: 50px;
   margin-right: 15px;
 }
 

@@ -141,15 +141,15 @@ function StudentDashboard() {
   return (
     <div>
       {/* Navbar */}
-      <Navbar bg="white" variant="light" className='mx-4'>
+      <Navbar bg="white" variant="light" className='mx-2'>
         <Container fluid className="d-flex justify-content-between align-items-center">
           <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" />
-          <Navbar.Brand className="d-flex align-items-left mx-auto my-4">
+          <Navbar.Brand className="d-flex align-items-left mx-auto my-8">
             <img
               src="../logo.png"
-              width="180px"
-              height="auto"
-              className="d-inline-block align-top me-1"
+              width="150px"
+              height="150px"
+              className="d-inline-block align-top me-2"
               alt="Logo"
             />
           </Navbar.Brand>
@@ -157,7 +157,7 @@ function StudentDashboard() {
             <img
               src={loggedInUser.proof_identity || "../anyrgb.com.png"}
               alt="Profile"
-              className="profile-picture"
+              className="w-[50px] h-[50px] rounded-full mr-[15px]"
               onClick={handleProfileClick}
             />
             {isPopupOpen && (

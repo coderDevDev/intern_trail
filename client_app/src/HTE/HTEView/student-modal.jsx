@@ -39,14 +39,14 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Student Details</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Student Details</DialogTitle>
         </DialogHeader>
 
-        <div className="py-4">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-shrink-0">
+        <div className="py-2">
+          <div className="grid grid-cols-1 gap-4 mb-6">
+            <div className="flex-shrink-0 flex justify-center">
               <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
                 {student.proof_identity ? (
                   <img
@@ -61,7 +61,7 @@ export function StudentModal({ student, isOpen, onClose, onApprove, onReject }) 
             </div>
 
             <div className="flex-1 space-y-4">
-              <h3 className="text-xl font-bold">{studentName}</h3>
+              <h3 className="text-xl font-semibold text-center">{studentName}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">

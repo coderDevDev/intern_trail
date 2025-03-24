@@ -207,24 +207,24 @@ function StudentHome() {
   };
   return (
     <div className="">
-      {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Hours</p>
-              <h3 className="text-2xl font-bold">
-                {traineeDetails?.remaining_hours}
-                {/* {traineeDetails.total_hours_rendered} / {360 - traineeDetails.remaining_hours} */}
-              </h3>
-            </div>
-            <Clock className="h-8 w-8 text-blue-500" />
+    {/* Header Stats */}
+    <div className="grid grid-cols-1 gap-4 mb-6">
+      <Card className="p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">Total Hours</p>
+            <h3 className="text-2xl font-semibold">
+              {traineeDetails?.remaining_hours}
+              {/* {traineeDetails.total_hours_rendered} / {360 - traineeDetails.remaining_hours} */}
+            </h3>
           </div>
-          <Progress
-            value={(traineeDetails.total_hours_rendered / (360 - traineeDetails.remaining_hours)) * 100}
-            className="mt-2"
-          />
-        </Card>
+          <Clock className="h-8 w-8 text-blue-500" />
+        </div>
+        <Progress
+          value={(traineeDetails.total_hours_rendered / (360 - traineeDetails.remaining_hours)) * 100}
+          className="mt-2"
+        />
+      </Card>
 
         {/* Add more stat cards */}
       </div>
@@ -314,7 +314,7 @@ function StudentHome() {
 
                       {/* View/Download/Update/Delete Buttons for Submitted Files */}
                       {isSubmitted && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 md:flex-row md:gap-2 md:items-center md:justify-start flex-col">
                           <Button
                             size="sm"
                             variant="outline"
@@ -327,7 +327,6 @@ function StudentHome() {
                               className="flex items-center gap-1"
                             >
                               <Eye className="h-4 w-4 mr-1" />
-
                             </a>
                           </Button>
                           <Button
@@ -341,7 +340,6 @@ function StudentHome() {
                               className="flex items-center gap-1"
                             >
                               <Download className="h-4 w-4 mr-1" />
-
                             </a>
                           </Button>
                           <Button
@@ -350,7 +348,6 @@ function StudentHome() {
                             onClick={() => handleUpdateFile(req, submittedFile)}
                           >
                             <Pencil className="h-4 w-4 mr-1" />
-
                           </Button>
                           <Button
                             size="sm"
@@ -362,7 +359,6 @@ function StudentHome() {
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
-
                           </Button>
                         </div>
                       )}
@@ -457,21 +453,21 @@ function StudentHome() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+         <AlertDialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete File</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this file? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+          <AlertDialogAction
               onClick={() => handleDeleteFile(fileToDelete?.id)}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 mt-2 w-full sm:w-auto"
             >
               Delete
             </AlertDialogAction>
+            <AlertDialogCancel className=" w-full sm:w-auto">Cancel</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

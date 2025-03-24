@@ -68,10 +68,6 @@ export function StudentModal({
                 status={student.is_verified}
                 text={student.is_verified ? "Verified" : "Unverified"}
               />
-              <StatusBadge
-                status={student.is_approved_by_admin}
-                text={student.is_approved_by_admin ? "Approved" : "Pending"}
-              />
             </div>
           </DialogTitle>
         </DialogHeader>

@@ -9,7 +9,13 @@
     background-color: white;
     border-radius: 8px;
   }
-  
+
+    /* Current Day - add hover styles */
+  .react-calendar .react-calendar__tile--now:hover {
+    background-color: #1087ff !important; /* Keep the same blue background on hover */
+    color: #FFF !important; /* Keep white text on hover */
+  }
+
   /* Active Day */
   .react-calendar .react-calendar__tile--active {
     background-color: #1F41BB; /* Blue background */

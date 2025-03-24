@@ -374,12 +374,12 @@ function StudentReports() {
 
   return (
     <div className="">
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden">
         <div className="">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold">Emergency Reports</h1>
-              <p className="text-gray-500 mt-1">Manage and track emergency incidents</p>
+              <p className="text-gray-500 mt-1 mb-3">Manage and track emergency incidents</p>
             </div>
             <Button
               disabled={!joinedCompany}
@@ -427,7 +427,7 @@ function StudentReports() {
                 placeholder="Search reports..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full"
+                className="pl-10 w-full mb-2"
               />
             </div>
             <Select value={activeTab} onValueChange={setActiveTab}>
@@ -531,18 +531,18 @@ function StudentReports() {
 
       {/* Report Form Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b">
-            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
+          <DialogHeader className="top-0 mt-4 z-10">
+            <DialogTitle className="text-xl font-semibold flex items-center text-left gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
               {selectedReport ? 'Edit Emergency Report' : 'Report an Emergency'}
             </DialogTitle>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-left text-gray-500">
               Please provide detailed information about the incident to help us respond appropriately.
             </p>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          <form onSubmit={handleSubmit} className="space-y-6 my-0">
             {/* Company Information */}
             {joinedCompany && (
               <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
@@ -698,7 +698,7 @@ function StudentReports() {
               </p>
             </div>
 
-            <DialogFooter className="sticky bottom-0 pt-4 pb-2 bg-white border-t mt-6">
+            <DialogFooter className="bottom-0 pt-4 pb-2 bg-white border-t mt-6">
               <div className="flex w-full justify-between items-center gap-4">
                 <Button
                   type="button"

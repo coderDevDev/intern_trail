@@ -462,21 +462,23 @@ function CertificateUpload({ isOpen, onClose, student, initialFocus }) {
                   <div className="space-y-4">
                     {existingCertificates.map((cert) => (
                       <div key={cert.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
+                        <div className="flex flex-col space-y-4">
                           <div>
                             <h4 className="font-medium">{cert.name}</h4>
                             <p className="text-sm text-gray-500">
                               Uploaded on {new Date(cert.created_at).toLocaleDateString()} by {cert.first_name} {cert.last_name}
                             </p>
                           </div>
-                          <div className="flex space-x-2">
+                  
+                          <div className="grid grid-cols-3 gap-2">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => window.open(cert.file_url, '_blank')}
+                              className="flex items-center justify-center"
                             >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
+                              <Eye className="h-4 w-4 mr-1 sm:mr-2" />
+                              <span className="hidden sm:inline">View</span>
                             </Button>
                             <Button
                               variant="outline"
@@ -489,18 +491,19 @@ function CertificateUpload({ isOpen, onClose, student, initialFocus }) {
                                 link.click();
                                 document.body.removeChild(link);
                               }}
+                              className="flex items-center justify-center"
                             >
-                              <Download className="h-4 w-4 mr-1" />
-                              Download
+                              <Download className="h-4 w-4 mr-1 sm:mr-2" />
+                              <span className="hidden sm:inline">Download</span>
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 flex items-center justify-center"
                               onClick={() => deleteCertificate(cert.id)}
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
+                              <Trash2 className="h-4 w-4 mr-1 sm:mr-2" />
+                              <span className="hidden sm:inline">Delete</span>
                             </Button>
                           </div>
                         </div>

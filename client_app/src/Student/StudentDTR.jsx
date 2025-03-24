@@ -862,7 +862,7 @@ function StudentDTR({ supervisorName }) {
           {certificate.map((cert) => (
             <Card key={cert.id} className="border border-gray-100 hover:shadow-md transition-all duration-200">
               <CardContent className="p-4">
-                <div className="flex justify-between items-start">
+                <div className="grid grid-cols-1 gap-4 mb-6">
                   <div>
                     <h4 className="font-medium">{cert.name}</h4>
                     <p className="text-sm text-gray-500">
@@ -1021,7 +1021,7 @@ function StudentDTR({ supervisorName }) {
                   if (entry && entry.timeIn && entry.timeOut &&
                     entry.timeIn !== 'N/A' && entry.timeOut !== 'N/A') {
                     return (
-                      <div className="text-xs mt-1 font-medium text-gray-600">
+                      <div className="text-xs mt-1 font-medium text-gray-fff">
                         {calculateHours(entry.timeIn, entry.timeOut).toFixed(1)}h
                       </div>
                     );
@@ -1087,7 +1087,7 @@ function StudentDTR({ supervisorName }) {
               <h2 className="text-lg font-semibold mb-3">Reports & Feedback</h2>
               <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden w-full sm:w-auto">
                 <button
-                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'reports'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -1097,7 +1097,7 @@ function StudentDTR({ supervisorName }) {
                   Reports
                 </button>
                 <button
-                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'feedbacks'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -1107,7 +1107,7 @@ function StudentDTR({ supervisorName }) {
                   Feedbacks
                 </button>
                 <button
-                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'evaluation'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -1117,7 +1117,7 @@ function StudentDTR({ supervisorName }) {
                   Evaluation
                 </button>
                 <button
-                  className={`px-4 py-2 text-sm font-medium transition-colors flex-1 sm:flex-auto
+                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'certificate'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-50'

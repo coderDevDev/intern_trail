@@ -18,7 +18,6 @@ export function SubmittedFiles({ studentId, userID }) {
 
   const fetchFiles = async () => {
     try {
-
       console.log({ fetchFiles: studentId })
       const response = await axios.get(`/trainee/submitted-files/of/${userID}`);
       setFiles(response.data.data);
@@ -74,7 +73,7 @@ export function SubmittedFiles({ studentId, userID }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-col h-[400px] md:h-[600px]">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Submitted Requirements</h3>
         <div className="flex gap-2">
@@ -95,67 +94,65 @@ export function SubmittedFiles({ studentId, userID }) {
         </div>
       </div>
 
-
-      {
-        console.log({ files })
-      }
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {files.map((file) => (
-            <Card key={file.id} className="p-4 hover:shadow-lg transition-shadow">
-              <div className="flex flex-col items-center text-center">
-                <FileIcon className="h-12 w-12 text-blue-500 mb-2" />
-                <p className="text-sm font-medium truncate w-full">{file.requirement_id}</p>
-                <p className="text-xs text-gray-500">
-                  {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
-                </p>
-                <div className="flex gap-2 mt-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={file.file_url} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={file.file_url} download>
-                      <Download className="h-4 w-4" />
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {files.map((file) => (
-            <Card key={file.id} className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <FileIcon className="h-8 w-8 text-blue-500" />
-                  <div>
-                    <p className="font-medium">{file.file_name}</p>
-                    <p className="text-sm text-gray-500">
-                      {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
-                    </p>
+      <div className="overflow-y-auto flex-1">
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {files.map((file) => (
+              <Card key={file.id} className="p-4 hover:shadow-lg transition-shadow">
+                <div className="flex flex-col items-center text-center">
+                  <FileIcon className="h-12 w-12 text-blue-500 mb-2" />
+                  <p className="text-sm font-medium truncate w-full">{file.requirement_id}</p>
+                  <p className="text-xs text-gray-500">
+                    {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={file.file_url} target="_blank" rel="noopener noreferrer">
+                        <Eye className="h-4 w-4" />
+                      </a>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={file.file_url} download>
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={file.file_url} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={file.file_url} download>
-                      <Download className="h-4 w-4" />
-                    </a>
-                  </Button>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {files.map((file) => (
+              <Card key={file.id} className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <FileIcon className="h-8 w-8 text-blue-500" />
+                    <div>
+                      <p className="font-medium">{file.file_name}</p>
+                      <p className="text-sm text-gray-500">
+                        {format(new Date(file.uploaded_at), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={file.file_url} target="_blank" rel="noopener noreferrer">
+                        <Eye className="h-4 w-4" />
+                      </a>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={file.file_url} download>
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
-} 
+}

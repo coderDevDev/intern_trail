@@ -301,69 +301,69 @@ function HTEReports() {
       </div>
 
       {/* View Report Modal */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Emergency Report Details</DialogTitle>
-          </DialogHeader>
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
+            <DialogHeader>
+              <DialogTitle className="mt-4 text-xl font-semibold">Emergency Report Details</DialogTitle>
+            </DialogHeader>
 
-          {selectedReport && (
-            <div className="space-y-6 py-4">
-              <div className="flex flex-wrap gap-2 justify-between items-center">
-                <Badge className={`${getStatusColor(selectedReport.status)} px-3 py-1 text-sm font-medium`}>
-                  {selectedReport.status.charAt(0).toUpperCase() + selectedReport.status.slice(1)}
-                </Badge>
-                <Badge className={`${getSeverityColor(selectedReport.severity)} px-3 py-1 text-sm font-medium flex items-center gap-1`}>
-                  <AlertTriangle className="h-4 w-4" />
-                  {selectedReport.severity} Severity
-                </Badge>
-              </div>
+            {selectedReport && (
+              <div className="space-y-6 py-4">
+                <div className="flex flex-row gap-2 mb-6">
+                  <Badge className={`${getStatusColor(selectedReport.status)} px-3 py-1 text-sm font-medium w-fit`}>
+                    {selectedReport.status.charAt(0).toUpperCase() + selectedReport.status.slice(1)}
+                  </Badge>
+                  <Badge className={`${getSeverityColor(selectedReport.severity)} px-3 py-1 text-sm font-medium flex items-center gap-1 w-fit`}>
+                    <AlertTriangle className="h-4 w-4" />
+                    {selectedReport.severity} Severity
+                  </Badge>
+                </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-500" />
-                  {selectedReport.emergency_type}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Reported on {formatDate(selectedReport.created_at)}
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-start gap-2">
-                    <User className="h-4 w-4 text-gray-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-500">Reported by</p>
-                      <p className="font-medium">{selectedReport.name}</p>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                  <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    {selectedReport.emergency_type}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Reported on {formatDate(selectedReport.created_at)}
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-start gap-2">
+                      <User className="h-4 w-4 text-gray-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Reported by</p>
+                        <p className="font-medium">{selectedReport.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Building className="h-4 w-4 text-gray-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Department</p>
+                        <p className="font-medium">{selectedReport.department}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Location</p>
+                        <p className="font-medium">{selectedReport.location}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Clock className="h-4 w-4 text-gray-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Date & Time</p>
+                        <p className="font-medium">{formatDate(selectedReport.created_at)}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <Building className="h-4 w-4 text-gray-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-500">Department</p>
-                      <p className="font-medium">{selectedReport.department}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-500">Location</p>
-                      <p className="font-medium">{selectedReport.location}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Clock className="h-4 w-4 text-gray-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-500">Date & Time</p>
-                      <p className="font-medium">{formatDate(selectedReport.created_at)}</p>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Details</p>
+                    <div className="bg-white p-3 rounded border border-gray-100">
+                      <p className="whitespace-pre-line">{selectedReport.details}</p>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Details</p>
-                  <div className="bg-white p-3 rounded border border-gray-100">
-                    <p className="whitespace-pre-line">{selectedReport.details}</p>
-                  </div>
-                </div>
-              </div>
 
               <StatusApprovals report={selectedReport} />
 

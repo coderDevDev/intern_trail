@@ -294,18 +294,18 @@ function CoordinatorReports() {
 
       {/* View Report Modal */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-w-[95%] mx-auto max-h-[90vh] overflow-y-auto p-4 rounded-lg">
           <DialogHeader>
-            <DialogTitle>Emergency Report Details</DialogTitle>
+            <DialogTitle className="text-xl font-semibold mt-4">Emergency Report Details</DialogTitle>
           </DialogHeader>
 
           {selectedReport && (
             <div className="space-y-6 py-4">
-              <div className="flex flex-wrap gap-2 justify-between items-center">
-                <Badge className={`${getStatusColor(selectedReport.status)} px-3 py-1 text-sm font-medium`}>
+              <div className="flex flex-col sm:flex-row gap-2 mb-6">
+                <Badge className={`${getStatusColor(selectedReport.status)} px-3 py-1 text-sm font-medium w-fit`}>
                   {selectedReport.status.charAt(0).toUpperCase() + selectedReport.status.slice(1)}
                 </Badge>
-                <Badge className={`${getSeverityColor(selectedReport.severity)} px-3 py-1 text-sm font-medium flex items-center gap-1`}>
+                <Badge className={`${getSeverityColor(selectedReport.severity)} px-3 py-1 text-sm font-medium flex items-center gap-1 w-fit`}>
                   <AlertTriangle className="h-4 w-4" />
                   {selectedReport.severity} Severity
                 </Badge>
@@ -351,12 +351,11 @@ function CoordinatorReports() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Details</p>
-                  <div className="bg-white rounded border border-gray-100">
+                  <div className="bg-white p-3 rounded border border-gray-100">
                     <p className="whitespace-pre-line">{selectedReport.details}</p>
                   </div>
                 </div>
               </div>
-
               <StatusApprovals report={selectedReport} />
 
               {/* Show status update history */}
