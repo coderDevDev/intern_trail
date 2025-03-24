@@ -9,10 +9,14 @@ import * as Yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+
+import { mdiEye, mdiEyeOff } from '@mdi/js';
+
 function AccountCreation() {
   const navigate = useNavigate();
   const location = useLocation();
   const { userType } = location.state || { userType: 'student' };
+  console.log("User Type:", userType);
 
   const handleSignInClick = () => {
     navigate('/login');
@@ -23,10 +27,12 @@ function AccountCreation() {
   };
 
 
-
+  const [fileName, setFileName] = useState("");
   const [companies, setCompanies] = useState([]);
   const [colleges, setColleges] = useState([]);
   const [programs, setPrograms] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -102,7 +108,9 @@ function AccountCreation() {
 
       password: Yup.string()
         .required("Password is required")
-        .min(8, "Password must be at least 8 characters"),
+        .min(8, "Password must be at least 8 characters")
+        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .matches(/[0-9]/, "Password must contain at least one number"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),
@@ -333,32 +341,63 @@ function AccountCreation() {
               )}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-2">
-                <div>
-                  <InputText
-                    label="Password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={values.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.password && errors.password}
-                  />
-                </div>
-                <div>
-                  <InputText
-                    label="Confirm Password"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={values.confirmPassword}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.confirmPassword && errors.confirmPassword}
-                  />
-                </div>
+                
+              <div className="relative">
+                <InputText
+                  label="Password"
+                  name="password"
+                  type={showPassword ? "text" : "password"} // Toggle visibility
+                  placeholder="Enter your password"
+                  value={values.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.password && errors.password}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d={mdiEyeOff} />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d={mdiEye} />
+                    </svg>
+                  )}
+                </button>
               </div>
 
+              <div className="relative">
+                <InputText
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"} // Toggle visibility
+                  placeholder="Confirm your password"
+                  value={values.confirmPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.confirmPassword && errors.confirmPassword}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                >
+                  {showConfirmPassword ? (
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d={mdiEyeOff} />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d={mdiEye} />
+                    </svg>
+                  )}
+                </button>
+              </div>   
+              </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-2">
                 <div className="">
@@ -374,23 +413,47 @@ function AccountCreation() {
                   />
                 </div>
                 <div className="">
-                  <InputText
-                    value=""
-                    label="Proof of Identity"
-                    name="proofOfIdentity"
-                    type="file"
-                    onChange={(event) => {
-                      const file = event.currentTarget.files[0];
-
-                      console.log({ file })
-                      setFieldValue("proofOfIdentity", file); // Update Formik state with the selected file
-                    }}
-                    onBlur={handleBlur}
-                    error={touched.proofOfIdentity && errors.proofOfIdentity}
-                  />
-                </div>
+                    <label className="text-gray-700 font-medium mb-2 block">Proof of Identity</label>
+                    
+                    <div className="flex items-center">
+                      {/* Hide the actual file input */}
+                      <input
+                        id="proofOfIdentity"
+                        name="proofOfIdentity"
+                        type="file"
+                        className="sr-only"
+                        onChange={(event) => {
+                          const file = event.currentTarget.files[0];
+                          console.log({ file });
+                          setFieldValue("proofOfIdentity", file);
+                          
+                          if (file) {
+                            setFileName(file.name);
+                          }
+                        }}
+                        onBlur={handleBlur}
+                      />
+                      
+                      {/* Button styled like the phone field but smaller */}
+                      <label 
+                        htmlFor="proofOfIdentity" 
+                        className="border-2 border-black rounded px-4 py-2 bg-white text-gray-600 cursor-pointer hover:bg-gray-50"
+                      >
+                        Choose File
+                      </label>
+                      
+                      {/* Filename display with matching styling */}
+                      <span className="ml-3 text-gray-800">
+                        {fileName || "No file chosen"}
+                      </span>
+                    </div>
+                    
+                    {touched.proofOfIdentity && errors.proofOfIdentity && (
+                      <div className="text-red-500 text-sm mt-1">{errors.proofOfIdentity}</div>
+                    )}
+                  </div>
               </div>
-
+                    
               {userType !== 'hte-supervisor' && (
                 <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="">
@@ -419,7 +482,7 @@ function AccountCreation() {
                       ))}
                     </select>
                   </div>
-                  {userType !== 'university-dean' && (
+                  {userType !== 'dean' && (
                     <div className="">
                       <label htmlFor="program" className='mb-2'>Program / Course</label>
                       <select
@@ -470,28 +533,6 @@ function AccountCreation() {
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
-                {/* {isSubmitting && (
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    ></path>
-                  </svg>
-                )} */}
                 {isSubmitting ? "Submitting..." : "Sign Up"}
               </button>
 
