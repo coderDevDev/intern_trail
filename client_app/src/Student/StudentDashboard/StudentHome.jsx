@@ -12,7 +12,9 @@ import {
   Eye,
   Download,
   Upload,
-  Circle
+  Circle,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +24,16 @@ import { toast } from 'react-toastify';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useDropzone } from 'react-dropzone';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function StudentHome() {
   const [stats, setStats] = useState(null);
@@ -35,6 +47,11 @@ function StudentHome() {
   const [selectedRequirement, setSelectedRequirement] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [uploadMode, setUploadMode] = useState('new');
+  const [fileToUpdate, setFileToUpdate] = useState(null);
 
   // Fetch requirements from company
   const fetchRequirements = async () => {
@@ -106,33 +123,67 @@ function StudentHome() {
     }
   });
 
+  // Handle file deletion
+  const handleDeleteFile = async (fileId) => {
+    try {
+      const response = await axios.delete(`/trainee/requirement-file/${fileId}`);
+      if (response.data.success) {
+        toast.success('File deleted successfully');
+        fetchSubmittedFiles();
+        fetchRequirements();
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error('Failed to delete file');
+    }
+    setIsDeleteDialogOpen(false);
+  };
+
+  // Handle file update
+  const handleUpdateFile = (req, file) => {
+    setSelectedRequirement(req);
+    setIsUploadModalOpen(true);
+    // Set mode to update
+    setUploadMode('update');
+    setFileToUpdate(file);
+  };
+
+  // Modify handleUploadRequirement to handle both new uploads and updates
   const handleUploadRequirement = async () => {
     if (!uploadingFile || !selectedRequirement) return;
 
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', uploadingFile);
-
-    console.log({ selectedRequirement })
     formData.append('requirementId', selectedRequirement.label);
-
-    console.log({ stats })
-
     formData.append('companyID', stats.traineeDetails.companyID);
+
+    // If updating existing file, add file ID
+    if (fileToUpdate) {
+      formData.append('fileId', fileToUpdate.id);
+    }
+
     try {
-      const response = await axios.post('/trainee/upload-requirement/upload-file', formData);
+      const url = fileToUpdate
+        ? `/trainee/requirement-file/${fileToUpdate.id}`
+        : '/trainee/upload-requirement/upload-file';
+
+      const response = fileToUpdate
+        ? await axios.put(url, formData)
+        : await axios.post(url, formData);
+
       if (response.data.success) {
-        toast.success('Requirement uploaded successfully');
+        toast.success(fileToUpdate ? 'File updated successfully' : 'File uploaded successfully');
         fetchSubmittedFiles();
-        fetchRequirements(); // Refresh requirements list
+        fetchRequirements();
         setIsUploadModalOpen(false);
+        setFileToUpdate(null);
       }
     } catch (error) {
       console.error('Error uploading requirement:', error);
       toast.error('Failed to upload requirement');
     } finally {
       setIsUploading(false);
-      setUploadingFile(null);
     }
   };
 
@@ -208,7 +259,7 @@ function StudentHome() {
           <Card key={company.id} className="shadow-lg">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl">{company.name}</CardTitle>
-              <div className="text-sm text-gray-500">Requirements Progresss</div>
+              <div className="text-sm text-gray-500">Requirements Progress</div>
             </CardHeader>
             <CardContent>
               {/* Progress Bar */}
@@ -261,7 +312,7 @@ function StudentHome() {
                         )}
                       </div>
 
-                      {/* View/Download Buttons for Submitted Files */}
+                      {/* View/Download/Update/Delete Buttons for Submitted Files */}
                       {isSubmitted && (
                         <div className="flex gap-2">
                           <Button
@@ -275,8 +326,8 @@ function StudentHome() {
                               rel="noopener noreferrer"
                               className="flex items-center gap-1"
                             >
-                              <Eye className="h-4 w-4" />
-                              View
+                              <Eye className="h-4 w-4 mr-1" />
+
                             </a>
                           </Button>
                           <Button
@@ -289,9 +340,29 @@ function StudentHome() {
                               download
                               className="flex items-center gap-1"
                             >
-                              <Download className="h-4 w-4" />
-                              Download
+                              <Download className="h-4 w-4 mr-1" />
+
                             </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUpdateFile(req, submittedFile)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setFileToDelete(submittedFile);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+
                           </Button>
                         </div>
                       )}
@@ -383,6 +454,27 @@ function StudentHome() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete File</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this file? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDeleteFile(fileToDelete?.id)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
