@@ -12,21 +12,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ApplicationsIcon from '@mui/icons-material/HowToReg';
 
 function HTESidebar({ expanded, setExpanded }) {
-  
-    // Get current location
-    const location = useLocation();
-    const currentPath = location.pathname;
-  
-    // Function to check if link is active
-    const isLinkActive = (path) => {
-      return currentPath === path || currentPath.startsWith(path);
-    };
-  
-    // Function to get link class based on active state
-    const getLinkClass = (path) => {
-      return `nav-link custom-nav-link ${isLinkActive(path) ? 'active-link' : ''}`;
-    };
-
   return (
     <div>
       <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
