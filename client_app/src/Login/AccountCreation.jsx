@@ -265,10 +265,11 @@ function AccountCreation() {
                 />
               </div>
               
-            <div className="account-creation-form">
-              <h2 className='text-center text-2xl'>Let's set up your account</h2>
-              <div className="flex flex-col gap-4 md:flex-row">
-                <div className="mb-2">
+              <div className="account-creation-form max-w-4xl mx-auto px-4 sm:px-6 py-8">
+                <h2 className='text-center font-semibold text-2xl mb-6'>Let's set up your account</h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-2">
+                <div className="w-full">
                   <InputText
                     label="First Name"
                     labelColor="text-blue-950"
@@ -281,7 +282,7 @@ function AccountCreation() {
                     error={touched.firstName && errors.firstName}
                   />
                 </div>
-                <div className="mb-2">
+                <div className="w-full">
                   <InputText
                     label="Middle Initial"
                     name="middleInitial"
@@ -293,7 +294,7 @@ function AccountCreation() {
                     error={touched.middleInitial && errors.middleInitial}
                   />
                 </div>
-                <div className="mb-2">
+                <div className="w-full">
                   <InputText
                     label="Last Name"
                     name="lastName"
@@ -340,9 +341,9 @@ function AccountCreation() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-2">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 mb-2">
                 
-              <div className="relative">
+              <div className="relative mt-2">
                 <InputText
                   label="Password"
                   name="password"
@@ -358,19 +359,10 @@ function AccountCreation() {
                   className="absolute inset-y-0 right-3 flex items-center text-gray-500"
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
-                  {showPassword ? (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d={mdiEyeOff} />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d={mdiEye} />
-                    </svg>
-                  )}
                 </button>
               </div>
 
-              <div className="relative">
+              <div className="relative mt-2">
                 <InputText
                   label="Confirm Password"
                   name="confirmPassword"
@@ -386,20 +378,11 @@ function AccountCreation() {
                   className="absolute inset-y-0 right-3 flex items-center text-gray-500"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                 >
-                  {showConfirmPassword ? (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d={mdiEyeOff} />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d={mdiEye} />
-                    </svg>
-                  )}
                 </button>
               </div>   
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-2">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 mb-2">
                 <div className="">
                   <InputText
                     label="Phone Number"
@@ -455,7 +438,7 @@ function AccountCreation() {
               </div>
                     
               {userType !== 'hte-supervisor' && (
-                <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                   <div className="">
                     <label htmlFor="college" className='mb-2'>College</label>
                     <select
