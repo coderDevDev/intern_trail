@@ -97,7 +97,9 @@ function AccountCreation() {
       firstName: Yup.string()
         .required("First name is required")
         .max(50, "First name must be 50 characters or less"),
-      middleInitial: Yup.string().max(1, "Middle initial must be 1 character"),
+        middleInitial: Yup.string()
+        .min(1, "Middle initial must be at least 1 character")
+        .max(2, "Middle initial must be at most 2 characters"),
       lastName: Yup.string()
         .required("Last name is required")
         .max(50, "Last name must be 50 characters or less"),
@@ -105,12 +107,12 @@ function AccountCreation() {
         .email("Invalid email address")
         .required("Email is required"),
       studentId: userType === 'student' ? Yup.string().required("Student ID is required") : null,
-
       password: Yup.string()
-        .required("Password is required")
-        .min(8, "Password must be at least 8 characters")
-        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .matches(/[0-9]/, "Password must contain at least one number"),
+      .required("Password is required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .matches(/[!@#$%^&*()_+{}\[\]:;<>,.?/~\\-]/, "Password must contain at least one special character"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),

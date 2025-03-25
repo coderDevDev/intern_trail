@@ -131,12 +131,17 @@ function ProfileManager({ open, onClose }) {
                     return;
                 }
 
-                let errorMessage = null;
+                // Define validation rules dynamically
+                const rules = [
+                    { regex: /.{8,}/, message: "Password must be at least 8 characters" },
+                    { regex: /[A-Z]/, message: "Password must contain at least one uppercase letter" },
+                    { regex: /[a-z]/, message: "Password must contain at least one lowercase letter" },
+                    { regex: /[0-9]/, message: "Password must contain at least one number" },
+                    { regex: /[^A-Za-z0-9]/, message: "Password must contain at least one special character" }
+                ];
 
-                if (value.length < 8) errorMessage = "Password must be at least 8 characters";
-                else if (!/[A-Z]/.test(value)) errorMessage = "Password must contain at least one uppercase letter";
-                else if (!/[a-z]/.test(value)) errorMessage = "Password must contain at least one lowercase letter";
-                else if (!/[0-9]/.test(value)) errorMessage = "Password must contain at least one number";
+                // Find the first unmet condition dynamically
+                let errorMessage = rules.find(rule => !rule.regex.test(value))?.message;
 
                 setErrors(prev => ({ ...prev, new_password: errorMessage }));
 
@@ -166,6 +171,7 @@ function ProfileManager({ open, onClose }) {
         }));
     }
 };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

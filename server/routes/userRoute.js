@@ -269,9 +269,10 @@ router.post('/create', async (req, res) => {
 
     let hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await db.query(
-      'INSERT INTO users (first_name, last_name, email, password, role, created_at,phone ) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (first_name, middle_initial, last_name, email, password, role, created_at,phone ) VALUES (?, ?, ?, ?, ?, ?, ?,?)',
       [
         firstName,
+        middleInitial,
         lastName,
         email,
         hashedPassword,
