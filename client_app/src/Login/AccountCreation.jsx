@@ -97,7 +97,9 @@ function AccountCreation() {
       firstName: Yup.string()
         .required("First name is required")
         .max(50, "First name must be 50 characters or less"),
-      middleInitial: Yup.string().max(1, "Middle initial must be 1 character"),
+        middleInitial: Yup.string()
+        .min(1, "Middle initial must be at least 1 character")
+        .max(2, "Middle initial must be at most 2 characters"),
       lastName: Yup.string()
         .required("Last name is required")
         .max(50, "Last name must be 50 characters or less"),
