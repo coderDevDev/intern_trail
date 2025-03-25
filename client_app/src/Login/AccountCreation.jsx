@@ -107,12 +107,12 @@ function AccountCreation() {
         .email("Invalid email address")
         .required("Email is required"),
       studentId: userType === 'student' ? Yup.string().required("Student ID is required") : null,
-
       password: Yup.string()
-        .required("Password is required")
-        .min(8, "Password must be at least 8 characters")
-        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .matches(/[0-9]/, "Password must contain at least one number"),
+      .required("Password is required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .matches(/[!@#$%^&*()_+{}\[\]:;<>,.?/~\\-]/, "Password must contain at least one special character"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),
