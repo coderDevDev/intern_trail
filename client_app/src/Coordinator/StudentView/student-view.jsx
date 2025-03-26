@@ -15,7 +15,7 @@ import axios from "axios";
 
 // Utility function for status badge
 const StatusBadge = ({ status, text }) => (
-  <Badge className={`${status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+  <Badge className={`${status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-yellow-800'}`}>
     {text}
   </Badge>
 );
@@ -239,6 +239,10 @@ export default function StudentView({
                     <StatusBadge
                       status={student.is_verified}
                       text={student.is_verified ? "Verified" : "Unverified"}
+                    />
+                    <StatusBadge
+                      status={student.is_verified_by_coordinator}
+                      text={student.is_verified_by_coordinator ? "Approved" : "Rejected"}
                     />
                   </div>
                 </CardTitle>
