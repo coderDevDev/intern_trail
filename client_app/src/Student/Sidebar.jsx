@@ -8,27 +8,31 @@ import FilesIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import ProgressIcon from '@mui/icons-material/EmojiEventsOutlined';
 import WarningIcon from '@mui/icons-material/ReportOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close'; // Import Close Icon
 
 function Sidebar({ expanded, setExpanded }) {
-  // Get current location
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Function to check if link is active
   const isLinkActive = (path) => {
     return currentPath === path || currentPath.startsWith(path);
   };
 
-  // Function to get link class based on active state
   const getLinkClass = (path) => {
     return `nav-link custom-nav-link ${isLinkActive(path) ? 'active-link' : ''}`;
   };
 
   return (
     <div>
-      <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
-        <MenuIcon />
+      {/* Sidebar Toggle Button */}
+      <div
+        className="sidebar-toggle z-3 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? <CloseIcon /> : <MenuIcon />}
       </div>
+
+      {/* Sidebar Content */}
       <div className={`custom-sidebar ${expanded ? 'expanded' : ''} z-2`}>
         <Nav defaultActiveKey="/student/home" className="flex-column">
           <Nav.Item>

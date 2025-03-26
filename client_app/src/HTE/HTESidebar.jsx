@@ -3,13 +3,11 @@ import { Nav } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/DashboardOutlined';
 import AnnouncementIcon from '@mui/icons-material/NotificationsNone';
-import CompanyIcon from '@mui/icons-material/CorporateFareOutlined';
 import FilesIcon from '@mui/icons-material/InsertDriveFileOutlined';
-import ProgressIcon from '@mui/icons-material/EmojiEventsOutlined';
-import WarningIcon from '@mui/icons-material/ReportOutlined';
-import TraineesIcon from '@mui/icons-material/HailOutlined';
-import MenuIcon from '@mui/icons-material/Menu';
 import ApplicationsIcon from '@mui/icons-material/HowToReg';
+import WarningIcon from '@mui/icons-material/ReportOutlined';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 function HTESidebar({ expanded, setExpanded }) {
   // Get current location
@@ -25,12 +23,18 @@ function HTESidebar({ expanded, setExpanded }) {
   const getLinkClass = (path) => {
     return `nav-link custom-nav-link ${isLinkActive(path) ? 'active-link' : ''}`;
   };
-  
+
   return (
     <div>
-      <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
-        <MenuIcon />
+      {/* Sidebar Toggle Button */}
+      <div
+        className="sidebar-toggle z-3 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? <CloseIcon /> : <MenuIcon />}
       </div>
+
+      {/* Sidebar Content */}
       <div className={`custom-sidebar ${expanded ? 'expanded' : ''} z-2`}>
         <Nav defaultActiveKey="/HTE/home" className="flex-column">
           <Nav.Item>
@@ -61,26 +65,10 @@ function HTESidebar({ expanded, setExpanded }) {
             <Link to="/HTE/applications" className={getLinkClass("/HTE/applications")} onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">
                 <ApplicationsIcon className={`custom-icon ${isLinkActive("/HTE/applications") ? "text-blue-500" : ""}`} />
-                <span className={isLinkActive("/HTE/applications") ? "text-blue-500 font-medium" : ""}>Trainees</span>
+                <span className={isLinkActive("/HTE/applications") ? "text-blue-500 font-medium" : ""}>Applications</span>
               </div>
             </Link>
           </Nav.Item>
-          {/* <Nav.Item>
-            <Link to="/HTE/trainees" className={getLinkClass("/HTE/trainees")} onClick={() => setExpanded(false)}>
-              <div className="d-flex align-items-center">
-                <TraineesIcon className={`custom-icon ${isLinkActive("/HTE/trainees") ? "text-blue-500" : ""}`} />
-                <span className={isLinkActive("/HTE/trainees") ? "text-blue-500 font-medium" : ""}>Trainees</span>
-              </div>
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/HTE/progress-reports" className={getLinkClass("/HTE/progress-reports")} onClick={() => setExpanded(false)}>
-              <div className="d-flex align-items-center">
-                <ProgressIcon className={`custom-icon ${isLinkActive("/HTE/progress-reports") ? "text-blue-500" : ""}`} />
-                <span className={isLinkActive("/HTE/progress-reports") ? "text-blue-500 font-medium" : ""}>Progress Reports</span>
-              </div>
-            </Link>
-          </Nav.Item> */}
           <Nav.Item>
             <Link to="/HTE/emergency-reports" className={getLinkClass("/HTE/emergency-reports")} onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">

@@ -6,6 +6,7 @@ import AnnouncementIcon from '@mui/icons-material/NotificationsNone';
 import CompanyIcon from '@mui/icons-material/CorporateFareOutlined';
 import TraineesIcon from '@mui/icons-material/HailOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 function DeanSidebar({ expanded, setExpanded }) {
   // Get current location
@@ -24,9 +25,15 @@ function DeanSidebar({ expanded, setExpanded }) {
 
   return (
     <div>
-      <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
-        <MenuIcon />
+      {/* Sidebar Toggle Button */}
+      <div
+        className="sidebar-toggle z-3 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? <CloseIcon /> : <MenuIcon />}
       </div>
+
+      {/* Sidebar Content */}
       <div className={`custom-sidebar ${expanded ? 'expanded' : ''} z-2`}>
         <Nav defaultActiveKey="/dean/home" className="flex-column">
           <Nav.Item>
@@ -53,7 +60,6 @@ function DeanSidebar({ expanded, setExpanded }) {
               </div>
             </Link>
           </Nav.Item>
-        
           <Nav.Item>
             <Link to="/dean/trainees" className={getLinkClass("/dean/trainees")} onClick={() => setExpanded(false)}>
               <div className="d-flex align-items-center">

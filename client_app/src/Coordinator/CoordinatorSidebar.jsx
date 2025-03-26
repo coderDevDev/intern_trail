@@ -9,6 +9,7 @@ import ProgressIcon from '@mui/icons-material/EmojiEventsOutlined';
 import WarningIcon from '@mui/icons-material/ReportOutlined';
 import TraineesIcon from '@mui/icons-material/HailOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 function CoordinatorSidebar({ expanded, setExpanded }) {
   // Get current location
@@ -27,9 +28,15 @@ function CoordinatorSidebar({ expanded, setExpanded }) {
 
   return (
     <div>
-      <div className="sidebar-toggle z-1" onClick={() => setExpanded(!expanded)}>
-        <MenuIcon />
+      {/* Sidebar Toggle Button */}
+      <div
+        className="sidebar-toggle z-3 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? <CloseIcon /> : <MenuIcon />}
       </div>
+
+      {/* Sidebar Content */}
       <div className={`custom-sidebar ${expanded ? 'expanded' : ''} z-2`}>
         <Nav defaultActiveKey="/coordinator/home" className="flex-column">
           <Nav.Item>
