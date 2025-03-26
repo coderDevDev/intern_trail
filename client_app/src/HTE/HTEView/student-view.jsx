@@ -483,7 +483,7 @@ export default function StudentView({
                         </TableCell>
                         
                         <TableCell className="text-right">
-                          <Popover open={openMenuId === student.traineeID} onOpenChange={(open) => setOpenMenuId(open ? student.traineeID : null)}>
+                        <Popover>
                             <PopoverTrigger asChild>
                               <Button
                                 variant="ghost"
@@ -495,63 +495,40 @@ export default function StudentView({
                                 <ChevronDown className="h-4 w-4" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent
-                              className="w-48 p-2"
-                              align="end"
-                              onInteractOutside={() => setOpenMenuId(null)}
-                            >
+                            <PopoverContent className="w-48 p-2" align="end">
                               <div className="flex flex-col gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="w-full justify-start"
-                                  onClick={() => {
-                                    handleViewInfo(student);
-                                    setOpenMenuId(null);
-                                  }}
+                                  onClick={() => handleViewInfo(student)}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
                                   View Details
                                 </Button>
-
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="w-full justify-start"
-                                  onClick={() => {
-                                    window.open(
-                                      `/HTE/student-progress/${student.trainee_user_id}`,
-                                      "_blank",
-                                      "noopener,noreferrer"
-                                    );
-                                    setOpenMenuId(null);
-                                  }}
+                                  onClick={() => window.open(`/HTE/student-progress/${student.trainee_user_id}`, "_blank", "noopener,noreferrer")}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
                                   Progress Report
                                 </Button>
-
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="w-full justify-start"
-                                  onClick={() => {
-                                    handleEvaluationForm(student);
-                                    setOpenMenuId(null);
-                                  }}
+                                  onClick={() => handleEvaluationForm(student)}
                                 >
                                   <FileText className="h-4 w-4 mr-2" />
                                   View Evaluation
                                 </Button>
-
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="w-full justify-start"
-                                  onClick={() => {
-                                    handleUploadCertificate(student);
-                                    setOpenMenuId(null);
-                                  }}
+                                  onClick={() => handleUploadCertificate(student)}
                                 >
                                   <Download className="h-4 w-4 mr-2" />
                                   View Certificate
