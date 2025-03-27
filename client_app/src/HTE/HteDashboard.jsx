@@ -102,7 +102,7 @@ function HTEDashboard() {
           <Navbar.Toggle aria-controls="sidebar-nav" className="d-md-none" />
           <Navbar.Brand className="d-flex align-items-left mx-auto my-8">
             <img
-              src="../logo.png"
+              src="/logo.png"
               width="150px"
               height="150px"
               className="d-inline-block align-top me-2"
