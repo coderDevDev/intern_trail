@@ -26,18 +26,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-const initialFiles = [
-  // { id: "1", name: "Documents", type: "folder", modified: "2023-04-01" },
-  // { id: "2", name: "Images", type: "folder", modified: "2023-04-02" },
-  { id: "3", name: "report.pdf", type: "file", size: "2.5 MB", modified: "2023-04-03" },
-  { id: "4", name: "presentation.pptx", type: "file", size: "5.1 MB", modified: "2023-04-04" },
-]
-
 export default function FileManager({
   readOnly = false,
   studentId = null,
   companyId = null,
-  filterTag = null
+  filterTag = null,
+  userRole = null // Add this prop to pass the user's role
 }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
@@ -54,6 +48,24 @@ export default function FileManager({
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [folderPath, setFolderPath] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [creatingFolder, setCreatingFolder] = useState(false);
+
+
+  // Permission helper functions
+  const canCreateFolder = () => {
+    // All users can create folders in their own space
+    return !readOnly;
+  }
+
+  const canDeleteItem = (item) => {
+    // Users can only delete their own items
+    if (readOnly) return false;
+    
+    // Check if item is owned by the current user
+    // Note: You'll need to add the current user ID in props for a complete check
+    return true; // Simplified for now, ideally check item.uploaded_by against current user ID
+  }
 
   // Fetch files and folders
   const fetchItems = async () => {
@@ -104,6 +116,7 @@ export default function FileManager({
   // Handle file upload
   const handleFileUpload = async () => {
     if (selectedFile && selectedTag) {
+      setUploading(true);
       try {
         const formData = new FormData();
         formData.append('file', selectedFile);
@@ -111,7 +124,7 @@ export default function FileManager({
         if (currentFolder) {
           formData.append('folder_id', currentFolder);
         }
-
+  
         await axios.post('/files/upload', formData);
         toast.success('File uploaded successfully');
         setUploadModalOpen(false);
@@ -121,11 +134,14 @@ export default function FileManager({
       } catch (error) {
         console.error(error);
         toast.error('Failed to upload file');
+      } finally {
+        setUploading(false);
       }
     }
   };
 
   const createNewFolder = async () => {
+    setCreatingFolder(true);
     try {
       const response = await axios.post('/files/folder', {
         name: newFolderName,
@@ -137,8 +153,11 @@ export default function FileManager({
       fetchItems();
     } catch (error) {
       toast.error('Failed to create folder');
+    } finally {
+      setCreatingFolder(false);
     }
   };
+  
 
   const navigateToFolder = (folderId) => {
     setCurrentFolder(folderId);
@@ -151,14 +170,15 @@ export default function FileManager({
 
   const handleDelete = async () => {
     if (!itemToDelete) return;
-
+  
     try {
-      const endpoint = itemToDelete.type === 'folder' ? 'folder' : 'files';
-      await axios.delete(`/${endpoint}/${itemToDelete.id}`);
+      const endpoint = itemToDelete.type === 'folder' ? '/files/folder' : '/files';
+      await axios.delete(`${endpoint}/${itemToDelete.id}`);
       toast.success(`${itemToDelete.type === 'folder' ? 'Folder' : 'File'} deleted successfully`);
       fetchItems();
     } catch (error) {
-      toast.error('Failed to delete item');
+      console.error(error);
+      toast.error(`Failed to delete ${itemToDelete.type}: ${error.response?.data?.message || error.message}`);
     } finally {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
@@ -200,7 +220,7 @@ export default function FileManager({
           <Download className="h-4 w-4" />
         </Button>
       )}
-      {!readOnly && (
+      {canDeleteItem(file) && (
         <Button
           variant="ghost"
           size="icon"
@@ -264,6 +284,7 @@ export default function FileManager({
         ))}
       </div>
 
+      {/* Only show action buttons if user has permission */}
       {!readOnly && (
         <div className="flex flex-col space-y-4 mb-4 flex-shrink-0 w-full">
           {/* Search and View Toggle Row */}
@@ -295,23 +316,35 @@ export default function FileManager({
 
           {/* Upload & New Folder Buttons */}
           <div className="flex flex-wrap gap-3 w-full">
-            <Button 
-              className="w-full sm:w-auto sm:max-w-[200px] flex-1 whitespace-nowrap" 
-              onClick={() => document.getElementById('fileInput').click()}
-            >
-              <Upload className="mr-2 h-4 w-4" /> Upload File
-            </Button>
+          <Button 
+            className="w-full sm:w-auto sm:max-w-[200px] flex-1 whitespace-nowrap" 
+            onClick={() => document.getElementById('fileInput').click()}
+            disabled={uploading}
+          >
+            {uploading ? 'Uploading...' : (
+              <>
+                <Upload className="mr-2 h-4 w-4" /> Upload File
+              </>
+            )}
+          </Button>
             <Input id="fileInput" type="file" className="hidden" onChange={handleFileSelect} />
+            
+            {/* Always show New Folder button, since we now allow all users to create folders */}
             <Button 
               className="w-full sm:w-auto sm:max-w-[200px] flex-1 whitespace-nowrap"
               onClick={() => setCreateFolderDialogOpen(true)}
+              disabled={creatingFolder}
             >
-              <FolderPlus className="mr-2 h-4 w-4" /> New Folder
+              {creatingFolder ? 'Creating...' : (
+                <>
+                  <FolderPlus className="mr-2 h-4 w-4" /> New Folder
+                </>
+              )}
             </Button>
+
           </div>
         </div>
       )}
-
 
       <div className="flex-1 overflow-auto min-h-0">
         {viewMode === "table" ? (
@@ -450,11 +483,28 @@ export default function FileManager({
             </div>
           </div>
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setUploadModalOpen(false)} className="w-full sm:w-auto mt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setUploadModalOpen(false)} 
+              className="w-full sm:w-auto mt-2"
+              disabled={uploading} // Disable button while uploading
+            >
               Cancel
             </Button>
-            <Button onClick={handleFileUpload} className="w-full sm:w-auto mt-2">
-              <Upload className="mr-2 h-4 w-4" /> Upload
+            <Button 
+              onClick={handleFileUpload} 
+              className="w-full sm:w-auto mt-2"
+              disabled={uploading} // Disable button while uploading
+            >
+              {uploading ? (
+                <>
+                  <span className="loader mr-2"></span> Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" /> Upload
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -497,14 +547,30 @@ export default function FileManager({
             </div>
           </div>
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setCreateFolderDialogOpen(false)} className="w-full sm:w-auto mt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setCreateFolderDialogOpen(false)} 
+              className="w-full sm:w-auto mt-2"
+              disabled={creatingFolder} // Disable button while creating folder
+            >
               Cancel
             </Button>
-            <Button onClick={createNewFolder} className="w-full sm:w-auto mt-2">Create</Button>
+            <Button 
+              onClick={createNewFolder} 
+              className="w-full sm:w-auto mt-2"
+              disabled={creatingFolder} // Disable button while creating folder
+            >
+              {creatingFolder ? (
+                <>
+                  <span className="loader mr-2"></span> Creating...
+                </>
+              ) : (
+                <>Create</>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   )
 }
-
