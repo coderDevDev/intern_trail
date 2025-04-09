@@ -113,8 +113,16 @@ function StudentDTR({ supervisorName }) {
         // Use ISO week for API request
         const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${isoWeekNumber}`);
 
+
+
         if (response.data.success) {
           const { weeklyReport, weeklyFeedback } = response.data.data;
+
+
+
+
+          let weeklyNarrativeReport = weeklyReport.filter(report => !!report.narrative);
+          setNarrativeReport(weeklyNarrativeReport.length > 0 ? weeklyNarrativeReport[0].narrative : '');
 
           // Generate the complete week template
           const start = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Start from Monday
@@ -446,9 +454,16 @@ function StudentDTR({ supervisorName }) {
     toast.success('Weekly narrative report added successfully!');
   };
 
-  const handleSave = async (date, report) => {
+  const handleSave = async (date, report, isNarrativeReport = false) => {
     try {
-      const weekNumber = differenceInCalendarWeeks(
+      // Use ISO week number for consistency across month boundaries
+      const isoWeekNumber = getWeek(new Date(date), { weekStartsOn: 1 });
+
+      // Get first day of the current week for display purposes
+      const weekStart = startOfWeek(new Date(date), { weekStartsOn: 1 });
+
+      // For backward compatibility, also calculate month-relative week number
+      const monthWeekNumber = differenceInCalendarWeeks(
         new Date(date),
         startOfMonth(new Date(date)),
         { weekStartsOn: 1 }
@@ -459,8 +474,11 @@ function StudentDTR({ supervisorName }) {
         report,
         timeIn,
         timeOut,
-        weekNumber: currentWeekNumber,
-        narrative: narrativeReport
+        weekNumber: isoWeekNumber, // Use ISO week number
+        isoWeekNumber, // Add this for explicit clarity
+        narrative: narrativeReport,
+        isNarrativeReport,
+        startDate: format(weekStart, 'yyyy-MM-dd') // Add the week start date
       });
 
       // Reset edit states
@@ -470,25 +488,29 @@ function StudentDTR({ supervisorName }) {
       }));
       setIsNarrativeEdited(false);
 
-      // Generate AI feedback
+      // Generate AI feedback with consistent week numbering
       const allReports = weeklyReport.map(r => r.report).join('\n');
       const aiResponse = await axios.post('/company/generate-feedback', {
         dailyReports: allReports,
         narrativeReport,
-        weekNumber: currentWeekNumber
+        weekNumber: isoWeekNumber, // Use ISO week number
+        isoWeekNumber, // Add this for explicit clarity
+        startDate: format(weekStart, 'yyyy-MM-dd') // Add the week start date
       });
 
       if (aiResponse.data.success) {
         await axios.post('/company/weekly-feedback', {
           studentId: studentId || JSON.parse(localStorage.getItem('loggedInUser')).userID,
-          weekNumber: currentWeekNumber,
+          weekNumber: isoWeekNumber, // Use ISO week number
+          isoWeekNumber, // Add this for explicit clarity
           feedback: aiResponse.data.feedback,
-          fromAI: true
+          fromAI: true,
+          startDate: format(weekStart, 'yyyy-MM-dd') // Add the week start date
         });
       }
 
-      // Refresh data
-      await refreshWeeklyData(currentWeekNumber);
+      // Refresh data using the ISO week number
+      await refreshWeeklyData(isoWeekNumber);
 
       toast.success('Report saved successfully!');
     } catch (error) {
@@ -583,6 +605,7 @@ function StudentDTR({ supervisorName }) {
       // Refresh the feedback list using ISO week
       const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${isoWeekNumber}`);
       if (response.data.success) {
+        console.log({ dydy: response.data.data })
         setWeeklyFeedback(response.data.data.weeklyFeedback);
       }
     } catch (error) {
@@ -849,7 +872,7 @@ function StudentDTR({ supervisorName }) {
           {showButtons && isNarrativeEdited && (
             <Button
               className="mt-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-              onClick={() => handleSave(format(selectedDate, 'yyyy-MM-dd'), null)}
+              onClick={() => handleSave(format(selectedDate, 'yyyy-MM-dd'), null, true)}
             >
               <Save className="w-4 h-4 mr-2" />
               Save Narrative
@@ -1047,7 +1070,7 @@ function StudentDTR({ supervisorName }) {
                 {/* Monthly Progress Bar */}
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Monthly Progress</span>
+                    <span className="text-gray-600">Total Progress</span>
                     {isProgressLoading ? (
                       <Skeleton className="h-4 w-24" />
                     ) : (
