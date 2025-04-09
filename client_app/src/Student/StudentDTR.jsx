@@ -769,7 +769,7 @@ function StudentDTR({ supervisorName }) {
         startOfMonth(new Date(selectedEntry.date)),
         { weekStartsOn: 1 }
       ) + 1;
-      await refreshWeeklyData(weekNumber);
+      await refreshWeeklyData(currentWeekNumber);
     } catch (error) {
       console.error('Error updating entry status:', error);
       toast.error('Failed to update entry status');
@@ -1074,7 +1074,6 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-<<<<<<< HEAD
                       <p className="text-lg font-bold text-blue-700">
                         {(() => {
                           const entry = weeklyReport.find(
@@ -1083,9 +1082,6 @@ function StudentDTR({ supervisorName }) {
                           return entry ? calculateHours(entry.timeIn, entry.timeOut).toFixed(2) : '0.00';
                         })()}h
                       </p>
-=======
-                      <p className="text-lg font-semibold text-blue-700">{dailyHours}h</p>
->>>>>>> af017ae7b396af84cccde6f2b317a8a7a04767f0
                     )}
                   </div>
 
@@ -1095,7 +1091,6 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-<<<<<<< HEAD
                       <p className="text-lg font-bold text-green-700">
                         {(() => {
                           // Get current ISO week number
@@ -1107,11 +1102,6 @@ function StudentDTR({ supervisorName }) {
                             .reduce((total, entry) => total + calculateHours(entry.timeIn, entry.timeOut), 0)
                             .toFixed(2);
                         })()}h
-=======
-                      <p className="text-lg font-semibold text-green-700">
-                        {weeklyReport.reduce((total, entry) =>
-                          total + calculateHours(entry.timeIn, entry.timeOut), 0).toFixed(2)}h
->>>>>>> af017ae7b396af84cccde6f2b317a8a7a04767f0
                       </p>
                     )}
                   </div>
@@ -1218,51 +1208,51 @@ function StudentDTR({ supervisorName }) {
         <div className="lg:col-span-2">
           <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
-            <div className="flex flex-col mb-6">
-              <h2 className="text-lg font-semibold mb-3">Reports & Feedback</h2>
-              <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden w-full sm:w-auto">
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+              <div className="flex flex-col mb-6">
+                <h2 className="text-lg font-semibold mb-3">Reports & Feedback</h2>
+                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden w-full sm:w-auto">
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'reports'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('reports')}
-                >
-                  Reports
-                </button>
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('reports')}
+                  >
+                    Reports
+                  </button>
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'feedbacks'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('feedbacks')}
-                >
-                  Feedbacks
-                </button>
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('feedbacks')}
+                  >
+                    Feedbacks
+                  </button>
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'evaluation'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('evaluation')}
-                >
-                  Evaluation
-                </button>
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('evaluation')}
+                  >
+                    Evaluation
+                  </button>
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'certificate'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('certificate')}
-                >
-                  Certificate
-                </button>
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('certificate')}
+                  >
+                    Certificate
+                  </button>
+                </div>
               </div>
-            </div>
 
               {activeTab === 'reports' ? renderReportsTab(currentWeekNumber) : activeTab === 'feedbacks' ? renderFeedbacksTab() : activeTab === 'evaluation' ? renderEvaluationTab() : renderCertificateTab()}
             </CardContent>
