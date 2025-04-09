@@ -46,8 +46,34 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
     let query = '';
     let queryParams = [];
 
-    console.log({ userRole });
-    if (view_mode === 'student-files' && student_id) {
+    if (company_id && tag === 'MOA') {
+      // For viewing MOA files only
+      query = `
+        SELECT 
+          'file' as item_type,
+          fl.id,
+          fl.name,
+          fl.file_url,
+          fl.size,
+          fl.tag,
+          fl.created_at,
+          fl.updated_at,
+          fl.folder_id,
+          fl.uploaded_by,
+          fl.uploaded_by_role,
+          fl.college_id,
+          fl.program_id,
+          fl.company_id,
+          u.first_name,
+          u.last_name
+        FROM files fl
+        LEFT JOIN users u ON fl.uploaded_by = u.userID
+        WHERE fl.company_id = ?
+          AND fl.tag = 'MOA'
+        ORDER BY fl.created_at DESC`;
+      queryParams = [company_id];
+    } else if (view_mode === 'student-files' && student_id) {
+      // Student-specific view
       query = `
         (SELECT 
           'folder' as item_type,
@@ -66,12 +92,10 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
           f.company_id,
           u.first_name,
           u.last_name
-         FROM folders f
-         LEFT JOIN users u ON f.uploaded_by = u.userID
-         WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
-         AND f.uploaded_by = ?
-
-         )
+        FROM folders f
+        LEFT JOIN users u ON f.uploaded_by = u.userID
+        WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
+          AND f.uploaded_by = ?)
         UNION ALL
         (SELECT 
           'file' as item_type,
@@ -90,19 +114,15 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
           fl.company_id,
           u.first_name,
           u.last_name
-         FROM files fl
-         LEFT JOIN users u ON fl.uploaded_by = u.userID
-         WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
-         AND fl.uploaded_by = ?
-         
-                 AND fl.tag = 'requirement'
-         )
+        FROM files fl
+        LEFT JOIN users u ON fl.uploaded_by = u.userID
+        WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
+          AND fl.uploaded_by = ?
+          AND fl.tag = 'requirement')
         ORDER BY created_at DESC`;
-      queryParams = folder_id
-        ? [folder_id, student_id, folder_id, student_id]
-        : [student_id, student_id];
+      queryParams = folder_id ? [folder_id, student_id, folder_id, student_id] : [student_id, student_id];
     } else if (userRole === 'trainee') {
-      // Students see files from their coordinator and HTE supervisor
+      // Trainee view: See own files, coordinator, and HTE supervisor files
       query = `
         (SELECT 
           'folder' as item_type,
@@ -121,18 +141,21 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
           f.company_id,
           u.first_name,
           u.last_name
-         FROM folders f
-         LEFT JOIN users u ON f.uploaded_by = u.userID
-         LEFT JOIN trainee t ON t.userID = ?
-         WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
-         AND (
-           (f.uploaded_by_role = 'ojt-coordinator' 
-            AND f.college_id = t.collegeID
-            AND f.program_id = t.programID)
-           OR
-           (f.uploaded_by_role = 'hte-supervisor' 
-            AND f.company_id = (SELECT company_id FROM inter_application WHERE trainee_user_id = ? AND is_confirmed = 1))
-         ))
+        FROM folders f
+        LEFT JOIN users u ON f.uploaded_by = u.userID
+        LEFT JOIN trainee t ON t.userID = ?
+        WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
+          AND (
+            f.uploaded_by = ? OR
+            (f.uploaded_by_role = 'ojt-coordinator' 
+              AND f.college_id = t.collegeID AND f.program_id = t.programID)
+            OR
+            (f.uploaded_by_role = 'hte-supervisor' 
+              AND f.company_id = (
+                SELECT company_id FROM inter_application 
+                WHERE trainee_user_id = ? AND is_confirmed = 1
+              ))
+          ))
         UNION ALL
         (SELECT 
           'file' as item_type,
@@ -151,28 +174,27 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
           fl.company_id,
           u.first_name,
           u.last_name
-         FROM files fl
-         LEFT JOIN users u ON fl.uploaded_by = u.userID
-         LEFT JOIN trainee t ON t.userID = ?
-         WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
-         AND (
-           (fl.uploaded_by_role = 'ojt-coordinator' 
-            AND fl.college_id = t.collegeID
-            AND fl.program_id = t.programID)
-           OR
-           (fl.uploaded_by_role = 'hte-supervisor' 
-            AND fl.company_id = (SELECT company_id FROM inter_application WHERE trainee_user_id = ? AND is_confirmed = 1))
-           OR fl.uploaded_by = ?
-         ))
+        FROM files fl
+        LEFT JOIN users u ON fl.uploaded_by = u.userID
+        LEFT JOIN trainee t ON t.userID = ?
+        WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
+          AND (
+            (fl.uploaded_by_role = 'ojt-coordinator' 
+              AND fl.college_id = t.collegeID AND fl.program_id = t.programID)
+            OR
+            (fl.uploaded_by_role = 'hte-supervisor' 
+              AND fl.company_id = (
+                SELECT company_id FROM inter_application 
+                WHERE trainee_user_id = ? AND is_confirmed = 1
+              ))
+            OR fl.uploaded_by = ?
+          ))
         ORDER BY created_at DESC`;
       queryParams = folder_id
-        ? [userId, userId, userId, userId, folder_id, userId, userId]
-        : [userId, userId, userId, userId, userId];
-    } else if (
-      userRole === 'ojt-coordinator' ||
-      userRole === 'hte-supervisor'
-    ) {
-      // Coordinators see their own files and student files from their college/program
+        ? [userId, folder_id, userId, userId, folder_id, userId, userId, userId]
+        : [userId, userId, userId, userId, userId, userId];
+    } else if (['ojt-coordinator', 'hte-supervisor'].includes(userRole)) {
+      // Coordinator or HTE supervisor view
       query = `
         (SELECT 
           'folder' as item_type,
@@ -191,14 +213,16 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
           f.company_id,
           u.first_name,
           u.last_name
-         FROM folders f
-         LEFT JOIN users u ON f.uploaded_by = u.userID
-         LEFT JOIN coordinators c ON c.userID = ?
-         WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
-         AND (f.uploaded_by = ? OR 
-              (f.uploaded_by_role = 'trainee' 
-               AND f.college_id = c.collegeID 
-               AND f.program_id = c.programID)))
+        FROM folders f
+        LEFT JOIN users u ON f.uploaded_by = u.userID
+        LEFT JOIN coordinators c ON c.userID = ?
+        WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
+          AND (
+            f.uploaded_by = ? OR 
+            (f.uploaded_by_role = 'trainee' 
+              AND f.college_id = c.collegeID 
+              AND f.program_id = c.programID)
+          ))
         UNION ALL
         (SELECT 
           'file' as item_type,
@@ -217,114 +241,21 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
           fl.company_id,
           u.first_name,
           u.last_name
-         FROM files fl
-         LEFT JOIN users u ON fl.uploaded_by = u.userID
-         LEFT JOIN coordinators c ON c.userID = ?
-         WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
-         AND (fl.uploaded_by = ? OR 
-              (fl.uploaded_by_role = 'trainee' 
-               AND fl.college_id = c.collegeID 
-               AND fl.program_id = c.programID)))
+        FROM files fl
+        LEFT JOIN users u ON fl.uploaded_by = u.userID
+        LEFT JOIN coordinators c ON c.userID = ?
+        WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
+          AND (
+            fl.uploaded_by = ? OR 
+            (fl.uploaded_by_role = 'trainee' 
+              AND fl.college_id = c.collegeID 
+              AND fl.program_id = c.programID)
+          ))
         ORDER BY created_at DESC`;
       queryParams = folder_id
         ? [userId, folder_id, userId, userId, folder_id, userId]
         : [userId, userId, userId, userId];
     }
-    // If viewing company MOA files
-    if (company_id && tag === 'MOA') {
-      query = `
-        (SELECT 
-          'file' as item_type,
-          fl.id,
-          fl.name,
-          fl.file_url,
-          fl.size,
-          fl.tag,
-          fl.created_at,
-          fl.updated_at,
-          fl.folder_id,
-          fl.uploaded_by,
-          fl.uploaded_by_role,
-          fl.college_id,
-          fl.program_id,
-          fl.company_id,
-          u.first_name,
-          u.last_name
-         FROM files fl
-         LEFT JOIN users u ON fl.uploaded_by = u.userID
-         WHERE fl.company_id = ?
-         AND fl.tag = 'MOA'
-         ORDER BY fl.created_at DESC)
-      `;
-      queryParams = [company_id];
-    }
-    // else if (userRole === 'hte-supervisor') {
-    //   // HTE supervisors see their own files and student files from their company
-    //   query = `
-    //     (SELECT
-    //       'folder' as item_type,
-    //       f.id,
-    //       f.name,
-    //       NULL as file_url,
-    //       NULL as size,
-    //       NULL as tag,
-    //       f.created_at,
-    //       f.updated_at,
-    //       f.parent_id as folder_id,
-    //       f.uploaded_by,
-    //       f.uploaded_by_role,
-    //       f.college_id,
-    //       f.program_id,
-    //       f.company_id,
-    //       u.first_name,
-    //       u.last_name
-    //      FROM folders f
-    //      LEFT JOIN users u ON f.uploaded_by = u.userID
-    //      LEFT JOIN hte_supervisors h ON h.userID = ?
-    //      WHERE f.parent_id ${folder_id ? '= ?' : 'IS NULL'}
-    //      AND (f.uploaded_by = ? OR
-    //           (f.uploaded_by_role = 'trainee'
-    //            AND EXISTS (
-    //              SELECT 1 FROM inter_application ia
-    //              WHERE ia.trainee_user_id = f.uploaded_by
-    //              AND ia.company_id = h.companyID
-    //              AND ia.is_confirmed = 1
-    //            ))))
-    //     UNION ALL
-    //     (SELECT
-    //       'file' as item_type,
-    //       fl.id,
-    //       fl.name,
-    //       fl.file_url,
-    //       fl.size,
-    //       fl.tag,
-    //       fl.created_at,
-    //       fl.updated_at,
-    //       fl.folder_id,
-    //       fl.uploaded_by,
-    //       fl.uploaded_by_role,
-    //       fl.college_id,
-    //       fl.program_id,
-    //       fl.company_id,
-    //       u.first_name,
-    //       u.last_name
-    //      FROM files fl
-    //      LEFT JOIN users u ON fl.uploaded_by = u.userID
-    //      LEFT JOIN hte_supervisors h ON h.userID = ?
-    //      WHERE fl.folder_id ${folder_id ? '= ?' : 'IS NULL'}
-    //      AND (fl.uploaded_by = ? OR
-    //           (fl.uploaded_by_role = 'trainee'
-    //            AND EXISTS (
-    //              SELECT 1 FROM inter_application ia
-    //              WHERE ia.trainee_user_id = fl.uploaded_by
-    //              AND ia.company_id = h.companyID
-    //              AND ia.is_confirmed = 1
-    //            ))))
-    //     ORDER BY created_at DESC`;
-    //   queryParams = folder_id
-    //     ? [userId, folder_id, userId, userId, folder_id, userId]
-    //     : [userId, userId, userId, userId];
-    // }
 
     const [items] = await db.query(query, queryParams);
     res.status(200).json({ success: true, data: items });
@@ -333,6 +264,7 @@ router.get('/list', authenticateUserMiddleware, async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch items' });
   }
 });
+
 
 // Upload file
 router.post(
@@ -537,6 +469,149 @@ router.get('/folder/:id', authenticateUserMiddleware, async (req, res) => {
       .status(500)
       .json({ success: false, message: 'Failed to fetch folder details' });
   }
+}); // <-- This closing bracket and parenthesis were missing
+
+
+//Delete folder
+router.delete('/folder/:id', authenticateUserMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    // First check if folder exists
+    const [folder] = await db.query(
+      'SELECT * FROM folders WHERE id = ?',
+      [id]
+    );
+
+    if (!folder.length) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Folder not found' });
+    }
+
+    const folderData = folder[0];
+
+    // Role-based permission check
+    let canDelete = false;
+
+    if (folderData.uploaded_by === userId) {
+      canDelete = true;
+    } else if (userRole === 'ojt-coordinator') {
+      const [coordinator] = await db.query(
+        'SELECT collegeID, programID FROM coordinators WHERE userID = ?',
+        [userId]
+      );
+
+      if (
+        coordinator.length &&
+        coordinator[0].collegeID === folderData.college_id &&
+        coordinator[0].programID === folderData.program_id
+      ) {
+        canDelete = true;
+      }
+    } else if (userRole === 'hte-supervisor') {
+      const [hte] = await db.query(
+        'SELECT companyID FROM hte_supervisors WHERE userID = ?',
+        [userId]
+      );
+
+      if (
+        hte.length &&
+        hte[0].companyID === folderData.company_id
+      ) {
+        canDelete = true;
+      }
+    } else if (userRole === 'admin') {
+      canDelete = true;
+    }
+
+    if (!canDelete) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to delete this folder',
+      });
+    }
+
+    // Delete all files in the folder
+    const [files] = await db.query(
+      'SELECT * FROM files WHERE folder_id = ?',
+      [id]
+    );
+
+    for (const file of files) {
+      try {
+        const fileRef = ref(firebaseStorage, file.file_url);
+        await deleteObject(fileRef);
+      } catch (error) {
+        console.error('Error deleting file from storage:', error);
+        // Continue deleting even if some fail
+      }
+    }
+
+    // Delete files from database
+    if (files.length > 0) {
+      await db.query('DELETE FROM files WHERE folder_id = ?', [id]);
+    }
+
+    // Handle recursive subfolder deletion
+    const [subfolders] = await db.query(
+      'SELECT id FROM folders WHERE parent_id = ?',
+      [id]
+    );
+
+    for (const subfolder of subfolders) {
+      try {
+        await deleteFolderRecursive(subfolder.id, db, firebaseStorage);
+      } catch (error) {
+        console.error('Error deleting subfolder:', error);
+      }
+    }
+
+    // Delete this folder
+    await db.query('DELETE FROM folders WHERE id = ?', [id]);
+
+    res.status(200).json({
+      success: true,
+      message: 'Folder and all contents deleted successfully'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to delete folder' });
+  }
+
+  // Helper function for recursive folder deletion
+async function deleteFolderRecursive(folderId, db, firebaseStorage) {
+  // Get all files in this folder
+  const [files] = await db.query('SELECT * FROM files WHERE folder_id = ?', [folderId]);
+  
+  // Delete each file from storage
+  for (const file of files) {
+    try {
+      const fileRef = ref(firebaseStorage, file.file_url);
+      await deleteObject(fileRef);
+    } catch (error) {
+      console.error('Error deleting file from storage:', error);
+    }
+  }
+  
+  // Delete files from database
+  if (files.length > 0) {
+    await db.query('DELETE FROM files WHERE folder_id = ?', [folderId]);
+  }
+  
+  // Find subfolders
+  const [subfolders] = await db.query('SELECT id FROM folders WHERE parent_id = ?', [folderId]);
+  
+  // Recursively delete subfolders
+  for (const subfolder of subfolders) {
+    await deleteFolderRecursive(subfolder.id, db, firebaseStorage);
+  }
+  
+  // Finally delete this folder
+  await db.query('DELETE FROM folders WHERE id = ?', [folderId]);
+}
 });
 
 export default router;
