@@ -219,6 +219,7 @@ const sendRegistrationEmail = async (email, templateKey) => {
 router.post('/create', async (req, res) => {
   let {
     firstName,
+    middleInitial = '',  // Default to empty string if not provided
     lastName,
     email,
     password,
@@ -229,6 +230,7 @@ router.post('/create', async (req, res) => {
     studentId,
     company
   } = req.body;
+  
 
   const created_at = new Date();
 
