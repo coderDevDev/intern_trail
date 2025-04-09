@@ -591,6 +591,7 @@ function StudentDTR({ supervisorName }) {
     }
   };
 
+  // refreshWeeklyData
   const refreshWeeklyData = async (weekNumber) => {
     try {
       const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
