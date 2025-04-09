@@ -28,7 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function StudentDTR({ supervisorName }) {
   const { studentId } = useParams();
-  console.log({ supervisorName })
+  //console.log({ supervisorName })
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const showButtons = !studentId || loggedInUser.userID === studentId;
@@ -57,6 +57,7 @@ function StudentDTR({ supervisorName }) {
   const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
   const [isProgressLoading, setIsProgressLoading] = useState(true);
   const [currentWeekNumber, setCurrentWeekNumber] = useState(null);
+  const [totalRenderedHours, setTotalRenderedHours] = useState(0);
 
   useEffect(() => {
     const storedRecords = JSON.parse(localStorage.getItem('dtrRecords')) || {};
@@ -101,25 +102,18 @@ function StudentDTR({ supervisorName }) {
         // Calculate ISO week number (consistent across month boundaries)
         const isoWeekNumber = getWeek(selectedDate, { weekStartsOn: 1 });
 
-
-        console.log({ isoWeekNumber })
+        //console.log({ isoWeekNumber })
         // Only fetch if ISO week number has changed
 
         setCurrentWeekNumber(isoWeekNumber);
 
-
-        console.log({ isoWeekNumber })
+        //console.log({ isoWeekNumber })
 
         // Use ISO week for API request
         const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${isoWeekNumber}`);
 
-
-
         if (response.data.success) {
           const { weeklyReport, weeklyFeedback } = response.data.data;
-
-
-
 
           let weeklyNarrativeReport = weeklyReport.filter(report => !!report.narrative);
           setNarrativeReport(weeklyNarrativeReport.length > 0 ? weeklyNarrativeReport[0].narrative : '');
@@ -192,7 +186,7 @@ function StudentDTR({ supervisorName }) {
           const monthlyReports = await Promise.all(weekPromises);
 
           // Calculate total monthly hours from all reports in the current month
-          let totalMonthlyHours = 0;
+          let monthlyHoursSum = 0;
           monthlyReports.forEach(response => {
             if (response.data.success) {
               const weekData = response.data.data.weeklyReport;
@@ -200,15 +194,49 @@ function StudentDTR({ supervisorName }) {
                 // Only count days in the current month
                 const dayDate = new Date(day.date);
                 if (dayDate.getMonth() === currentMonth && dayDate.getFullYear() === currentYear) {
-                  totalMonthlyHours += calculateHours(day.timeIn, day.timeOut);
+                  monthlyHoursSum += calculateHours(day.timeIn, day.timeOut);
                 }
               });
             }
           });
 
-          setMonthlyHours(totalMonthlyHours.toFixed(2));
-        }
+          // Set monthly hours for the current month
+          setMonthlyHours(monthlyHoursSum.toFixed(2));
 
+          // Now fetch all reports for calculating total hours
+          try {
+            setIsProgressLoading(true)
+            const totalHoursResponse = await axios.get(`/student/total-hours-rendered`);
+            console.log({ totalHoursResponse: totalHoursResponse })
+            if (totalHoursResponse.data.success) {
+
+              //console.log({ dexdee: totalHoursResponse.data.data.totalHours.toFixed(2) })
+              setTotalRenderedHours(parseFloat(totalHoursResponse.data.data?.totalHours));
+              setIsProgressLoading(false)
+
+              console.log({ totalRenderedHours })
+
+            } else {
+              // // Fallback: Calculate from available data
+              // let accumulatedHours = 0;
+
+              // // Get all approved DTR entries
+              // const approvedDTRsResponse = await axios.get('/student/approved-dtrs');
+              // if (approvedDTRsResponse.data.success) {
+              //   approvedDTRsResponse.data.data.forEach(dtr => {
+              //     accumulatedHours += calculateHours(dtr.time_in, dtr.time_out);
+              //   });
+              //   setTotalRenderedHours(accumulatedHours.toFixed(2));
+              // }
+            }
+          } catch (error) {
+
+            console.log(error)
+            //console.error('Error fetching total hours:', error);
+            // Just use the current monthly calculation as fallback
+            setTotalRenderedHours(monthlyHoursSum.toFixed(2));
+          }
+        }
 
         // Always update today's data from weeklyReport, regardless of week change
         let todayReport = weeklyReport.find(
@@ -224,7 +252,7 @@ function StudentDTR({ supervisorName }) {
 
         setIsProgressLoading(false);
       } catch (error) {
-        console.error('Error fetching weekly data:', error);
+        //console.error('Error fetching weekly data:', error);
         toast.error('Failed to fetch weekly report data');
         setIsProgressLoading(false);
       }
@@ -252,7 +280,7 @@ function StudentDTR({ supervisorName }) {
           setCertificate(null);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        //console.error("Error fetching data:", error);
         setEvaluation(null);
         setCertificate(null);
       }
@@ -276,7 +304,7 @@ function StudentDTR({ supervisorName }) {
   //         });
   //       }
   //     } catch (error) {
-  //       console.error("Error fetching student data:", error);
+  //       //console.error("Error fetching student data:", error);
   //     }
   //   };
 
@@ -362,7 +390,7 @@ function StudentDTR({ supervisorName }) {
       totalHours += parseFloat(calculateDailyHours(date));
     }
 
-    console.log({ totalHours })
+    //console.log({ totalHours })
     return totalHours.toFixed(2);
   };
 
@@ -377,7 +405,7 @@ function StudentDTR({ supervisorName }) {
       { weekStartsOn: 1 }
     ) + 1;
 
-    console.log({ weekNumber })
+    //console.log({ weekNumber })
 
     const report = [];
 
@@ -514,7 +542,7 @@ function StudentDTR({ supervisorName }) {
 
       toast.success('Report saved successfully!');
     } catch (error) {
-      console.error('Error saving report:', error);
+      //console.error('Error saving report:', error);
       toast.error('Failed to save report');
     }
   };
@@ -605,11 +633,11 @@ function StudentDTR({ supervisorName }) {
       // Refresh the feedback list using ISO week
       const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${isoWeekNumber}`);
       if (response.data.success) {
-        console.log({ dydy: response.data.data })
+        //console.log({ dydy: response.data.data })
         setWeeklyFeedback(response.data.data.weeklyFeedback);
       }
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      //console.error('Error submitting feedback:', error);
       toast.error('Failed to submit feedback');
     }
   };
@@ -663,7 +691,7 @@ function StudentDTR({ supervisorName }) {
         setWeeklyFeedback(weeklyFeedback);
       }
     } catch (error) {
-      console.error('Error refreshing data:', error);
+      //console.error('Error refreshing data:', error);
       toast.error('Failed to refresh data');
     }
   };
@@ -749,7 +777,7 @@ function StudentDTR({ supervisorName }) {
         // Force refresh the current week data to ensure consistent state
         setCurrentWeekNumber(null); // This will trigger a re-fetch on next render
       } catch (updateError) {
-        console.error('Error in initial update attempt:', updateError);
+        //console.error('Error in initial update attempt:', updateError);
 
         // Fallback to creating a new report if update fails
         await axios.post('/company/daily-report', {
@@ -766,7 +794,7 @@ function StudentDTR({ supervisorName }) {
         setCurrentWeekNumber(null);
       }
     } catch (error) {
-      console.error('Error updating time:', error);
+      //console.error('Error updating time:', error);
       toast.error('Failed to update time');
     }
   };
@@ -794,7 +822,7 @@ function StudentDTR({ supervisorName }) {
       ) + 1;
       await refreshWeeklyData(currentWeekNumber);
     } catch (error) {
-      console.error('Error updating entry status:', error);
+      //console.error('Error updating entry status:', error);
       toast.error('Failed to update entry status');
     }
   };
@@ -1045,7 +1073,9 @@ function StudentDTR({ supervisorName }) {
     setIsDialogOpen(true);
   };
 
-  console.log({ weeklyReport, weeklyFeedback });
+  //console.log({ weeklyReport, weeklyFeedback });
+
+  console.log({ totalRenderedHours })
   return (
     <div className="container mx-auto px-0">
       <div className="grid grid-cols-1 min-[1300px]:grid-cols-3 gap-6">
@@ -1074,7 +1104,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-4 w-24" />
                     ) : (
-                      <span className="font-medium">{monthlyHours}/{totalOJTHours} hours</span>
+                      <span className="font-medium">{totalRenderedHours}/{totalOJTHours} hours</span>
                     )}
                   </div>
                   {isProgressLoading ? (
@@ -1083,7 +1113,7 @@ function StudentDTR({ supervisorName }) {
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min((parseFloat(monthlyHours) / 360) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((parseFloat(totalRenderedHours) / totalOJTHours) * 100, 100)}%` }}
                       />
                     </div>
                   )}
@@ -1135,7 +1165,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-semibold text-purple-700">{monthlyHours}h</p>
+                      <p className="text-lg font-semibold text-purple-700">{totalRenderedHours}h</p>
                     )}
                   </div>
                 </div>
