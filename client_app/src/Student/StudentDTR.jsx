@@ -1165,7 +1165,8 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-semibold text-purple-700">{totalRenderedHours}h</p>
+                      //Fix monthly only and font
+                      <p className="text-lg font-bold text-purple-700">{monthlyHours}</p>
                     )}
                   </div>
                 </div>
