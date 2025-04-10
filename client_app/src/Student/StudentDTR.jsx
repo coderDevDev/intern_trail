@@ -200,27 +200,41 @@ function StudentDTR({ supervisorName }) {
             }
           });
 
-          // Set monthly hours for the current month - THIS IS CORRECT
+          // Set monthly hours for the current month
           setMonthlyHours(monthlyHoursSum.toFixed(2));
 
           // Now fetch all reports for calculating total hours
           try {
-            setIsProgressLoading(true);
-            const reportsResponse = await axios.get('/student/frontend-total-hours');
-            
-            if (reportsResponse.data.success) {
-              let totalSum = 0;
-              reportsResponse.data.data.forEach(report => {
-                totalSum += calculateHours(report.time_in, report.time_out);
-              });
-              setTotalRenderedHours(parseFloat(totalSum.toFixed(2)));
+            setIsProgressLoading(true)
+            const totalHoursResponse = await axios.get(`/student/total-hours-rendered/${studentId || loggedInUser.userID}`);
+            console.log({ totalHoursResponse: totalHoursResponse })
+            if (totalHoursResponse.data.success) {
+
+              //console.log({ dexdee: totalHoursResponse.data.data.totalHours.toFixed(2) })
+              setTotalRenderedHours(parseFloat(totalHoursResponse.data.data?.totalHours));
+              setIsProgressLoading(false)
+
+              console.log({ totalRenderedHours })
+
             } else {
-              setTotalRenderedHours(0);
+              // // Fallback: Calculate from available data
+              // let accumulatedHours = 0;
+
+              // // Get all approved DTR entries
+              // const approvedDTRsResponse = await axios.get('/student/approved-dtrs');
+              // if (approvedDTRsResponse.data.success) {
+              //   approvedDTRsResponse.data.data.forEach(dtr => {
+              //     accumulatedHours += calculateHours(dtr.time_in, dtr.time_out);
+              //   });
+              //   setTotalRenderedHours(accumulatedHours.toFixed(2));
+              // }
             }
-            setIsProgressLoading(false);
           } catch (error) {
-            console.log(error);
-            setIsProgressLoading(false);
+
+            console.log(error)
+            //console.error('Error fetching total hours:', error);
+            // Just use the current monthly calculation as fallback
+            setTotalRenderedHours(monthlyHoursSum.toFixed(2));
           }
         }
 
@@ -310,10 +324,9 @@ function StudentDTR({ supervisorName }) {
     //   },
     // }));
     setDailyHours(calculateDailyHours(selectedDate));
-    // Remove this line to prevent overriding API-calculated monthly hours
-    // setMonthlyHours(calculateMonthlyHours());
+    setMonthlyHours(calculateMonthlyHours());
   };
-  
+
   const handleTimeOutChange = (e) => {
     setTimeOut(e.target.value);
     const newTimeOut = new Date(selectedDate);
@@ -331,10 +344,9 @@ function StudentDTR({ supervisorName }) {
       },
     }));
     setDailyHours(calculateDailyHours(selectedDate));
-    // Remove this line to prevent overriding API-calculated monthly hours
-    // setMonthlyHours(calculateMonthlyHours());
+    setMonthlyHours(calculateMonthlyHours());
   };
-  
+
   const handleDeleteRecord = () => {
     setRecords((prev) => {
       const updatedRecords = { ...prev };
@@ -345,8 +357,7 @@ function StudentDTR({ supervisorName }) {
     setTimeOut('17:00');
     setDailyReport('');
     setDailyHours('0.00');
-    // Remove this line to prevent overriding API-calculated monthly hours
-    // setMonthlyHours(calculateMonthlyHours());
+    setMonthlyHours(calculateMonthlyHours());
     setWeeklyReport(generateWeeklyReport());
     toast.success('Record deleted successfully.');
   };
@@ -372,8 +383,15 @@ function StudentDTR({ supervisorName }) {
   };
 
   const calculateMonthlyHours = () => {
-    // Just return the current state instead of recalculating
-    return monthlyHours;
+    const monthStart = startOfMonth(selectedDate);
+    const monthEnd = endOfMonth(selectedDate);
+    let totalHours = 0;
+    for (let date = monthStart; date <= monthEnd; date = addDays(date, 1)) {
+      totalHours += parseFloat(calculateDailyHours(date));
+    }
+
+    //console.log({ totalHours })
+    return totalHours.toFixed(2);
   };
 
   const generateWeeklyReport = () => {
@@ -1147,7 +1165,7 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-bold text-purple-700">{monthlyHours}h</p>
+                      <p className="text-lg font-semibold text-purple-700">{totalRenderedHours}h</p>
                     )}
                   </div>
                 </div>
