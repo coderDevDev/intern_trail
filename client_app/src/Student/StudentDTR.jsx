@@ -28,7 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function StudentDTR({ supervisorName }) {
   const { studentId } = useParams();
-  console.log({ supervisorName })
+  //console.log({ supervisorName })
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
   const showButtons = !studentId || loggedInUser.userID === studentId;
@@ -56,6 +56,8 @@ function StudentDTR({ supervisorName }) {
   const [studentData, setStudentData] = useState(null);
   const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
   const [isProgressLoading, setIsProgressLoading] = useState(true);
+  const [currentWeekNumber, setCurrentWeekNumber] = useState(null);
+  const [totalRenderedHours, setTotalRenderedHours] = useState(0);
 
   useEffect(() => {
     const storedRecords = JSON.parse(localStorage.getItem('dtrRecords')) || {};
@@ -76,34 +78,20 @@ function StudentDTR({ supervisorName }) {
     setWeeklyReport(generateWeeklyReport());
   }, [selectedDate, records]);
 
-
-
-
   const [totalOJTHours, setTotalOJTHours] = useState(0);
-
-
-
 
   const fetchDashboardStats = async () => {
     try {
       const response = await axios.get('/student/dashboard-stats');
-
-
-
-
       setTotalOJTHours(response.data.data.traineeDetails.remaining_hours)
     } catch (error) {
       setTotalOJTHours(360)
-
     }
   };
-
 
   useEffect(() => {
     fetchDashboardStats();
   }, []);
-
-
 
   useEffect(() => {
     const fetchWeeklyData = async () => {
@@ -111,48 +99,31 @@ function StudentDTR({ supervisorName }) {
         setIsProgressLoading(true);
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
-        // Get the week number relative to the month
-        const weekNumber = differenceInCalendarWeeks(
-          selectedDate,
-          startOfMonth(selectedDate),
-          { weekStartsOn: 1 }
-        ) + 1;
+        // Calculate ISO week number (consistent across month boundaries)
+        const isoWeekNumber = getWeek(selectedDate, { weekStartsOn: 1 });
 
-        const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${weekNumber}`);
+        //console.log({ isoWeekNumber })
+        // Only fetch if ISO week number has changed
+
+        setCurrentWeekNumber(isoWeekNumber);
+
+        //console.log({ isoWeekNumber })
+
+        // Use ISO week for API request
+        const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${isoWeekNumber}`);
 
         if (response.data.success) {
           const { weeklyReport, weeklyFeedback } = response.data.data;
 
-          // Get all weeks in the current month
-          const currentDate = new Date(selectedDate);
-          const firstDayOfMonth = startOfMonth(currentDate);
-          const lastDayOfMonth = endOfMonth(currentDate);
-          const totalWeeksInMonth = differenceInCalendarWeeks(lastDayOfMonth, firstDayOfMonth, { weekStartsOn: 1 }) + 1;
-
-          // Fetch all weekly reports for the month
-          const monthlyReportsPromises = Array.from({ length: totalWeeksInMonth }, (_, i) => {
-            return axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${i + 1}`);
-          });
-
-          const monthlyReports = await Promise.all(monthlyReportsPromises);
-
-          // Calculate total monthly hours from all weekly reports
-          const totalMonthlyHours = monthlyReports.reduce((total, weekResponse) => {
-            if (weekResponse.data.success) {
-              const weeklyData = weekResponse.data.data.weeklyReport;
-              return total + weeklyData.reduce((weekTotal, day) => {
-                return weekTotal + calculateHours(day.timeIn, day.timeOut);
-              }, 0);
-            }
-            return total;
-          }, 0);
+          let weeklyNarrativeReport = weeklyReport.filter(report => !!report.narrative);
+          setNarrativeReport(weeklyNarrativeReport.length > 0 ? weeklyNarrativeReport[0].narrative : '');
 
           // Generate the complete week template
           const start = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Start from Monday
           const end = endOfWeek(selectedDate, { weekStartsOn: 1 }); // End on Sunday
           const completeWeekReport = [];
 
-          // Fill in all weekdays
+          // Fill in all weekdays, regardless of month
           for (let date = start; date <= end; date = addDays(date, 1)) {
             const dayOfWeek = date.getDay();
             if (dayOfWeek === 0 || dayOfWeek === 6) continue; // Skip weekends
@@ -172,7 +143,8 @@ function StudentDTR({ supervisorName }) {
                 timeIn: existingReport.timeIn || 'N/A',
                 timeOut: existingReport.timeOut || 'N/A',
                 report: existingReport.report || '',
-                narrative: existingReport.narrative || ''
+                narrative: existingReport.narrative || '',
+                isoWeekNumber // Store ISO week number
               });
             } else {
               // Create empty entry for this date
@@ -182,7 +154,8 @@ function StudentDTR({ supervisorName }) {
                 report: '',
                 timeIn: 'N/A',
                 timeOut: 'N/A',
-                weekNumber,
+                weekNumber: isoWeekNumber, // Use ISO week number
+                isoWeekNumber,
                 narrative: ''
               });
             }
@@ -191,36 +164,88 @@ function StudentDTR({ supervisorName }) {
           setWeeklyReport(completeWeekReport);
           setWeeklyFeedback(weeklyFeedback);
 
-          // Set narrative report if available from any entry
-          const anyReportWithNarrative = completeWeekReport.find(report => report.narrative);
-          if (anyReportWithNarrative) {
-            setNarrativeReport(anyReportWithNarrative.narrative);
+          // Calculate monthly hours more accurately
+          const currentMonth = selectedDate.getMonth();
+          const currentYear = selectedDate.getFullYear();
+
+          // Get first and last day of current month
+          const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+          const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+
+          // Fetch all weekly reports for weeks that overlap with this month
+          const startWeek = getWeek(firstDayOfMonth, { weekStartsOn: 1 });
+          const endWeek = getWeek(lastDayOfMonth, { weekStartsOn: 1 });
+
+          const weekPromises = [];
+          for (let week = startWeek; week <= endWeek; week++) {
+            weekPromises.push(
+              axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${week}`)
+            );
           }
 
-          // Find today's report to set time inputs
-          const todayReport = completeWeekReport.find(
-            report => format(new Date(report.date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-          );
+          const monthlyReports = await Promise.all(weekPromises);
 
-          if (todayReport) {
-            setTimeIn(todayReport.timeIn);
-            setTimeOut(todayReport.timeOut);
-            setDailyHours(calculateHours(todayReport.timeIn, todayReport.timeOut).toFixed(2));
+          // Calculate total monthly hours from all reports in the current month
+          let monthlyHoursSum = 0;
+          monthlyReports.forEach(response => {
+            if (response.data.success) {
+              const weekData = response.data.data.weeklyReport;
+              weekData.forEach(day => {
+                // Only count days in the current month
+                const dayDate = new Date(day.date);
+                if (dayDate.getMonth() === currentMonth && dayDate.getFullYear() === currentYear) {
+                  monthlyHoursSum += calculateHours(day.timeIn, day.timeOut);
+                }
+              });
+            }
+          });
+
+          // Set monthly hours for the current month - THIS IS CORRECT
+          setMonthlyHours(monthlyHoursSum.toFixed(2));
+
+          // Now fetch all reports for calculating total hours
+          try {
+            setIsProgressLoading(true);
+            const reportsResponse = await axios.get('/student/frontend-total-hours');
+            
+            if (reportsResponse.data.success) {
+              let totalSum = 0;
+              reportsResponse.data.data.forEach(report => {
+                totalSum += calculateHours(report.time_in, report.time_out);
+              });
+              setTotalRenderedHours(parseFloat(totalSum.toFixed(2)));
+            } else {
+              setTotalRenderedHours(0);
+            }
+            setIsProgressLoading(false);
+          } catch (error) {
+            console.log(error);
+            setIsProgressLoading(false);
           }
-
-          // Set monthly hours from accumulated data
-          setMonthlyHours(totalMonthlyHours.toFixed(2));
-          setIsProgressLoading(false);
         }
+
+        // Always update today's data from weeklyReport, regardless of week change
+        let todayReport = weeklyReport.find(
+          report => format(new Date(report.date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+        );
+
+        if (todayReport) {
+          setTimeIn(todayReport.timeIn);
+          setTimeOut(todayReport.timeOut);
+          setDailyReport(todayReport.report || '');
+          setDailyHours(calculateHours(todayReport.timeIn, todayReport.timeOut).toFixed(2));
+        }
+
+        setIsProgressLoading(false);
       } catch (error) {
-        console.error('Error fetching weekly data:', error);
+        //console.error('Error fetching weekly data:', error);
         toast.error('Failed to fetch weekly report data');
         setIsProgressLoading(false);
       }
     };
 
     fetchWeeklyData();
-  }, [selectedDate]);
+  }, [selectedDate, currentWeekNumber, studentId]);
 
   useEffect(() => {
     const fetchEvaluationAndCertificate = async () => {
@@ -241,7 +266,7 @@ function StudentDTR({ supervisorName }) {
           setCertificate(null);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        //console.error("Error fetching data:", error);
         setEvaluation(null);
         setCertificate(null);
       }
@@ -265,7 +290,7 @@ function StudentDTR({ supervisorName }) {
   //         });
   //       }
   //     } catch (error) {
-  //       console.error("Error fetching student data:", error);
+  //       //console.error("Error fetching student data:", error);
   //     }
   //   };
 
@@ -285,9 +310,10 @@ function StudentDTR({ supervisorName }) {
     //   },
     // }));
     setDailyHours(calculateDailyHours(selectedDate));
-    setMonthlyHours(calculateMonthlyHours());
+    // Remove this line to prevent overriding API-calculated monthly hours
+    // setMonthlyHours(calculateMonthlyHours());
   };
-
+  
   const handleTimeOutChange = (e) => {
     setTimeOut(e.target.value);
     const newTimeOut = new Date(selectedDate);
@@ -305,9 +331,10 @@ function StudentDTR({ supervisorName }) {
       },
     }));
     setDailyHours(calculateDailyHours(selectedDate));
-    setMonthlyHours(calculateMonthlyHours());
+    // Remove this line to prevent overriding API-calculated monthly hours
+    // setMonthlyHours(calculateMonthlyHours());
   };
-
+  
   const handleDeleteRecord = () => {
     setRecords((prev) => {
       const updatedRecords = { ...prev };
@@ -318,7 +345,8 @@ function StudentDTR({ supervisorName }) {
     setTimeOut('17:00');
     setDailyReport('');
     setDailyHours('0.00');
-    setMonthlyHours(calculateMonthlyHours());
+    // Remove this line to prevent overriding API-calculated monthly hours
+    // setMonthlyHours(calculateMonthlyHours());
     setWeeklyReport(generateWeeklyReport());
     toast.success('Record deleted successfully.');
   };
@@ -344,13 +372,8 @@ function StudentDTR({ supervisorName }) {
   };
 
   const calculateMonthlyHours = () => {
-    const monthStart = startOfMonth(selectedDate);
-    const monthEnd = endOfMonth(selectedDate);
-    let totalHours = 0;
-    for (let date = monthStart; date <= monthEnd; date = addDays(date, 1)) {
-      totalHours += parseFloat(calculateDailyHours(date));
-    }
-    return totalHours.toFixed(2);
+    // Just return the current state instead of recalculating
+    return monthlyHours;
   };
 
   const generateWeeklyReport = () => {
@@ -363,6 +386,8 @@ function StudentDTR({ supervisorName }) {
       startOfMonth(selectedDate),
       { weekStartsOn: 1 }
     ) + 1;
+
+    //console.log({ weekNumber })
 
     const report = [];
 
@@ -439,9 +464,16 @@ function StudentDTR({ supervisorName }) {
     toast.success('Weekly narrative report added successfully!');
   };
 
-  const handleSave = async (date, report) => {
+  const handleSave = async (date, report, isNarrativeReport = false) => {
     try {
-      const weekNumber = differenceInCalendarWeeks(
+      // Use ISO week number for consistency across month boundaries
+      const isoWeekNumber = getWeek(new Date(date), { weekStartsOn: 1 });
+
+      // Get first day of the current week for display purposes
+      const weekStart = startOfWeek(new Date(date), { weekStartsOn: 1 });
+
+      // For backward compatibility, also calculate month-relative week number
+      const monthWeekNumber = differenceInCalendarWeeks(
         new Date(date),
         startOfMonth(new Date(date)),
         { weekStartsOn: 1 }
@@ -452,8 +484,11 @@ function StudentDTR({ supervisorName }) {
         report,
         timeIn,
         timeOut,
-        weekNumber,
-        narrative: narrativeReport
+        weekNumber: isoWeekNumber, // Use ISO week number
+        isoWeekNumber, // Add this for explicit clarity
+        narrative: narrativeReport,
+        isNarrativeReport,
+        startDate: format(weekStart, 'yyyy-MM-dd') // Add the week start date
       });
 
       // Reset edit states
@@ -463,29 +498,33 @@ function StudentDTR({ supervisorName }) {
       }));
       setIsNarrativeEdited(false);
 
-      // Generate AI feedback
+      // Generate AI feedback with consistent week numbering
       const allReports = weeklyReport.map(r => r.report).join('\n');
       const aiResponse = await axios.post('/company/generate-feedback', {
         dailyReports: allReports,
         narrativeReport,
-        weekNumber
+        weekNumber: isoWeekNumber, // Use ISO week number
+        isoWeekNumber, // Add this for explicit clarity
+        startDate: format(weekStart, 'yyyy-MM-dd') // Add the week start date
       });
 
       if (aiResponse.data.success) {
         await axios.post('/company/weekly-feedback', {
           studentId: studentId || JSON.parse(localStorage.getItem('loggedInUser')).userID,
-          weekNumber,
+          weekNumber: isoWeekNumber, // Use ISO week number
+          isoWeekNumber, // Add this for explicit clarity
           feedback: aiResponse.data.feedback,
-          fromAI: true
+          fromAI: true,
+          startDate: format(weekStart, 'yyyy-MM-dd') // Add the week start date
         });
       }
 
-      // Refresh data
-      await refreshWeeklyData(weekNumber);
+      // Refresh data using the ISO week number
+      await refreshWeeklyData(isoWeekNumber);
 
       toast.success('Report saved successfully!');
     } catch (error) {
-      console.error('Error saving report:', error);
+      //console.error('Error saving report:', error);
       toast.error('Failed to save report');
     }
   };
@@ -494,40 +533,98 @@ function StudentDTR({ supervisorName }) {
     toast.info('Feedback added!');
   };
 
-  const handleFeedbackSubmit = async (weekNumber) => {
+  const handleFeedbackSubmit = async () => {
     try {
       if (!currentFeedback.trim()) {
-        toast.warning('Please enter feedback before submitting');
+        toast.error('Please enter feedback before submitting');
         return;
       }
 
       const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-      const weekNum = differenceInCalendarWeeks(
+
+      // Get ISO week number for consistency
+      const isoWeekNumber = getWeek(selectedDate, { weekStartsOn: 1 });
+
+      // Get first day of the current week for display purposes
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+
+      // Get reports for the current week
+      const weekReports = weeklyReport.filter(report =>
+        getWeek(new Date(report.date), { weekStartsOn: 1 }) === isoWeekNumber
+      );
+
+      // Filter out only entries with reports
+      const reportsWithContent = weekReports
+        .filter(entry => entry.report && entry.report.trim())
+        .map(entry => `${format(new Date(entry.date), 'EEEE, MMM d')}: ${entry.report}`)
+        .join('\n\n');
+
+      // Get the week number relative to the month (for backwards compatibility)
+      const monthWeekNumber = differenceInCalendarWeeks(
         selectedDate,
         startOfMonth(selectedDate),
         { weekStartsOn: 1 }
       ) + 1;
 
-      await axios.post('/company/weekly-feedback', {
-        studentId: studentId || loggedInUser.userID,
-        weekNumber: weekNum,
-        feedback: currentFeedback,
-        fromAI: false
-      });
+      if (loggedInUser.role === 'hte-supervisor') {
+        // Regular supervisor feedback
+        await axios.post('/company/weekly-feedback', {
+          weekNumber: isoWeekNumber, // Use ISO week for consistency
+          isoWeekNumber,
+          user_id: loggedInUser.userID,
+          feedback: currentFeedback,
+          studentId: studentId || loggedInUser.userID,
+          startDate: format(weekStart, 'yyyy-MM-dd')
+        });
+      } else if (currentFeedback.toLowerCase().includes('generate ai feedback') ||
+        currentFeedback.toLowerCase().includes('ai feedback')) {
+        // Generate AI feedback based on reports
+        const response = await axios.post('/company/generate-feedback', {
+          dailyReports: reportsWithContent,
+          narrativeReport,
+          weekNumber: isoWeekNumber, // Use ISO week for consistency
+          isoWeekNumber,
+          startDate: format(weekStart, 'yyyy-MM-dd')
+        });
 
-      // Clear feedback input
+        // Submit the AI-generated feedback
+        await axios.post('/company/weekly-feedback', {
+          weekNumber: isoWeekNumber, // Use ISO week for consistency
+          isoWeekNumber,
+          feedback: response.data.feedback,
+          studentId: studentId || loggedInUser.userID,
+          role: 'AI',
+          startDate: format(weekStart, 'yyyy-MM-dd'),
+          fromAI: true
+        });
+      } else {
+        // Regular student feedback
+        await axios.post('/company/weekly-feedback', {
+          weekNumber: isoWeekNumber, // Use ISO week for consistency
+          isoWeekNumber,
+          feedback: currentFeedback,
+          user_id: loggedInUser.userID,
+          studentId: studentId || loggedInUser.userID,
+          startDate: format(weekStart, 'yyyy-MM-dd')
+        });
+      }
+
+      toast.success('Feedback submitted successfully');
       setCurrentFeedback('');
 
-      // Refresh data
-      await refreshWeeklyData(weekNum);
-
-      toast.success('Feedback submitted successfully!');
+      // Refresh the feedback list using ISO week
+      const response = await axios.get(`/company/weekly-report/${studentId || loggedInUser.userID}/${isoWeekNumber}`);
+      if (response.data.success) {
+        //console.log({ dydy: response.data.data })
+        setWeeklyFeedback(response.data.data.weeklyFeedback);
+      }
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      //console.error('Error submitting feedback:', error);
       toast.error('Failed to submit feedback');
     }
   };
 
+  // refreshWeeklyData
   const refreshWeeklyData = async (weekNumber) => {
     try {
       const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -576,7 +673,7 @@ function StudentDTR({ supervisorName }) {
         setWeeklyFeedback(weeklyFeedback);
       }
     } catch (error) {
-      console.error('Error refreshing data:', error);
+      //console.error('Error refreshing data:', error);
       toast.error('Failed to refresh data');
     }
   };
@@ -598,42 +695,88 @@ function StudentDTR({ supervisorName }) {
   const handleUpdateTime = async (date) => {
     try {
       const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-      const weekNumber = differenceInCalendarWeeks(
-        new Date(date),
-        startOfMonth(new Date(date)),
-        { weekStartsOn: 1 }
-      ) + 1;
 
-      // First check if report exists for this date
-      const existingReport = weeklyReport.find(
-        r => r.date === format(date, 'yyyy-MM-dd') && r.report
-      );
+      // Use ISO week number for consistency across month boundaries
+      const isoWeekNumber = getWeek(new Date(date), { weekStartsOn: 1 });
 
-      if (existingReport) {
-        // If report exists, update time only
-        await axios.put('/company/daily-report/update-time', {
-          date: format(date, 'yyyy-MM-dd'),
-          timeIn,
-          timeOut,
-          studentId: studentId || loggedInUser.userID
-        });
-      } else {
-        // If no report exists, create new one
-        await axios.post('/company/daily-report', {
-          date: format(date, 'yyyy-MM-dd'),
-          report: '',
-          timeIn,
-          timeOut,
-          weekNumber,
-          narrative: narrativeReport
-        });
+      // Make sure we have valid time values
+      if (!timeIn || !timeOut) {
+        toast.error('Please enter valid time values');
+        return;
       }
 
-      // Refresh data
-      await refreshWeeklyData(weekNumber);
-      toast.success('Time updated successfully!');
+      // Check if time out is after time in
+      const [inHours, inMinutes] = timeIn.split(':').map(Number);
+      const [outHours, outMinutes] = timeOut.split(':').map(Number);
+
+      if ((outHours < inHours) || (outHours === inHours && outMinutes <= inMinutes)) {
+        toast.error('Time out must be after time in');
+        return;
+      }
+
+      // Find the existing report in the weeklyReport state
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      const existingReport = weeklyReport.find(r => r.date === formattedDate);
+      const reportText = existingReport?.report || '';
+
+      try {
+        // First try to update using the update-time endpoint
+        if (existingReport && existingReport.id) {
+          await axios.put('/company/daily-report/update-time', {
+            date: formattedDate,
+            timeIn,
+            timeOut,
+            studentId: studentId || loggedInUser.userID
+          });
+        } else {
+          // If no existing report or it doesn't have an ID, create a new one
+          await axios.post('/company/daily-report', {
+            date: formattedDate,
+            report: reportText,
+            timeIn,
+            timeOut,
+            weekNumber: isoWeekNumber,
+            narrative: narrativeReport,
+            studentId: studentId || loggedInUser.userID
+          });
+        }
+
+        // Update the local state to reflect changes immediately
+        setWeeklyReport(prevReports =>
+          prevReports.map(report =>
+            report.date === formattedDate
+              ? { ...report, timeIn, timeOut }
+              : report
+          )
+        );
+
+        // Recalculate daily hours
+        const newDailyHours = calculateHours(timeIn, timeOut);
+        setDailyHours(newDailyHours.toFixed(2));
+
+        toast.success('Time updated successfully!');
+
+        // Force refresh the current week data to ensure consistent state
+        setCurrentWeekNumber(null); // This will trigger a re-fetch on next render
+      } catch (updateError) {
+        //console.error('Error in initial update attempt:', updateError);
+
+        // Fallback to creating a new report if update fails
+        await axios.post('/company/daily-report', {
+          date: formattedDate,
+          report: reportText,
+          timeIn,
+          timeOut,
+          weekNumber: isoWeekNumber,
+          narrative: narrativeReport,
+          studentId: studentId || loggedInUser.userID
+        });
+
+        toast.success('Time saved successfully!');
+        setCurrentWeekNumber(null);
+      }
     } catch (error) {
-      console.error('Error updating time:', error);
+      //console.error('Error updating time:', error);
       toast.error('Failed to update time');
     }
   };
@@ -659,14 +802,14 @@ function StudentDTR({ supervisorName }) {
         startOfMonth(new Date(selectedEntry.date)),
         { weekStartsOn: 1 }
       ) + 1;
-      await refreshWeeklyData(weekNumber);
+      await refreshWeeklyData(currentWeekNumber);
     } catch (error) {
-      console.error('Error updating entry status:', error);
+      //console.error('Error updating entry status:', error);
       toast.error('Failed to update entry status');
     }
   };
 
-  const renderReportsTab = () => (
+  const renderReportsTab = (currentWeekNumber) => (
     <div className="space-y-4">
       {weeklyReport.map((entry, index) => (
         <Card key={index} className="overflow-hidden border border-gray-100 hover:shadow-sm transition-all duration-200">
@@ -739,7 +882,7 @@ function StudentDTR({ supervisorName }) {
           {showButtons && isNarrativeEdited && (
             <Button
               className="mt-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-              onClick={() => handleSave(format(selectedDate, 'yyyy-MM-dd'), null)}
+              onClick={() => handleSave(format(selectedDate, 'yyyy-MM-dd'), null, true)}
             >
               <Save className="w-4 h-4 mr-2" />
               Save Narrative
@@ -810,7 +953,7 @@ function StudentDTR({ supervisorName }) {
           />
           <Button
             className="mt-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-            onClick={() => handleFeedbackSubmit(weeklyReport[0]?.weekNumber)}
+            onClick={handleFeedbackSubmit}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Submit Feedback
@@ -912,7 +1055,9 @@ function StudentDTR({ supervisorName }) {
     setIsDialogOpen(true);
   };
 
-  console.log({ weeklyReport, weeklyFeedback });
+  //console.log({ weeklyReport, weeklyFeedback });
+
+  console.log({ totalRenderedHours })
   return (
     <div className="container mx-auto px-0">
       <div className="grid grid-cols-1 min-[1300px]:grid-cols-3 gap-6">
@@ -937,11 +1082,11 @@ function StudentDTR({ supervisorName }) {
                 {/* Monthly Progress Bar */}
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Monthly Progress</span>
+                    <span className="text-gray-600">Total Progress</span>
                     {isProgressLoading ? (
                       <Skeleton className="h-4 w-24" />
                     ) : (
-                      <span className="font-medium">{monthlyHours}/{totalOJTHours} hours</span>
+                      <span className="font-medium">{totalRenderedHours}/{totalOJTHours} hours</span>
                     )}
                   </div>
                   {isProgressLoading ? (
@@ -950,7 +1095,7 @@ function StudentDTR({ supervisorName }) {
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min((parseFloat(monthlyHours) / 360) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((parseFloat(totalRenderedHours) / totalOJTHours) * 100, 100)}%` }}
                       />
                     </div>
                   )}
@@ -964,19 +1109,34 @@ function StudentDTR({ supervisorName }) {
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-semibold text-blue-700">{dailyHours}h</p>
+                      <p className="text-lg font-bold text-blue-700">
+                        {(() => {
+                          const entry = weeklyReport.find(
+                            r => r.date === format(selectedDate, 'yyyy-MM-dd')
+                          );
+                          return entry ? calculateHours(entry.timeIn, entry.timeOut).toFixed(2) : '0.00';
+                        })()}h
+                      </p>
                     )}
                   </div>
 
-                  {/* Weekly Progress */}
+                  {/* Weekly Progress - only count days in the current week */}
                   <div className="bg-green-50 p-3 rounded-lg text-center">
                     <p className="text-sm text-green-600">Weekly</p>
                     {isProgressLoading ? (
                       <Skeleton className="h-7 w-16 mx-auto mt-1" />
                     ) : (
-                      <p className="text-lg font-semibold text-green-700">
-                        {weeklyReport.reduce((total, entry) =>
-                          total + calculateHours(entry.timeIn, entry.timeOut), 0).toFixed(2)}h
+                      <p className="text-lg font-bold text-green-700">
+                        {(() => {
+                          // Get current ISO week number
+                          const currentIsoWeek = getWeek(selectedDate, { weekStartsOn: 1 });
+
+                          // Only count entries from the current week
+                          return weeklyReport
+                            .filter(entry => getWeek(new Date(entry.date), { weekStartsOn: 1 }) === currentIsoWeek)
+                            .reduce((total, entry) => total + calculateHours(entry.timeIn, entry.timeOut), 0)
+                            .toFixed(2);
+                        })()}h
                       </p>
                     )}
                   </div>
@@ -1083,53 +1243,53 @@ function StudentDTR({ supervisorName }) {
         <div className="lg:col-span-2">
           <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
-            <div className="flex flex-col mb-6">
-              <h2 className="text-lg font-semibold mb-3">Reports & Feedback</h2>
-              <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden w-full sm:w-auto">
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+              <div className="flex flex-col mb-6">
+                <h2 className="text-lg font-semibold mb-3">Reports & Feedback</h2>
+                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden w-full sm:w-auto">
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'reports'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('reports')}
-                >
-                  Reports
-                </button>
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('reports')}
+                  >
+                    Reports
+                  </button>
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'feedbacks'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('feedbacks')}
-                >
-                  Feedbacks
-                </button>
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('feedbacks')}
+                  >
+                    Feedbacks
+                  </button>
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'evaluation'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('evaluation')}
-                >
-                  Evaluation
-                </button>
-                <button
-                  className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('evaluation')}
+                  >
+                    Evaluation
+                  </button>
+                  <button
+                    className={`px-1 py-2 text-xs font-medium transition-colors flex-1 sm:flex-auto
                     ${activeTab === 'certificate'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setActiveTab('certificate')}
-                >
-                  Certificate
-                </button>
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('certificate')}
+                  >
+                    Certificate
+                  </button>
+                </div>
               </div>
-            </div>
 
-              {activeTab === 'reports' ? renderReportsTab() : activeTab === 'feedbacks' ? renderFeedbacksTab() : activeTab === 'evaluation' ? renderEvaluationTab() : renderCertificateTab()}
+              {activeTab === 'reports' ? renderReportsTab(currentWeekNumber) : activeTab === 'feedbacks' ? renderFeedbacksTab() : activeTab === 'evaluation' ? renderEvaluationTab() : renderCertificateTab()}
             </CardContent>
           </Card>
         </div>
