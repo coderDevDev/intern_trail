@@ -11,37 +11,45 @@ import axios from 'axios';
 const questions = [
   {
     question: "A. Quality of Work",
-    choices: ["Excellent", "Above Average", "Average", "Below Average", "Unreliable"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "B. Quantity of Work",
-    choices: ["Exceptionally productive", "Very productive", "Average productive", "Very slow to produce output", "Rather slow to produce output"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "C. Relation with Others",
-    choices: ["Exceptionally accepted", "Works well with others", "Gets along satisfactory", "Has some problems working with others", "Works very poorly with others"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "D. Attitude Towards Work",
-    choices: ["Exceptionally enthusiastic", "Shows initiative in his/her work", "Average in diligence", "Somewhat indifferent", "Definitely not interested"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "E. Dependability",
-    choices: ["Excellent", "Above Average", "Average", "Below Average", "Unreliable"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "F. Ability to Learn",
-    choices: ["Exceptionally fast learner", "Learns rapidly", "Average learner", "Rather slow to learn", "Very slow to learn"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "G. Attendance",
-    choices: ["Exceptionally perfect", "Keeps good attendance record", "Acceptable working attendance", "Needs improvement", "Cannot meet working schedule"]
+    choices: ["5", "4", "3", "2", "1"]
   },
   {
     question: "H. Judgement",
-    choices: ["Exceptionally matured", "Above average in making decision", "Usually makes the right decision", "Often uses poor judgement", "Consistently uses bad judgement"]
+    choices: ["5", "4", "3", "2", "1"]
   }
 ];
+
+const ratingLabels = {
+  "5": "Excellent",
+  "4": "Above Average",
+  "3": "Average",
+  "2": "Below Average",
+  "1": "Unreliable"
+};
 
 function EvaluationForm({ isOpen, onClose, student, existingData = null, initialFocus }) {
   const [answers, setAnswers] = useState(
@@ -56,12 +64,14 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
   const [viewOnly, setViewOnly] = useState(!!existingData);
   const [signatureData, setSignatureData] = useState(existingData?.signature || null);
   const signatureRef = useRef(null);
+  const [overallRating, setOverallRating] = useState(existingData?.overallRating || "");
 
   useEffect(() => {
     if (existingData) {
       setAnswers(existingData.answers);
       setComments(existingData.comments);
       setSignatureData(existingData.signature);
+      setOverallRating(existingData.overallRating);
     } else {
       resetForm();
     }
@@ -76,6 +86,7 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
     );
     setComments("");
     setSignatureData(null);
+    setOverallRating("");
     if (signatureRef.current) {
       signatureRef.current.clear();
     }
@@ -106,6 +117,15 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
     }
   };
 
+  const calculateAverageScore = () => {
+    const numericAnswers = Object.values(answers).map(answer => parseInt(answer));
+    const validAnswers = numericAnswers.filter(score => !isNaN(score));
+    if (validAnswers.length === 0) return 0;
+
+    const sum = validAnswers.reduce((acc, curr) => acc + curr, 0);
+    return (sum / validAnswers.length).toFixed(2);
+  };
+
   const handleSubmit = async () => {
     // Validate all questions are answered
     const unansweredQuestions = Object.values(answers).some(answer => !answer);
@@ -127,7 +147,9 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
         answers,
         comments,
         signature: signatureData,
-        evaluationDate: new Date().toISOString()
+        evaluationDate: new Date().toISOString(),
+        overallRating,
+        averageScore: calculateAverageScore()
       };
 
       // If we have existing data, update it
@@ -149,16 +171,19 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
     }
   };
 
+
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  const isTrainee = loggedInUser?.role === 'trainee';
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[92%] sm:w-full mx-auto rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-blue-700">
+          <DialogTitle className="text-2xl font-semibold text-center black mt-4">
             Student Performance Evaluation
           </DialogTitle>
         </DialogHeader>
 
-        <div className="bg-white rounded-lg p-6">
+        <div className="bg-white rounded-lg p-0">
           {/* Student Information */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">Student Information</h3>
@@ -183,7 +208,7 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
           </div>
 
           {/* Evaluation Questions */}
-          <div className="space-y-6">
+          {!isTrainee && <div className="space-y-6">
             {questions.map((q, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
                 <Label className="text-lg font-medium mb-2 block">{q.question}</Label>
@@ -202,15 +227,53 @@ function EvaluationForm({ isOpen, onClose, student, existingData = null, initial
                       />
                       <Label
                         htmlFor={`q${index}_c${choiceIndex}`}
-                        className="cursor-pointer w-full"
+                        className="cursor-pointer w-full flex items-center"
                       >
-                        {choice}
+                        {choice} - {ratingLabels[choice]}
+                        <span className="ml-2">
+                          {"★".repeat(parseInt(choice))}
+                          {"☆".repeat(5 - parseInt(choice))}
+                        </span>
                       </Label>
                     </div>
                   ))}
                 </RadioGroup>
               </div>
             ))}
+          </div>
+          }
+
+          {/* Average Score Display */}
+          {!isTrainee && <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">Average Score</h3>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl font-bold">{calculateAverageScore()}</span>
+              <span className="text-yellow-500 text-2xl">
+                {"★".repeat(Math.round(calculateAverageScore()))}
+                {"☆".repeat(5 - Math.round(calculateAverageScore()))}
+              </span>
+            </div>
+          </div>
+          }
+
+          {/* Overall Rating Selection */}
+          <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+            <Label className="text-lg font-medium mb-2 block">Overall Rating</Label>
+            <RadioGroup
+              value={overallRating}
+              onValueChange={setOverallRating}
+              disabled={viewOnly}
+              className="space-y-2"
+            >
+              {Object.entries(ratingLabels).reverse().map(([value, label]) => (
+                <div key={value} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50">
+                  <RadioGroupItem value={value} id={`overall_${value}`} disabled={viewOnly} />
+                  <Label htmlFor={`overall_${value}`} className="cursor-pointer w-full">
+                    {label}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
 
           {/* Comments Section */}
