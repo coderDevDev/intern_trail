@@ -42,6 +42,8 @@ function StudentProgress() {
 
 
 
+
+      console.log({ response })
       if (response.data.success) {
         setStudentData(response.data.data);
         // Once we have company ID, fetch supervisor details
@@ -112,9 +114,19 @@ function StudentProgress() {
 
 
   return isLoaded && (
-    <div className='p-3 sm:p-6 space-y-4 sm:space-y-6'>
-      <h1 className='text-xl sm:text-2xl font-bold'>Progress Reports</h1>
+    <div className='space-y-4 sm:space-y-6'>
+      {studentData?.first_name && <h1 className='text-xl sm:text-2xl font-semibold text-blue-500'>
 
+
+        {
+          studentData?.first_name + " " + studentData?.last_name
+        }
+      </h1>
+      }
+
+      <h3>
+        Progress Report
+      </h3>
       <div className="progress-container">
         <StudentDTR
           supervisorName={supervisorName}
