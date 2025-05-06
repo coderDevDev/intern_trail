@@ -8,22 +8,24 @@ const router = express.Router();
 // Create a new evaluation
 router.post('/create', authenticateUserMiddleware, async (req, res) => {
   try {
-    const { studentId, answers, comments, signature, evaluationDate } =
-      req.body;
+    const { studentId, answers, comments, signature, overallRating } = req.body;
     const evaluatorId = req.user.id;
 
+    // console.log({ overallRating });
     // Store the evaluation data
     const [result] = await db.query(
       `INSERT INTO evaluations 
-       (student_id, evaluator_id, answers, comments, signature, evaluation_date) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
+       (student_id, evaluator_id, answers, comments, 
+       signature,
+       overallRating) 
+       VALUES (?, ?, ?, ?, ?,?)`,
       [
         studentId,
         evaluatorId,
         JSON.stringify(answers),
         comments,
         signature,
-        evaluationDate
+        overallRating
       ]
     );
 
@@ -103,7 +105,7 @@ router.get('/:studentId', authenticateUserMiddleware, async (req, res) => {
 router.put('/:id', authenticateUserMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { answers, comments, signature, evaluationDate } = req.body;
+    const { answers, comments, signature, overallRating } = req.body;
     const evaluatorId = req.user.id;
 
     // Verify the evaluator owns this evaluation
@@ -123,10 +125,10 @@ router.put('/:id', authenticateUserMiddleware, async (req, res) => {
     // Update the evaluation
     await db.query(
       `UPDATE evaluations 
-       SET answers = ?, comments = ?, signature = ?
+       SET answers = ?, comments = ?, signature = ?, overallRating = ?
 
        WHERE id = ?`,
-      [JSON.stringify(answers), comments, signature, id]
+      [JSON.stringify(answers), comments, signature, overallRating, id]
     );
 
     res.status(200).json({
